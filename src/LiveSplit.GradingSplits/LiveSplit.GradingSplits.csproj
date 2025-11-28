@@ -1,0 +1,28 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net481</TargetFramework>
+    <UseWindowsForms>true</UseWindowsForms>
+    <RootNamespace>LiveSplit.GradingSplits</RootNamespace>
+    <AssemblyName>LiveSplit.GradingSplits</AssemblyName>
+    <OutputPath>..\..\deps\LiveSplit\bin\$(Configuration)\Components\</OutputPath>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Reference Include="LiveSplit.Core">
+      <HintPath>..\..\deps\LiveSplit\bin\debug\LiveSplit.Core.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="LiveSplit.View">
+      <HintPath>..\..\deps\LiveSplit\bin\debug\LiveSplit.View.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="UpdateManager">
+      <HintPath>..\..\deps\LiveSplit\bin\debug\UpdateManager.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+  </ItemGroup>
+
+</Project>
