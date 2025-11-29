@@ -25,7 +25,7 @@ namespace LiveSplit.GradingSplits.UI.Components
         public void SetSettings(XmlNode node)
         {
             var element = (XmlElement)node;
-            Mode = (GradingMode)Enum.Parse(typeof(GradingMode), element["Mode"].InnerText);
+            Mode = SettingsHelper.ParseEnum(element["Mode"], GradingMode.Single);
         }
 
         public XmlNode GetSettings(XmlDocument document)
