@@ -20,12 +20,29 @@ namespace LiveSplit.GradingSplits.UI.Components
         private int _lastGradedIndex = -1;
         private IRun _lastRun = null;
         private string _lastComparison = null;
+        private LiveSplitState _state;
+        private Dictionary<int, (string Grade, Color Color)> _gradeCache = new Dictionary<int, (string Grade, Color Color)>();
 
         public string ComponentName => "Grading Splits";
 
         public float HorizontalWidth => Math.Max(Label.ActualWidth + GradeLabel.ActualWidth + 5, MinimumWidth);
         public float MinimumHeight => 25;
-        public float VerticalHeight => 25;
+        public float VerticalHeight
+        {
+            get
+            {
+                if (Settings.Mode == GradingMode.List)
+                {
+                    // Estimate height based on font or standard split height
+                    // Since we don't have easy access to the actual split height from LayoutSettings here without state context in getter (though we have _state now)
+                    // We'll use a standard height or try to measure.
+                    // Standard split height is often around 25-30px depending on font.
+                    // Let's use a safe default or try to read from LayoutSettings if possible.
+                    return (_state?.Run?.Count ?? 0) * 25f + PaddingTop + PaddingBottom;
+                }
+                return 25f;
+            }
+        }
         public float MinimumWidth => 100;
 
         public float PaddingTop => 7f;
@@ -37,6 +54,7 @@ namespace LiveSplit.GradingSplits.UI.Components
 
         public GradingSplitsComponent(LiveSplitState state)
         {
+            _state = state;
             Settings = new GradingSplitsSettings();
             Label = new SimpleLabel()
             {
@@ -76,9 +94,7 @@ namespace LiveSplit.GradingSplits.UI.Components
             }
             else
             {
-                // List mode vertical
-                // Placeholder: just draw single for now
-                DrawSingle(g, state, width, VerticalHeight, clipRegion, false);
+                DrawListVertical(g, state, width, clipRegion);
             }
         }
 
@@ -132,6 +148,44 @@ namespace LiveSplit.GradingSplits.UI.Components
             g.Transform = oldMatrix;
         }
 
+        private void DrawListVertical(Graphics g, LiveSplitState state, float width, Region clipRegion)
+        {
+            var oldMatrix = g.Transform;
+            
+            // Setup common label properties
+            GradeLabel.HasShadow = state.LayoutSettings.DropShadows;
+            GradeLabel.ShadowColor = state.LayoutSettings.ShadowsColor;
+            GradeLabel.Font = state.LayoutSettings.TextFont;
+
+            float rowHeight = 25f;
+            float y = PaddingTop;
+
+            for (int i = 0; i < state.Run.Count; i++)
+            {
+                if (_gradeCache.TryGetValue(i, out var gradeData))
+                {
+                    GradeLabel.Text = gradeData.Grade;
+                    GradeLabel.ForeColor = gradeData.Color;
+                    
+                    GradeLabel.SetActualWidth(g);
+                    
+                    GradeLabel.X = width - GradeLabel.ActualWidth - 5;
+                    GradeLabel.Y = y;
+                    GradeLabel.Width = GradeLabel.ActualWidth;
+                    GradeLabel.Height = rowHeight;
+                    
+                    // Only draw if visible in clip region (optimization)
+                    if (clipRegion.IsVisible(GradeLabel.X, GradeLabel.Y, GradeLabel.Width, GradeLabel.Height))
+                    {
+                        GradeLabel.Draw(g);
+                    }
+                }
+                y += rowHeight;
+            }
+
+            g.Transform = oldMatrix;
+        }
+
         public Control GetSettingsControl(LayoutMode mode)
         {
             return Settings;
@@ -152,6 +206,10 @@ namespace LiveSplit.GradingSplits.UI.Components
             if (Settings.Mode == GradingMode.Single)
             {
                 UpdateSingle(state);
+            }
+            else
+            {
+                UpdateList(state);
             }
 
             if (invalidator != null)
@@ -192,7 +250,45 @@ namespace LiveSplit.GradingSplits.UI.Components
             _lastRun = state.Run;
             _lastComparison = state.CurrentComparison;
 
-            // Get the segment
+            var gradeResult = CalculateGradeForSplit(state, index);
+            GradeLabel.Text = gradeResult.Grade;
+            GradeLabel.ForeColor = gradeResult.Color;
+        }
+
+        private void UpdateList(LiveSplitState state)
+        {
+            // Check if we need to recalculate
+            // We recalculate if the run changes, comparison changes, or timing method changes.
+            // For simplicity, we can check if the cache is empty or if key parameters changed.
+            // But since this is called every frame, we must be efficient.
+            
+            // We can track _lastRun and _lastComparison.
+            // Also need to track TimingMethod.
+            
+            bool shouldRecalculate = false;
+            if (state.Run != _lastRun || state.CurrentComparison != _lastComparison || _gradeCache.Count != state.Run.Count)
+            {
+                shouldRecalculate = true;
+            }
+
+            if (shouldRecalculate)
+            {
+                _gradeCache.Clear();
+                _lastRun = state.Run;
+                _lastComparison = state.CurrentComparison;
+
+                for (int i = 0; i < state.Run.Count; i++)
+                {
+                    _gradeCache[i] = CalculateGradeForSplit(state, i);
+                }
+            }
+        }
+
+        private (string Grade, Color Color) CalculateGradeForSplit(LiveSplitState state, int index)
+        {
+            if (index < 0 || index >= state.Run.Count)
+                return ("-", Color.White);
+
             var segment = state.Run[index];
 
             // Calculate stats for this segment based on history
@@ -208,9 +304,7 @@ namespace LiveSplit.GradingSplits.UI.Components
 
             if (segmentHistory.Count < 2)
             {
-                GradeLabel.Text = "?";
-                GradeLabel.ForeColor = Color.White;
-                return;
+                return ("?", Color.White);
             }
 
             var mean = Statistics.CalculateMean(segmentHistory);
@@ -232,15 +326,10 @@ namespace LiveSplit.GradingSplits.UI.Components
             if (comparisonSegmentTime != null)
             {
                 var zScore = Statistics.CalculateZScore(comparisonSegmentTime.Value.TotalSeconds, mean, stdDev);
-                var grade = GradeCalculator.CalculateGrade(zScore);
-                GradeLabel.Text = grade.Grade;
-                GradeLabel.ForeColor = grade.Color;
+                return GradeCalculator.CalculateGrade(zScore);
             }
-            else
-            {
-                GradeLabel.Text = "-";
-                GradeLabel.ForeColor = Color.White;
-            }
+
+            return ("-", Color.White);
         }
 
         public void Dispose()

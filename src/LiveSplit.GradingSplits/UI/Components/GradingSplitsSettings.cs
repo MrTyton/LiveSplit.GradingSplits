@@ -19,13 +19,24 @@ namespace LiveSplit.GradingSplits.UI.Components
         {
             InitializeComponent();
             Mode = GradingMode.Single;
-            cmbMode.DataBindings.Add("SelectedIndex", this, "Mode", false, DataSourceUpdateMode.OnPropertyChanged);
+            cmbMode.SelectedIndexChanged += CmbMode_SelectedIndexChanged;
+        }
+
+        private void CmbMode_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            Mode = (GradingMode)cmbMode.SelectedIndex;
+        }
+
+        private void GradingSplitsSettings_Load(object sender, EventArgs e)
+        {
+            cmbMode.SelectedIndex = (int)Mode;
         }
 
         public void SetSettings(XmlNode node)
         {
             var element = (XmlElement)node;
             Mode = SettingsHelper.ParseEnum(element["Mode"], GradingMode.Single);
+            cmbMode.SelectedIndex = (int)Mode;
         }
 
         public XmlNode GetSettings(XmlDocument document)

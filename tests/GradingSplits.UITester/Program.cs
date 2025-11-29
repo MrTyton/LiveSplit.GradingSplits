@@ -136,6 +136,27 @@ namespace GradingSplits.UITester
                     Console.WriteLine($"Grade Label Text: {gradeLabel.Text}");
                 }
 
+                // 8. Test List Mode
+                Console.WriteLine("Testing List Mode...");
+                // Access Settings via reflection or cast if possible, but Settings property is protected.
+                // However, we can use SetSettings to change mode.
+                var listSettingsNode = doc.CreateElement("Settings");
+                var modeNode = doc.CreateElement("Mode");
+                modeNode.InnerText = "List";
+                listSettingsNode.AppendChild(modeNode);
+                component.SetSettings(listSettingsNode);
+                
+                // Update List
+                component.Update(null, state, 100, 100, LayoutMode.Vertical);
+                
+                // Draw List
+                using (var bitmapList = new Bitmap(300, 500))
+                using (var gList = Graphics.FromImage(bitmapList))
+                {
+                     component.DrawVertical(gList, state, 300, new Region(new Rectangle(0, 0, 300, 500)));
+                     Console.WriteLine("DrawVertical (List) passed.");
+                }
+
                 Console.WriteLine("All tests passed!");
                 MessageBox.Show("All tests passed successfully!", "Success");
             }
