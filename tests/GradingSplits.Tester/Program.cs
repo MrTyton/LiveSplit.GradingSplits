@@ -13,7 +13,7 @@ namespace GradingSplits.Tester
         static void Main(string[] args)
         {
             var splitsPath = Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"..\..\..\..\..\deps\splits\Final Fantasy X - PC (Any% English).lss"));
-            
+
             if (!File.Exists(splitsPath))
             {
                 Console.WriteLine($"File not found: {splitsPath}");
@@ -39,7 +39,7 @@ namespace GradingSplits.Tester
                 foreach (var segment in run)
                 {
                     Console.WriteLine($"Segment: {segment.Name}");
-                    
+
                     // Extract history for GameTime or RealTime. Let's assume RealTime for now.
                     var method = TimingMethod.RealTime;
                     var historyTimes = segment.SegmentHistory
@@ -67,7 +67,7 @@ namespace GradingSplits.Tester
                         // Note: PB Split Time is cumulative. We need Segment Time.
                         // But for this test, let's just pick the *last* history item as a "test case"
                         var lastHistoryTime = historyTimes.Last();
-                        
+
                         var zScore = Statistics.CalculateZScore(lastHistoryTime, mean, stdDev);
                         var grade = GradeCalculator.CalculateGrade(zScore);
 

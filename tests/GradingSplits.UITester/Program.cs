@@ -39,7 +39,7 @@ namespace GradingSplits.UITester
                 segment1.SegmentHistory.Add(1, new Time(TimeSpan.FromSeconds(10), TimeSpan.FromSeconds(10)));
                 segment1.SegmentHistory.Add(2, new Time(TimeSpan.FromSeconds(12), TimeSpan.FromSeconds(12)));
                 segment1.SegmentHistory.Add(3, new Time(TimeSpan.FromSeconds(8), TimeSpan.FromSeconds(8)));
-                
+
                 // Add Comparison (Personal Best): 9s
                 // Z-Score = (9 - 10) / 2 = -0.5.
                 var comparisons = new Time(TimeSpan.FromSeconds(9), TimeSpan.FromSeconds(9));
@@ -55,7 +55,7 @@ namespace GradingSplits.UITester
                 layoutSettings.TextColor = Color.White;
                 layoutSettings.ShadowsColor = Color.Black;
                 layoutSettings.DropShadows = true;
-                
+
                 // Constructor: LiveSplitState(IRun run, Form form, ILayout layout, LayoutSettings layoutSettings, ISettings settings)
                 var state = new LiveSplitState(run, form, null, layoutSettings, null);
 
@@ -79,7 +79,7 @@ namespace GradingSplits.UITester
                 settingsForm.AutoSize = true;
                 settingsForm.Controls.Add(settingsControl);
                 settingsControl.Dock = DockStyle.Fill;
-                
+
                 Console.WriteLine("Showing Settings Form (Close it to continue)...");
                 settingsForm.ShowDialog();
                 // settingsForm.Show();
@@ -127,7 +127,7 @@ namespace GradingSplits.UITester
 
                 component.Update(null, state, 100, 25, LayoutMode.Vertical);
                 Console.WriteLine("Update passed (No Crash).");
-                
+
                 // Reflection to check GradeLabel text
                 var gradeLabelProp = component.GetType().GetProperty("GradeLabel", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Public);
                 if (gradeLabelProp != null)
@@ -145,16 +145,16 @@ namespace GradingSplits.UITester
                 modeNode.InnerText = "List";
                 listSettingsNode.AppendChild(modeNode);
                 component.SetSettings(listSettingsNode);
-                
+
                 // Update List
                 component.Update(null, state, 100, 100, LayoutMode.Vertical);
-                
+
                 // Draw List
                 using (var bitmapList = new Bitmap(300, 500))
                 using (var gList = Graphics.FromImage(bitmapList))
                 {
-                     component.DrawVertical(gList, state, 300, new Region(new Rectangle(0, 0, 300, 500)));
-                     Console.WriteLine("DrawVertical (List) passed.");
+                    component.DrawVertical(gList, state, 300, new Region(new Rectangle(0, 0, 300, 500)));
+                    Console.WriteLine("DrawVertical (List) passed.");
                 }
 
                 Console.WriteLine("All tests passed!");

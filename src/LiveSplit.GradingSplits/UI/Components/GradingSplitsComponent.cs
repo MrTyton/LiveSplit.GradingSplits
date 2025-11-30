@@ -97,6 +97,15 @@ namespace LiveSplit.GradingSplits.UI.Components
                 GradeLabel.Y = 0;
                 GradeLabel.Width = GradeLabel.ActualWidth;
                 GradeLabel.Height = height;
+                
+                // Draw background for grade label only if enabled
+                if (Settings.GradingConfig.UseBackgroundColor)
+                {
+                    var backgroundBrush = new SolidBrush(Settings.GradingConfig.BackgroundColor);
+                    g.FillRectangle(backgroundBrush, GradeLabel.X, GradeLabel.Y, GradeLabel.Width, GradeLabel.Height);
+                    backgroundBrush.Dispose();
+                }
+                
                 GradeLabel.Draw(g);
             }
             else
@@ -111,6 +120,15 @@ namespace LiveSplit.GradingSplits.UI.Components
                 GradeLabel.Y = 0;
                 GradeLabel.Width = GradeLabel.ActualWidth;
                 GradeLabel.Height = height;
+                
+                // Draw background for grade label only if enabled
+                if (Settings.GradingConfig.UseBackgroundColor)
+                {
+                    var backgroundBrush = new SolidBrush(Settings.GradingConfig.BackgroundColor);
+                    g.FillRectangle(backgroundBrush, GradeLabel.X, GradeLabel.Y, GradeLabel.Width, GradeLabel.Height);
+                    backgroundBrush.Dispose();
+                }
+                
                 GradeLabel.Draw(g);
             }
 
@@ -219,7 +237,27 @@ namespace LiveSplit.GradingSplits.UI.Components
             if (segmentTime != null)
             {
                 var zScore = Statistics.CalculateZScore(segmentTime.Value.TotalSeconds, mean, stdDev);
-                return GradeCalculator.CalculateGrade(zScore);
+                
+                // Check if this is a gold split (best segment)
+                bool isGoldSplit = false;
+                var bestSegment = segment.BestSegmentTime[method];
+                if (bestSegment != null && segmentTime.Value == bestSegment.Value)
+                {
+                    isGoldSplit = true;
+                }
+                
+                // Check if this is the worst segment
+                bool isWorstSplit = false;
+                if (segmentHistory.Count > 0)
+                {
+                    var maxSegmentTime = segmentHistory.Max();
+                    if (Math.Abs(segmentTime.Value.TotalSeconds - maxSegmentTime) < 0.001) // Small epsilon for float comparison
+                    {
+                        isWorstSplit = true;
+                    }
+                }
+                
+                return GradeCalculator.CalculateGrade(zScore, Settings.GradingConfig, isGoldSplit, isWorstSplit);
             }
 
             return ("-", state.LayoutSettings.TextColor);
