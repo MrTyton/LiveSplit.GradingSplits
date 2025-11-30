@@ -1,0 +1,151 @@
+# LiveSplit.GradingSplits
+
+A LiveSplit component that shows a percentile-based grade for your current split performance, complete with distribution visualization and customizable grading thresholds.
+
+## Features
+
+- **Real-time Grading**: See how your current split compares to your historical attempts on a percentile scale (0-100)
+- **Customizable Thresholds**: Define your own grade labels, percentile cutoffs, and colors
+- **Distribution Graph**: Optional visualization showing:
+  - Normal distribution curve based on your historical data
+  - Your current attempt position
+  - Comparison time reference line
+  - Mean (average) time line
+  - Statistical summary (Average, Percentile, sample size)
+- **Special Badges**: Automatic detection and custom labels for:
+  - Gold segments (personal best)
+  - Worst segments
+- **Background Color Options**: Apply colors to the label background for better visibility
+
+## Installation
+
+1. Download `LiveSplit.GradingSplits.dll` from the [releases page](https://github.com/MrTyton/LiveSplit.GradingSplits/releases) or from the root of this repository
+2. Place it in your LiveSplit `Components` folder (usually `LiveSplit\Components\`)
+3. Right-click LiveSplit → Edit Layout → Add → Information → Grading Splits
+4. Adjust settings as desired
+
+## How It Works
+
+The component analyzes your split history to calculate:
+1. **Mean (Average)**: The average time for each split across all attempts
+2. **Standard Deviation**: How much variation exists in your times
+3. **Z-Score**: How many standard deviations your current time is from the mean
+4. **Percentile**: Converts the z-score to a 0-100 percentile rank
+   - 0% = fastest possible (best)
+   - 50% = average
+   - 100% = slowest possible (worst)
+
+Your current split time is then graded based on which percentile threshold it falls under.
+
+## Default Grading Scale
+
+| Grade | Percentile Range | Color | Meaning |
+|-------|------------------|-------|---------|
+| S | 0-7% | Gold | Exceptional (top ~7%) |
+| A | 7-31% | Green | Above average |
+| B | 31-69% | Light Green | Average |
+| C | 69-93% | Yellow | Below average |
+| F | 93-100% | Red | Poor performance |
+| ★ | — | Gold | Personal best (gold split) |
+| ✗ | — | Dark Red | Worst segment |
+
+These are based on standard deviation intervals:
+- S: Better than z=-1.5 (93rd percentile performance)
+- A: Between z=-1.5 and z=-0.5
+- B: Between z=-0.5 and z=+0.5
+- C: Between z=+0.5 and z=+1.5
+- F: Worse than z=+1.5
+
+## Customization
+
+### Threshold Settings
+- **Add/Remove Thresholds**: Create your own grading system with as many or as few grades as you want
+- **Percentile Values**: Set custom percentile cutoffs (0-100)
+- **Labels**: Use any text for your grades (A-F, numbers, emoji, etc.)
+- **Colors**: Choose individual colors for each grade
+
+### Display Options
+- **Background Color**: Toggle background fill on the grade label
+- **Gold Badge**: Enable/disable special badge for personal best splits
+  - Customize label and color
+- **Worst Badge**: Enable/disable special badge for worst segments
+  - Customize label and color
+- **Distribution Graph**: Toggle visualization on/off
+  - Adjust graph height (default: 80px)
+
+### Graph Visualization
+When enabled, the graph shows:
+- **Bell curve**: Normal distribution based on your historical data
+- **Blue dots**: Your previous attempts for this split
+- **Red vertical line**: Your comparison time (e.g., PB pace)
+- **Green vertical line**: Mean (average) time
+- **Statistics**: Average time, current percentile, and sample size
+
+## Requirements
+
+- LiveSplit 1.7 or later
+- .NET Framework 4.6.1 or later
+- Split history data (at least 2 completed attempts for meaningful statistics)
+
+## Building from Source
+
+1. Clone this repository
+2. Ensure you have the LiveSplit dependencies in `deps/LiveSplit/`
+3. Open `src/LiveSplit.GradingSplits/LiveSplit.GradingSplits.csproj` in Visual Studio
+4. Build the solution (Release configuration recommended)
+5. The DLL will be output to `deps/LiveSplit/bin/Release/Components/`
+
+## Technical Details
+
+### Statistical Methods
+- **Z-Score Calculation**: `(current_time - mean) / standard_deviation`
+- **Percentile Conversion**: Uses the cumulative distribution function (CDF) for normal distribution
+  - Implemented via the error function (Abramowitz & Stegun approximation)
+- **Inverse Conversion**: Uses Beasley-Springer-Moro algorithm for percentile → z-score
+
+### Data Requirements
+- Minimum 2 attempts needed for standard deviation calculation
+- More attempts = more accurate statistical representation
+- Graph visualization benefits from 10+ attempts for clear patterns
+
+### Backward Compatibility
+Old settings files using z-score thresholds are automatically converted to percentiles on load.
+
+## Contributing
+
+Contributions are welcome! Feel free to:
+- Report bugs via GitHub Issues
+- Suggest features or improvements
+- Submit pull requests
+
+## License
+
+This component is provided as-is for use with LiveSplit. See the LiveSplit license for more details.
+
+## Credits
+
+- Built for [LiveSplit](https://livesplit.org/)
+- Statistical algorithms based on standard normal distribution theory
+- Error function approximation from Abramowitz & Stegun
+- Inverse normal CDF using Beasley-Springer-Moro algorithm
+
+## Screenshots
+
+*(Add screenshots here showing the component in action, settings panel, and graph visualization)*
+
+## FAQ
+
+**Q: Why percentiles instead of raw times?**  
+A: Percentiles normalize performance across splits of different lengths and variability, making grades more meaningful and comparable.
+
+**Q: What if I don't have enough history data?**  
+A: The component needs at least 2 attempts to calculate statistics. With fewer attempts, the grades may not be as meaningful. Aim for 10+ attempts for reliable grading.
+
+**Q: Can I use this for individual levels/categories?**  
+A: Yes! The component analyzes the currently loaded splits file, so switch to different splits files for different categories.
+
+**Q: The graph looks strange/empty**  
+A: This usually means you have very few attempts or very consistent times (low standard deviation). The graph works best with varied data.
+
+**Q: Can I export my grading settings?**  
+A: Settings are stored in your LiveSplit layout file. You can share your layout file to share your grading configuration.
