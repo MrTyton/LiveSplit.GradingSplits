@@ -16,18 +16,19 @@ namespace LiveSplit.GradingSplits.Model
         public bool UseWorstGrade { get; set; }
         public string WorstLabel { get; set; }
         public Color WorstColor { get; set; }
+        public bool ShowGraph { get; set; }
+        public int GraphHeight { get; set; }
 
         public GradingSettings()
         {
-            // Default thresholds
+            // Default thresholds (using percentiles: 0=fastest, 100=slowest)
             Thresholds = new List<GradeThreshold>
             {
-                new GradeThreshold(-1.5, "S", Color.Gold),
-                new GradeThreshold(-0.5, "A", Color.Green),
-                new GradeThreshold(0.5, "B", Color.LightGreen),
-                new GradeThreshold(1.5, "C", Color.Yellow),
-                new GradeThreshold(2.0, "D", Color.Orange),
-                new GradeThreshold(double.MaxValue, "F", Color.Red)
+                new GradeThreshold(7, "S", Color.Gold),           // ~7th percentile (z=-1.5)
+                new GradeThreshold(31, "A", Color.Green),         // ~31st percentile (z=-0.5)
+                new GradeThreshold(69, "B", Color.LightGreen),    // ~69th percentile (z=+0.5)
+                new GradeThreshold(93, "C", Color.Yellow),        // ~93rd percentile (z=+1.5)
+                new GradeThreshold(100, "F", Color.Red)           // Everything else
             };
 
             UseBackgroundColor = false;
@@ -36,8 +37,10 @@ namespace LiveSplit.GradingSplits.Model
             GoldLabel = "★";
             GoldColor = Color.Gold;
             UseWorstGrade = true;
-            WorstLabel = "✗";
+            WorstLabel = "\u2717";
             WorstColor = Color.DarkRed;
+            ShowGraph = false;
+            GraphHeight = 80;
         }
 
         public GradingSettings Clone()
@@ -52,7 +55,9 @@ namespace LiveSplit.GradingSplits.Model
                 GoldColor = GoldColor,
                 UseWorstGrade = UseWorstGrade,
                 WorstLabel = WorstLabel,
-                WorstColor = WorstColor
+                WorstColor = WorstColor,
+                ShowGraph = ShowGraph,
+                GraphHeight = GraphHeight
             };
             return clone;
         }

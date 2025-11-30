@@ -5,20 +5,20 @@ namespace LiveSplit.GradingSplits.Model
 {
     public class GradeThreshold
     {
-        public double ZScoreThreshold { get; set; }
+        public double PercentileThreshold { get; set; }
         public string Label { get; set; }
         public Color ForegroundColor { get; set; }
 
-        public GradeThreshold(double threshold, string label, Color color)
+        public GradeThreshold(double percentileThreshold, string label, Color foregroundColor)
         {
-            ZScoreThreshold = threshold;
+            PercentileThreshold = percentileThreshold;
             Label = label;
-            ForegroundColor = color;
+            ForegroundColor = foregroundColor;
         }
 
         public GradeThreshold Clone()
         {
-            return new GradeThreshold(ZScoreThreshold, Label, ForegroundColor);
+            return new GradeThreshold(PercentileThreshold, Label, ForegroundColor);
         }
     }
 }

@@ -21,12 +21,19 @@ namespace LiveSplit.GradingSplits.UI.Components
         private IRun _lastRun = null;
         private string _lastComparison = null;
         private LiveSplitState _state;
+        
+        // Cached statistics for graph rendering
+        private List<double> _cachedHistory = new List<double>();
+        private double _cachedMean = 0;
+        private double _cachedStdDev = 0;
+        private double _cachedComparisonTime = 0;
+        private double _cachedZScore = 0;
 
         public string ComponentName => "Grading Splits";
 
         public float HorizontalWidth => Label.ActualWidth + GradeLabel.ActualWidth + 5;
-        public float MinimumHeight => 25;
-        public float VerticalHeight => 25f;
+        public float MinimumHeight => Settings.GradingConfig.ShowGraph ? 25 + Settings.GradingConfig.GraphHeight + 30 : 25;
+        public float VerticalHeight => Settings.GradingConfig.ShowGraph ? 25 + Settings.GradingConfig.GraphHeight + 30 : 25f;
         public float MinimumWidth => 100;
 
         public float PaddingTop => 7f;
@@ -90,13 +97,13 @@ namespace LiveSplit.GradingSplits.UI.Components
                 Label.X = 0;
                 Label.Y = 0;
                 Label.Width = Label.ActualWidth;
-                Label.Height = height;
+                Label.Height = 25; // Fixed height for label at top
                 Label.Draw(g);
 
                 GradeLabel.X = Label.ActualWidth + 5;
                 GradeLabel.Y = 0;
                 GradeLabel.Width = GradeLabel.ActualWidth;
-                GradeLabel.Height = height;
+                GradeLabel.Height = 25; // Fixed height for grade at top
                 
                 // Draw background for grade label only if enabled
                 if (Settings.GradingConfig.UseBackgroundColor)
@@ -113,13 +120,13 @@ namespace LiveSplit.GradingSplits.UI.Components
                 Label.X = 5;
                 Label.Y = 0;
                 Label.Width = width - GradeLabel.ActualWidth - 10;
-                Label.Height = height;
+                Label.Height = 25; // Fixed height for label at top
                 Label.Draw(g);
 
                 GradeLabel.X = width - GradeLabel.ActualWidth - 5;
                 GradeLabel.Y = 0;
                 GradeLabel.Width = GradeLabel.ActualWidth;
-                GradeLabel.Height = height;
+                GradeLabel.Height = 25; // Fixed height for grade at top
                 
                 // Draw background for grade label only if enabled
                 if (Settings.GradingConfig.UseBackgroundColor)
@@ -132,7 +139,102 @@ namespace LiveSplit.GradingSplits.UI.Components
                 GradeLabel.Draw(g);
             }
 
+            // Draw graph if enabled
+            if (Settings.GradingConfig.ShowGraph && _cachedHistory.Count >= 2)
+            {
+                float graphY = 25; // Position graph below the grade label
+                DrawDistributionGraph(g, state, width, Settings.GradingConfig.GraphHeight, graphY);
+                
+                // Draw statistics text below graph
+                float statsY = graphY + Settings.GradingConfig.GraphHeight + 2;
+                DrawStatistics(g, state, width, statsY);
+            }
+
             g.Transform = oldMatrix;
+        }
+
+        private void DrawDistributionGraph(Graphics g, LiveSplitState state, float width, float height, float yOffset)
+        {
+            if (_cachedHistory.Count < 2 || _cachedStdDev == 0)
+                return;
+
+            var graphRect = new RectangleF(5, yOffset, width - 10, height);
+            
+            // Draw background
+            g.FillRectangle(new SolidBrush(Color.FromArgb(50, 0, 0, 0)), graphRect);
+
+            // Calculate range for x-axis (mean ± 3 standard deviations)
+            double minValue = _cachedMean - 3 * _cachedStdDev;
+            double maxValue = _cachedMean + 3 * _cachedStdDev;
+            double range = maxValue - minValue;
+            
+            if (range <= 0)
+                return;
+
+            // Draw normal distribution curve
+            var curvePoints = new List<PointF>();
+            int numPoints = (int)graphRect.Width;
+            for (int i = 0; i < numPoints; i++)
+            {
+                float x = graphRect.X + i;
+                double value = minValue + (i / (double)numPoints) * range;
+                double probability = NormalDistribution(value, _cachedMean, _cachedStdDev);
+                
+                // Scale to graph height
+                double maxProbability = NormalDistribution(_cachedMean, _cachedMean, _cachedStdDev);
+                float y = graphRect.Y + graphRect.Height - (float)(probability / maxProbability * graphRect.Height * 0.9);
+                
+                curvePoints.Add(new PointF(x, y));
+            }
+            
+            if (curvePoints.Count > 1)
+            {
+                g.DrawLines(new Pen(Color.LightBlue, 2), curvePoints.ToArray());
+            }
+
+            // Draw historical points
+            foreach (var histValue in _cachedHistory)
+            {
+                if (histValue >= minValue && histValue <= maxValue)
+                {
+                    float x = graphRect.X + (float)((histValue - minValue) / range * graphRect.Width);
+                    float pointSize = 4;
+                    g.FillEllipse(new SolidBrush(Color.Yellow), x - pointSize / 2, graphRect.Y + graphRect.Height - 10, pointSize, pointSize);
+                }
+            }
+
+            // Draw current comparison line
+            if (_cachedComparisonTime >= minValue && _cachedComparisonTime <= maxValue)
+            {
+                float x = graphRect.X + (float)((_cachedComparisonTime - minValue) / range * graphRect.Width);
+                g.DrawLine(new Pen(GradeLabel.ForeColor, 2), x, graphRect.Y, x, graphRect.Y + graphRect.Height);
+            }
+
+            // Draw mean line
+            float meanX = graphRect.X + (float)((_cachedMean - minValue) / range * graphRect.Width);
+            g.DrawLine(new Pen(Color.White, 1) { DashStyle = System.Drawing.Drawing2D.DashStyle.Dash }, meanX, graphRect.Y, meanX, graphRect.Y + graphRect.Height);
+        }
+
+        private double NormalDistribution(double x, double mean, double stdDev)
+        {
+            double exponent = -Math.Pow(x - mean, 2) / (2 * Math.Pow(stdDev, 2));
+            return (1 / (stdDev * Math.Sqrt(2 * Math.PI))) * Math.Exp(exponent);
+        }
+
+        private void DrawStatistics(Graphics g, LiveSplitState state, float width, float yOffset)
+        {
+            var font = new Font(state.LayoutSettings.TextFont.FontFamily, 8, FontStyle.Regular);
+            var brush = new SolidBrush(state.LayoutSettings.TextColor);
+            
+            // Calculate percentile from z-score
+            double percentile = Statistics.ZScoreToPercentile(_cachedZScore);
+            
+            string statsText = $"Average: {TimeSpan.FromSeconds(_cachedMean):mm\\:ss\\.ff}  Percentile: {percentile:F1}%  n={_cachedHistory.Count}";
+            
+            var textSize = g.MeasureString(statsText, font);
+            float x = (width - textSize.Width) / 2;
+            
+            g.DrawString(statsText, font, brush, x, yOffset);
         }
 
         public Control GetSettingsControl(LayoutMode mode)
@@ -196,31 +298,39 @@ namespace LiveSplit.GradingSplits.UI.Components
         private (string Grade, Color Color) CalculateGradeForSplit(LiveSplitState state, int index)
         {
             if (index < 0 || index >= state.Run.Count)
+            {
+                _cachedHistory.Clear();
                 return ("-", state.LayoutSettings.TextColor);
+            }
 
             var segment = state.Run[index];
             var method = state.CurrentTimingMethod;
 
             // Calculate stats for this segment based on history
-            var segmentHistory = new List<double>();
+            _cachedHistory = new List<double>();
             foreach (var historyItem in segment.SegmentHistory)
             {
                 var time = historyItem.Value[method];
                 if (time.HasValue)
                 {
-                    segmentHistory.Add(time.Value.TotalSeconds);
+                    _cachedHistory.Add(time.Value.TotalSeconds);
                 }
             }
 
-            if (segmentHistory.Count < 2)
+            if (_cachedHistory.Count < 2)
             {
+                _cachedHistory.Clear();
                 return ("-", state.LayoutSettings.TextColor);
             }
 
-            var mean = Statistics.CalculateMean(segmentHistory);
-            var stdDev = Statistics.CalculateStandardDeviation(segmentHistory);
+            _cachedMean = Statistics.CalculateMean(_cachedHistory);
+            _cachedStdDev = Statistics.CalculateStandardDeviation(_cachedHistory);
 
-            if (stdDev == 0) return ("-", state.LayoutSettings.TextColor);
+            if (_cachedStdDev == 0)
+            {
+                _cachedHistory.Clear();
+                return ("-", state.LayoutSettings.TextColor);
+            }
 
             // Get the comparison segment time for the current split
             TimeSpan? segmentTime = null;
@@ -236,7 +346,8 @@ namespace LiveSplit.GradingSplits.UI.Components
 
             if (segmentTime != null)
             {
-                var zScore = Statistics.CalculateZScore(segmentTime.Value.TotalSeconds, mean, stdDev);
+                _cachedComparisonTime = segmentTime.Value.TotalSeconds;
+                _cachedZScore = Statistics.CalculateZScore(_cachedComparisonTime, _cachedMean, _cachedStdDev);
                 
                 // Check if this is a gold split (best segment)
                 bool isGoldSplit = false;
@@ -248,16 +359,16 @@ namespace LiveSplit.GradingSplits.UI.Components
                 
                 // Check if this is the worst segment
                 bool isWorstSplit = false;
-                if (segmentHistory.Count > 0)
+                if (_cachedHistory.Count > 0)
                 {
-                    var maxSegmentTime = segmentHistory.Max();
-                    if (Math.Abs(segmentTime.Value.TotalSeconds - maxSegmentTime) < 0.001) // Small epsilon for float comparison
+                    var maxSegmentTime = _cachedHistory.Max();
+                    if (Math.Abs(_cachedComparisonTime - maxSegmentTime) < 0.001) // Small epsilon for float comparison
                     {
                         isWorstSplit = true;
                     }
                 }
                 
-                return GradeCalculator.CalculateGrade(zScore, Settings.GradingConfig, isGoldSplit, isWorstSplit);
+                return GradeCalculator.CalculateGrade(_cachedZScore, Settings.GradingConfig, isGoldSplit, isWorstSplit);
             }
 
             return ("-", state.LayoutSettings.TextColor);

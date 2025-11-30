@@ -26,21 +26,20 @@ namespace LiveSplit.GradingSplits.UI.Components
                     var threshold = row.Tag as GradeThreshold;
                     if (threshold != null)
                     {
-                        if (e.ColumnIndex == 0) // Z-Score
+                        if (e.ColumnIndex == 0) // Percentile
                         {
                             var cellValue = row.Cells[0].Value?.ToString()?.Trim();
-                            if (cellValue == "∞" || cellValue == "inf" || cellValue == "infinity")
+                            if (double.TryParse(cellValue, out double percentile))
                             {
-                                threshold.ZScoreThreshold = double.MaxValue;
-                            }
-                            else if (double.TryParse(cellValue, out double zScore))
-                            {
-                                threshold.ZScoreThreshold = zScore;
+                                // Clamp to valid percentile range
+                                percentile = Math.Max(0, Math.Min(100, percentile));
+                                threshold.PercentileThreshold = percentile;
+                                row.Cells[0].Value = percentile.ToString("F1");
                             }
                             else
                             {
                                 // Invalid input, revert to previous value
-                                row.Cells[0].Value = double.IsInfinity(threshold.ZScoreThreshold) || threshold.ZScoreThreshold >= double.MaxValue ? "∞" : threshold.ZScoreThreshold.ToString("F2");
+                                row.Cells[0].Value = threshold.PercentileThreshold.ToString("F1");
                             }
                         }
                         else if (e.ColumnIndex == 1) // Label
@@ -73,11 +72,11 @@ namespace LiveSplit.GradingSplits.UI.Components
 
             btnAddThreshold.Click += (s, e) =>
             {
-                var newThreshold = new GradeThreshold(0.0, "X", Color.White);
+                var newThreshold = new GradeThreshold(50.0, "X", Color.White);
                 GradingConfig.Thresholds.Add(newThreshold);
                 int rowIndex = dgvThresholds.Rows.Add();
                 var row = dgvThresholds.Rows[rowIndex];
-                row.Cells[0].Value = "0.00";
+                row.Cells[0].Value = "50.0";
                 row.Cells[1].Value = "X";
                 row.Cells[2].Value = Color.White.Name;
                 row.Cells[2].Style.BackColor = Color.White;
@@ -161,6 +160,17 @@ namespace LiveSplit.GradingSplits.UI.Components
                 }
             };
 
+            chkShowGraph.CheckedChanged += (s, e) =>
+            {
+                numGraphHeight.Enabled = chkShowGraph.Checked;
+                GradingConfig.ShowGraph = chkShowGraph.Checked;
+            };
+
+            numGraphHeight.ValueChanged += (s, e) =>
+            {
+                GradingConfig.GraphHeight = (int)numGraphHeight.Value;
+            };
+
             btnResetDefaults.Click += (s, e) =>
             {
                 if (MessageBox.Show("Reset all grade settings to defaults?", "Confirm Reset", 
@@ -197,13 +207,17 @@ namespace LiveSplit.GradingSplits.UI.Components
             btnWorstColor.BackColor = GradingConfig.WorstColor;
             btnWorstColor.Enabled = GradingConfig.UseWorstGrade;
 
+            chkShowGraph.Checked = GradingConfig.ShowGraph;
+            numGraphHeight.Value = GradingConfig.GraphHeight;
+            numGraphHeight.Enabled = GradingConfig.ShowGraph;
+
             // Populate thresholds grid
             dgvThresholds.Rows.Clear();
             foreach (var threshold in GradingConfig.Thresholds)
             {
                 int rowIndex = dgvThresholds.Rows.Add();
                 var row = dgvThresholds.Rows[rowIndex];
-                row.Cells[0].Value = double.IsInfinity(threshold.ZScoreThreshold) || threshold.ZScoreThreshold >= double.MaxValue ? "∞" : threshold.ZScoreThreshold.ToString("F2");
+                row.Cells[0].Value = threshold.PercentileThreshold.ToString("F1");
                 row.Cells[1].Value = threshold.Label;
                 row.Cells[2].Value = threshold.ForegroundColor.Name;
                 row.Cells[2].Style.BackColor = threshold.ForegroundColor;
@@ -225,8 +239,10 @@ namespace LiveSplit.GradingSplits.UI.Components
             GradingConfig.GoldLabel = SettingsHelper.ParseString(element["GoldLabel"], "★");
             GradingConfig.GoldColor = SettingsHelper.ParseColor(element["GoldColor"], Color.Gold);
             GradingConfig.UseWorstGrade = SettingsHelper.ParseBool(element["UseWorstGrade"], true);
-            GradingConfig.WorstLabel = SettingsHelper.ParseString(element["WorstLabel"], "✗");
+            GradingConfig.WorstLabel = SettingsHelper.ParseString(element["WorstLabel"], "\u2717");
             GradingConfig.WorstColor = SettingsHelper.ParseColor(element["WorstColor"], Color.DarkRed);
+            GradingConfig.ShowGraph = SettingsHelper.ParseBool(element["ShowGraph"], false);
+            GradingConfig.GraphHeight = SettingsHelper.ParseInt(element["GraphHeight"], 80);
 
             // Parse thresholds
             var thresholdsNode = element["Thresholds"];
@@ -235,25 +251,37 @@ namespace LiveSplit.GradingSplits.UI.Components
                 GradingConfig.Thresholds.Clear();
                 foreach (XmlElement thresholdNode in thresholdsNode.ChildNodes)
                 {
-                    var zScoreStr = thresholdNode["ZScore"]?.InnerText;
-                    double zScore = 0;
-                    if (!string.IsNullOrEmpty(zScoreStr))
+                    double percentile = 50.0;
+                    
+                    // Try to load as percentile first (new format)
+                    var percentileStr = thresholdNode["Percentile"]?.InnerText;
+                    if (!string.IsNullOrEmpty(percentileStr) && double.TryParse(percentileStr, out double parsedPercentile))
                     {
-                        // Handle special infinity values
-                        if (zScoreStr == "∞" || zScoreStr.ToLower() == "infinity" || zScoreStr.ToLower() == "inf")
+                        percentile = Math.Max(0, Math.Min(100, parsedPercentile));
+                    }
+                    else
+                    {
+                        // Fallback: try to load as z-score (old format) and convert
+                        var zScoreStr = thresholdNode["ZScore"]?.InnerText;
+                        if (!string.IsNullOrEmpty(zScoreStr))
                         {
-                            zScore = double.MaxValue;
-                        }
-                        else if (double.TryParse(zScoreStr, out double parsedValue))
-                        {
-                            // Clamp extremely large values to MaxValue
-                            zScore = parsedValue >= double.MaxValue ? double.MaxValue : parsedValue;
+                            double zScore = 0;
+                            if (zScoreStr == "∞" || zScoreStr.ToLower() == "infinity" || zScoreStr.ToLower() == "inf")
+                            {
+                                zScore = 3.0; // Cap at z=3 for conversion
+                            }
+                            else if (double.TryParse(zScoreStr, out double parsedZScore))
+                            {
+                                zScore = Math.Max(-3, Math.Min(3, parsedZScore)); // Clamp for conversion
+                            }
+                            percentile = Statistics.ZScoreToPercentile(zScore);
                         }
                     }
+                    
                     var label = SettingsHelper.ParseString(thresholdNode["Label"], "?");
                     var color = SettingsHelper.ParseColor(thresholdNode["Color"], Color.White);
                     
-                    GradingConfig.Thresholds.Add(new GradeThreshold(zScore, label, color));
+                    GradingConfig.Thresholds.Add(new GradeThreshold(percentile, label, color));
                 }
             }
 
@@ -282,6 +310,8 @@ namespace LiveSplit.GradingSplits.UI.Components
             hash ^= SettingsHelper.CreateSetting(document, parent, "UseWorstGrade", GradingConfig.UseWorstGrade);
             hash ^= SettingsHelper.CreateSetting(document, parent, "WorstLabel", GradingConfig.WorstLabel);
             hash ^= SettingsHelper.CreateSetting(document, parent, "WorstColor", GradingConfig.WorstColor);
+            hash ^= SettingsHelper.CreateSetting(document, parent, "ShowGraph", GradingConfig.ShowGraph);
+            hash ^= SettingsHelper.CreateSetting(document, parent, "GraphHeight", GradingConfig.GraphHeight);
 
             // Save thresholds
             if (document != null)
@@ -290,7 +320,7 @@ namespace LiveSplit.GradingSplits.UI.Components
                 foreach (var threshold in GradingConfig.Thresholds)
                 {
                     var thresholdNode = document.CreateElement("Threshold");
-                    SettingsHelper.CreateSetting(document, thresholdNode, "ZScore", threshold.ZScoreThreshold);
+                    SettingsHelper.CreateSetting(document, thresholdNode, "Percentile", threshold.PercentileThreshold);
                     SettingsHelper.CreateSetting(document, thresholdNode, "Label", threshold.Label);
                     SettingsHelper.CreateSetting(document, thresholdNode, "Color", threshold.ForegroundColor);
                     thresholdsNode.AppendChild(thresholdNode);
@@ -301,7 +331,7 @@ namespace LiveSplit.GradingSplits.UI.Components
             // Hash thresholds
             foreach (var threshold in GradingConfig.Thresholds)
             {
-                hash ^= threshold.ZScoreThreshold.GetHashCode();
+                hash ^= threshold.PercentileThreshold.GetHashCode();
                 hash ^= threshold.Label.GetHashCode();
                 hash ^= threshold.ForegroundColor.GetHashCode();
             }
