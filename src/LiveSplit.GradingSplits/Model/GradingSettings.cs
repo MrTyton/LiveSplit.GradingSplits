@@ -5,20 +5,70 @@ using System.Linq;
 
 namespace LiveSplit.GradingSplits.Model
 {
+    /// <summary>
+    /// Configuration settings for the grading system, including thresholds and display options.
+    /// </summary>
     public class GradingSettings
     {
+        /// <summary>
+        /// List of grade thresholds ordered by percentile.
+        /// </summary>
         public List<GradeThreshold> Thresholds { get; set; }
+        
+        /// <summary>
+        /// Whether to show a background color behind the grade label.
+        /// </summary>
         public bool UseBackgroundColor { get; set; }
+        
+        /// <summary>
+        /// The background color to use when UseBackgroundColor is true.
+        /// </summary>
         public Color BackgroundColor { get; set; }
+        
+        /// <summary>
+        /// Whether to show a special badge for the best (gold) segment.
+        /// </summary>
         public bool UseGoldGrade { get; set; }
+        
+        /// <summary>
+        /// The label to show for gold segments (default: "★").
+        /// </summary>
         public string GoldLabel { get; set; }
+        
+        /// <summary>
+        /// The color to use for gold segment labels.
+        /// </summary>
         public Color GoldColor { get; set; }
+        
+        /// <summary>
+        /// Whether to show a special badge for the worst segment.
+        /// </summary>
         public bool UseWorstGrade { get; set; }
+        
+        /// <summary>
+        /// The label to show for worst segments (default: "✗").
+        /// </summary>
         public string WorstLabel { get; set; }
+        
+        /// <summary>
+        /// The color to use for worst segment labels.
+        /// </summary>
         public Color WorstColor { get; set; }
+        
+        /// <summary>
+        /// Whether to show the distribution graph below the grade.
+        /// </summary>
         public bool ShowGraph { get; set; }
+        
+        /// <summary>
+        /// The height of the distribution graph in pixels.
+        /// </summary>
         public int GraphHeight { get; set; }
 
+        /// <summary>
+        /// Creates a new GradingSettings instance with default values.
+        /// Default thresholds use percentiles where 0=fastest and 100=slowest.
+        /// </summary>
         public GradingSettings()
         {
             // Default thresholds (using percentiles: 0=fastest, 100=slowest)
@@ -43,6 +93,10 @@ namespace LiveSplit.GradingSplits.Model
             GraphHeight = 80;
         }
 
+        /// <summary>
+        /// Creates a deep copy of this settings object.
+        /// </summary>
+        /// <returns>A new GradingSettings instance with the same values.</returns>
         public GradingSettings Clone()
         {
             var clone = new GradingSettings
