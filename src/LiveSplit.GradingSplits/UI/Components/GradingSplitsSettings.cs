@@ -5,38 +5,20 @@ using LiveSplit.UI;
 
 namespace LiveSplit.GradingSplits.UI.Components
 {
-    public enum GradingMode
-    {
-        Single,
-        List
-    }
-
     public partial class GradingSplitsSettings : UserControl
     {
-        public GradingMode Mode { get; set; }
-
         public GradingSplitsSettings()
         {
             InitializeComponent();
-            Mode = GradingMode.Single;
-            cmbMode.SelectedIndexChanged += CmbMode_SelectedIndexChanged;
-        }
-
-        private void CmbMode_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            Mode = (GradingMode)cmbMode.SelectedIndex;
         }
 
         private void GradingSplitsSettings_Load(object sender, EventArgs e)
         {
-            cmbMode.SelectedIndex = (int)Mode;
         }
 
         public void SetSettings(XmlNode node)
         {
-            var element = (XmlElement)node;
-            Mode = SettingsHelper.ParseEnum(element["Mode"], GradingMode.Single);
-            cmbMode.SelectedIndex = (int)Mode;
+            // No settings to load for now
         }
 
         public XmlNode GetSettings(XmlDocument document)
@@ -53,7 +35,7 @@ namespace LiveSplit.GradingSplits.UI.Components
 
         private int CreateSettingsNode(XmlDocument document, XmlElement parent)
         {
-            return SettingsHelper.CreateSetting(document, parent, "Mode", Mode);
+            return 0;
         }
     }
 }
