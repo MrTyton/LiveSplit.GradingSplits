@@ -135,10 +135,69 @@ namespace LiveSplit.GradingSplits.UI.Components
 
             for (int i = 0; i < _state.Run.Count; i++)
             {
-                _originalSplitNames[i] = _state.Run[i].Name;
+                // Try to extract the original name in case it already has grade formatting
+                string name = _state.Run[i].Name;
+                string cleanedName = StripGradeFromName(name);
+                _originalSplitNames[i] = cleanedName;
+                
+                // If we cleaned the name, also update the run to use the clean name
+                if (cleanedName != name)
+                {
+                    _state.Run[i].Name = cleanedName;
+                }
             }
 
             _splitNamesModified = false;
+        }
+
+        /// <summary>
+        /// Attempts to strip grade formatting from a split name using the configured format.
+        /// </summary>
+        private string StripGradeFromName(string name)
+        {
+            if (string.IsNullOrEmpty(name)) return name;
+
+            string format = Settings.GradingConfig.SplitNameFormat;
+            if (string.IsNullOrEmpty(format) || !format.Contains("{Name}") || !format.Contains("{Grade}"))
+                return name;
+
+            // Get all possible grade labels
+            var allGrades = new HashSet<string>();
+            foreach (var threshold in Settings.GradingConfig.Thresholds)
+            {
+                if (!string.IsNullOrEmpty(threshold.Label))
+                    allGrades.Add(threshold.Label);
+            }
+            if (Settings.GradingConfig.UseGoldGrade && !string.IsNullOrEmpty(Settings.GradingConfig.GoldLabel))
+                allGrades.Add(Settings.GradingConfig.GoldLabel);
+            if (Settings.GradingConfig.UseWorstGrade && !string.IsNullOrEmpty(Settings.GradingConfig.WorstLabel))
+                allGrades.Add(Settings.GradingConfig.WorstLabel);
+
+            if (allGrades.Count == 0) return name;
+
+            // Try each grade to see if we can extract the original name
+            foreach (var grade in allGrades)
+            {
+                string formatted = format.Replace("{Grade}", grade);
+                // Now we have something like "{Name} [A]" or "[A] {Name}"
+                
+                // Find where {Name} is in the formatted string
+                int nameIndex = formatted.IndexOf("{Name}");
+                if (nameIndex < 0) continue;
+
+                string prefix = formatted.Substring(0, nameIndex);
+                string suffix = formatted.Substring(nameIndex + 6); // 6 = "{Name}".Length
+
+                // Check if the current name matches this pattern
+                if (name.StartsWith(prefix) && name.EndsWith(suffix) && name.Length > prefix.Length + suffix.Length)
+                {
+                    string extracted = name.Substring(prefix.Length, name.Length - prefix.Length - suffix.Length);
+                    // Recursively strip in case multiple grades were appended
+                    return StripGradeFromName(extracted);
+                }
+            }
+
+            return name;
         }
 
         private void RestoreOriginalSplitNames()
