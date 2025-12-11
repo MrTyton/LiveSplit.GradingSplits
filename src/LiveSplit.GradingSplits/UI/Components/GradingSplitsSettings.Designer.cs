@@ -52,6 +52,8 @@ namespace LiveSplit.GradingSplits.UI.Components
             this.chkShowGraph = new System.Windows.Forms.CheckBox();
             this.lblGraphHeight = new System.Windows.Forms.Label();
             this.numGraphHeight = new System.Windows.Forms.NumericUpDown();
+            this.lblGraphStyle = new System.Windows.Forms.Label();
+            this.cboGraphStyle = new System.Windows.Forms.ComboBox();
             this.btnResetDefaults = new System.Windows.Forms.Button();
             this.tableLayoutPanel1.SuspendLayout();
             this.groupBox1.SuspendLayout();
@@ -217,15 +219,19 @@ namespace LiveSplit.GradingSplits.UI.Components
             this.tableLayoutPanel2.Controls.Add(this.chkShowGraph, 0, 3);
             this.tableLayoutPanel2.Controls.Add(this.lblGraphHeight, 1, 3);
             this.tableLayoutPanel2.Controls.Add(this.numGraphHeight, 2, 3);
+            this.tableLayoutPanel2.Controls.Add(this.lblGraphStyle, 0, 4);
+            this.tableLayoutPanel2.Controls.Add(this.cboGraphStyle, 1, 4);
+            this.tableLayoutPanel2.SetColumnSpan(this.cboGraphStyle, 2);
             this.tableLayoutPanel2.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tableLayoutPanel2.Location = new System.Drawing.Point(3, 16);
             this.tableLayoutPanel2.Name = "tableLayoutPanel2";
-            this.tableLayoutPanel2.RowCount = 4;
+            this.tableLayoutPanel2.RowCount = 5;
             this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 30F));
             this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 30F));
             this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 30F));
             this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 30F));
-            this.tableLayoutPanel2.Size = new System.Drawing.Size(450, 120);
+            this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 30F));
+            this.tableLayoutPanel2.Size = new System.Drawing.Size(450, 150);
             this.tableLayoutPanel2.TabIndex = 0;
             // 
             // chkUseBackground
@@ -337,6 +343,27 @@ namespace LiveSplit.GradingSplits.UI.Components
             this.numGraphHeight.TabIndex = 10;
             this.numGraphHeight.Value = new decimal(new int[] { 80, 0, 0, 0 });
             // 
+            // lblGraphStyle
+            // 
+            this.lblGraphStyle.Anchor = System.Windows.Forms.AnchorStyles.Left;
+            this.lblGraphStyle.AutoSize = true;
+            this.lblGraphStyle.Location = new System.Drawing.Point(3, 128);
+            this.lblGraphStyle.Name = "lblGraphStyle";
+            this.lblGraphStyle.Size = new System.Drawing.Size(65, 13);
+            this.lblGraphStyle.TabIndex = 11;
+            this.lblGraphStyle.Text = "Graph Style:";
+            // 
+            // cboGraphStyle
+            // 
+            this.cboGraphStyle.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
+            this.cboGraphStyle.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.cboGraphStyle.FormattingEnabled = true;
+            this.cboGraphStyle.Items.AddRange(new object[] { "Histogram (stacked dots)", "Scatter (line)" });
+            this.cboGraphStyle.Location = new System.Drawing.Point(153, 124);
+            this.cboGraphStyle.Name = "cboGraphStyle";
+            this.cboGraphStyle.Size = new System.Drawing.Size(294, 21);
+            this.cboGraphStyle.TabIndex = 12;
+            // 
             // btnResetDefaults
             // 
             this.btnResetDefaults.Anchor = System.Windows.Forms.AnchorStyles.Right;
@@ -388,6 +415,8 @@ namespace LiveSplit.GradingSplits.UI.Components
         private System.Windows.Forms.CheckBox chkShowGraph;
         private System.Windows.Forms.Label lblGraphHeight;
         private System.Windows.Forms.NumericUpDown numGraphHeight;
+        private System.Windows.Forms.Label lblGraphStyle;
+        private System.Windows.Forms.ComboBox cboGraphStyle;
         private System.Windows.Forms.Button btnResetDefaults;
         private System.Windows.Forms.DataGridViewTextBoxColumn colZScore;
         private System.Windows.Forms.DataGridViewTextBoxColumn colLabel;

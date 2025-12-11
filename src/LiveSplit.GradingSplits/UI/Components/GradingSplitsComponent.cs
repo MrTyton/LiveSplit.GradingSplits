@@ -193,13 +193,67 @@ namespace LiveSplit.GradingSplits.UI.Components
             }
 
             // Draw historical points
-            foreach (var histValue in _cachedHistory)
+            float dotSize = 4;
+            
+            if (Settings.GradingConfig.UseHistogramGraph)
             {
-                if (histValue >= minValue && histValue <= maxValue)
+                // Histogram mode: dots stacked vertically in bins
+                int numBins = Math.Min(30, (int)(graphRect.Width / 6)); // Each bin ~6 pixels wide
+                var bins = new int[numBins];
+                float binWidth = graphRect.Width / numBins;
+                
+                // Count values in each bin
+                foreach (var histValue in _cachedHistory)
                 {
-                    float x = graphRect.X + (float)((histValue - minValue) / range * graphRect.Width);
-                    float pointSize = 4;
-                    g.FillEllipse(new SolidBrush(Color.Yellow), x - pointSize / 2, graphRect.Y + graphRect.Height - 10, pointSize, pointSize);
+                    if (histValue >= minValue && histValue <= maxValue)
+                    {
+                        int binIndex = (int)((histValue - minValue) / range * (numBins - 1));
+                        binIndex = Math.Max(0, Math.Min(numBins - 1, binIndex));
+                        bins[binIndex]++;
+                    }
+                }
+                
+                // Find max bin count for scaling
+                int maxBinCount = bins.Max();
+                if (maxBinCount == 0) maxBinCount = 1;
+                
+                // Draw dots for each bin, stacked vertically
+                float dotSpacing = dotSize + 1;
+                
+                for (int bin = 0; bin < numBins; bin++)
+                {
+                    if (bins[bin] > 0)
+                    {
+                        float binCenterX = graphRect.X + bin * binWidth + binWidth / 2;
+                        
+                        // Stack dots from bottom up
+                        for (int dotIndex = 0; dotIndex < bins[bin]; dotIndex++)
+                        {
+                            float dotY = graphRect.Y + graphRect.Height - 8 - (dotIndex * dotSpacing);
+                            
+                            // Don't draw if we'd go above the graph area
+                            if (dotY < graphRect.Y + 10)
+                                break;
+                                
+                            g.FillEllipse(new SolidBrush(Color.Yellow), 
+                                binCenterX - dotSize / 2, 
+                                dotY - dotSize / 2, 
+                                dotSize, 
+                                dotSize);
+                        }
+                    }
+                }
+            }
+            else
+            {
+                // Scatter mode: dots on a single line
+                foreach (var histValue in _cachedHistory)
+                {
+                    if (histValue >= minValue && histValue <= maxValue)
+                    {
+                        float x = graphRect.X + (float)((histValue - minValue) / range * graphRect.Width);
+                        g.FillEllipse(new SolidBrush(Color.Yellow), x - dotSize / 2, graphRect.Y + graphRect.Height - 10, dotSize, dotSize);
+                    }
                 }
             }
 

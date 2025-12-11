@@ -64,6 +64,11 @@ namespace LiveSplit.GradingSplits.Model
         /// The height of the distribution graph in pixels.
         /// </summary>
         public int GraphHeight { get; set; }
+        
+        /// <summary>
+        /// Whether to show historical points as a histogram (stacked dots) or a scatter line.
+        /// </summary>
+        public bool UseHistogramGraph { get; set; }
 
         /// <summary>
         /// Creates a new GradingSettings instance with default values.
@@ -91,6 +96,7 @@ namespace LiveSplit.GradingSplits.Model
             WorstColor = Color.DarkRed;
             ShowGraph = false;
             GraphHeight = 80;
+            UseHistogramGraph = true;
         }
 
         /// <summary>
@@ -111,7 +117,8 @@ namespace LiveSplit.GradingSplits.Model
                 WorstLabel = WorstLabel,
                 WorstColor = WorstColor,
                 ShowGraph = ShowGraph,
-                GraphHeight = GraphHeight
+                GraphHeight = GraphHeight,
+                UseHistogramGraph = UseHistogramGraph
             };
             return clone;
         }

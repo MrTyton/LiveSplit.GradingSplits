@@ -163,12 +163,18 @@ namespace LiveSplit.GradingSplits.UI.Components
             chkShowGraph.CheckedChanged += (s, e) =>
             {
                 numGraphHeight.Enabled = chkShowGraph.Checked;
+                cboGraphStyle.Enabled = chkShowGraph.Checked;
                 GradingConfig.ShowGraph = chkShowGraph.Checked;
             };
 
             numGraphHeight.ValueChanged += (s, e) =>
             {
                 GradingConfig.GraphHeight = (int)numGraphHeight.Value;
+            };
+
+            cboGraphStyle.SelectedIndexChanged += (s, e) =>
+            {
+                GradingConfig.UseHistogramGraph = cboGraphStyle.SelectedIndex == 0;
             };
 
             btnResetDefaults.Click += (s, e) =>
@@ -210,6 +216,8 @@ namespace LiveSplit.GradingSplits.UI.Components
             chkShowGraph.Checked = GradingConfig.ShowGraph;
             numGraphHeight.Value = GradingConfig.GraphHeight;
             numGraphHeight.Enabled = GradingConfig.ShowGraph;
+            cboGraphStyle.SelectedIndex = GradingConfig.UseHistogramGraph ? 0 : 1;
+            cboGraphStyle.Enabled = GradingConfig.ShowGraph;
 
             // Populate thresholds grid
             dgvThresholds.Rows.Clear();
@@ -243,6 +251,7 @@ namespace LiveSplit.GradingSplits.UI.Components
             GradingConfig.WorstColor = SettingsHelper.ParseColor(element["WorstColor"], Color.DarkRed);
             GradingConfig.ShowGraph = SettingsHelper.ParseBool(element["ShowGraph"], false);
             GradingConfig.GraphHeight = SettingsHelper.ParseInt(element["GraphHeight"], 80);
+            GradingConfig.UseHistogramGraph = SettingsHelper.ParseBool(element["UseHistogramGraph"], true);
 
             // Parse thresholds
             var thresholdsNode = element["Thresholds"];
@@ -312,6 +321,7 @@ namespace LiveSplit.GradingSplits.UI.Components
             hash ^= SettingsHelper.CreateSetting(document, parent, "WorstColor", GradingConfig.WorstColor);
             hash ^= SettingsHelper.CreateSetting(document, parent, "ShowGraph", GradingConfig.ShowGraph);
             hash ^= SettingsHelper.CreateSetting(document, parent, "GraphHeight", GradingConfig.GraphHeight);
+            hash ^= SettingsHelper.CreateSetting(document, parent, "UseHistogramGraph", GradingConfig.UseHistogramGraph);
 
             // Save thresholds
             if (document != null)
