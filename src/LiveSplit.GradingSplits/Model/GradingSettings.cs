@@ -14,77 +14,77 @@ namespace LiveSplit.GradingSplits.Model
         /// List of grade thresholds ordered by percentile.
         /// </summary>
         public List<GradeThreshold> Thresholds { get; set; }
-        
+
         /// <summary>
         /// Whether to show a background color behind the grade label.
         /// </summary>
         public bool UseBackgroundColor { get; set; }
-        
+
         /// <summary>
         /// The background color to use when UseBackgroundColor is true.
         /// </summary>
         public Color BackgroundColor { get; set; }
-        
+
         /// <summary>
         /// Whether to show a special badge for the best (gold) segment.
         /// </summary>
         public bool UseGoldGrade { get; set; }
-        
+
         /// <summary>
         /// The label to show for gold segments (default: "★").
         /// </summary>
         public string GoldLabel { get; set; }
-        
+
         /// <summary>
         /// The color to use for gold segment labels.
         /// </summary>
         public Color GoldColor { get; set; }
-        
+
         /// <summary>
         /// Whether to show a special badge for the worst segment.
         /// </summary>
         public bool UseWorstGrade { get; set; }
-        
+
         /// <summary>
         /// The label to show for worst segments (default: "✗").
         /// </summary>
         public string WorstLabel { get; set; }
-        
+
         /// <summary>
         /// The color to use for worst segment labels.
         /// </summary>
         public Color WorstColor { get; set; }
-        
+
         /// <summary>
         /// Whether to show the distribution graph below the grade.
         /// </summary>
         public bool ShowGraph { get; set; }
-        
+
         /// <summary>
         /// The height of the distribution graph in pixels.
         /// </summary>
         public int GraphHeight { get; set; }
-        
+
         /// <summary>
         /// Whether to show historical points as a histogram (stacked dots) or a scatter line.
         /// </summary>
         public bool UseHistogramGraph { get; set; }
-        
+
         /// <summary>
         /// Whether to show statistics text below the graph.
         /// </summary>
         public bool ShowStatistics { get; set; }
-        
+
         /// <summary>
         /// The font size for the statistics text.
         /// </summary>
         public int StatisticsFontSize { get; set; }
-        
+
         /// <summary>
         /// Whether to show the previous split's comparison result.
         /// </summary>
         public bool ShowPreviousSplit { get; set; }
-        
+
         /// <summary>
         /// The font size for the previous split comparison text.
         /// </summary>

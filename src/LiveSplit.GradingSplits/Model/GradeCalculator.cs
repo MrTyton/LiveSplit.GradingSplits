@@ -20,18 +20,18 @@ namespace LiveSplit.GradingSplits.Model
         {
             // Convert z-score to percentile (0-100 scale)
             double percentile = Statistics.ZScoreToPercentile(zScore);
-            
+
             // Check for special badges first
             if (isGold && settings.UseGoldGrade)
             {
                 return (settings.GoldLabel, settings.GoldColor);
             }
-            
+
             if (isWorst && settings.UseWorstGrade)
             {
                 return (settings.WorstLabel, settings.WorstColor);
             }
-            
+
             // Find the appropriate grade based on percentile thresholds
             foreach (var threshold in settings.Thresholds.OrderBy(t => t.PercentileThreshold))
             {
@@ -40,14 +40,14 @@ namespace LiveSplit.GradingSplits.Model
                     return (threshold.Label, threshold.ForegroundColor);
                 }
             }
-            
+
             // Fallback to last threshold
             var lastThreshold = settings.Thresholds.LastOrDefault();
             if (lastThreshold != null)
             {
                 return (lastThreshold.Label, lastThreshold.ForegroundColor);
             }
-            
+
             return ("?", Color.White);
         }
     }

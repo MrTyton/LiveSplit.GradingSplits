@@ -12,12 +12,12 @@ namespace LiveSplit.GradingSplits.Model
         /// The percentile threshold (0-100). Times at or below this percentile receive this grade.
         /// </summary>
         public double PercentileThreshold { get; set; }
-        
+
         /// <summary>
         /// The label to display for this grade (e.g., "S", "A", "B", "C", "F").
         /// </summary>
         public string Label { get; set; }
-        
+
         /// <summary>
         /// The color to use when displaying this grade.
         /// </summary>

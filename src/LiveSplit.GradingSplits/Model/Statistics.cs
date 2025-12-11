@@ -75,10 +75,10 @@ namespace LiveSplit.GradingSplits.Model
         {
             // Clamp percentile to valid range to avoid numerical issues
             percentile = Math.Max(0.01, Math.Min(99.99, percentile));
-            
+
             // Convert to probability (0-1)
             double p = percentile / 100.0;
-            
+
             // Inverse normal CDF approximation
             return InverseNormalCDF(p);
         }
@@ -92,12 +92,12 @@ namespace LiveSplit.GradingSplits.Model
         private static double Erf(double x)
         {
             // Constants for A&S formula 7.1.26
-            double a1 =  0.254829592;
+            double a1 = 0.254829592;
             double a2 = -0.284496736;
-            double a3 =  1.421413741;
+            double a3 = 1.421413741;
             double a4 = -1.453152027;
-            double a5 =  1.061405429;
-            double p  =  0.3275911;
+            double a5 = 1.061405429;
+            double p = 0.3275911;
 
             // Save the sign of x (erf is an odd function)
             int sign = x < 0 ? -1 : 1;

@@ -16,7 +16,7 @@ namespace LiveSplit.GradingSplits.UI.Components
         {
             InitializeComponent();
             GradingConfig = new GradingSettings();
-            
+
             // Wire up event handlers for threshold grid
             dgvThresholds.CellValueChanged += (s, e) =>
             {
@@ -97,12 +97,12 @@ namespace LiveSplit.GradingSplits.UI.Components
                 }
             };
 
-            chkUseBackground.CheckedChanged += (s, e) => 
+            chkUseBackground.CheckedChanged += (s, e) =>
             {
                 btnBackgroundColor.Enabled = chkUseBackground.Checked;
                 GradingConfig.UseBackgroundColor = chkUseBackground.Checked;
             };
-            
+
             btnBackgroundColor.Click += (s, e) =>
             {
                 var colorDialog = new ColorDialog();
@@ -203,7 +203,7 @@ namespace LiveSplit.GradingSplits.UI.Components
 
             btnResetDefaults.Click += (s, e) =>
             {
-                if (MessageBox.Show("Reset all grade settings to defaults?", "Confirm Reset", 
+                if (MessageBox.Show("Reset all grade settings to defaults?", "Confirm Reset",
                     MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
                 {
                     ResetToDefaults();
@@ -272,7 +272,7 @@ namespace LiveSplit.GradingSplits.UI.Components
         public void SetSettings(XmlNode node)
         {
             var element = (XmlElement)node;
-            
+
             GradingConfig.UseBackgroundColor = SettingsHelper.ParseBool(element["UseBackgroundColor"], false);
             GradingConfig.BackgroundColor = SettingsHelper.ParseColor(element["BackgroundColor"], Color.Black);
             GradingConfig.UseGoldGrade = SettingsHelper.ParseBool(element["UseGoldGrade"], true);
@@ -297,7 +297,7 @@ namespace LiveSplit.GradingSplits.UI.Components
                 foreach (XmlElement thresholdNode in thresholdsNode.ChildNodes)
                 {
                     double percentile = 50.0;
-                    
+
                     // Try to load as percentile first (new format)
                     var percentileStr = thresholdNode["Percentile"]?.InnerText;
                     if (!string.IsNullOrEmpty(percentileStr) && double.TryParse(percentileStr, out double parsedPercentile))
@@ -322,10 +322,10 @@ namespace LiveSplit.GradingSplits.UI.Components
                             percentile = Statistics.ZScoreToPercentile(zScore);
                         }
                     }
-                    
+
                     var label = SettingsHelper.ParseString(thresholdNode["Label"], "?");
                     var color = SettingsHelper.ParseColor(thresholdNode["Color"], Color.White);
-                    
+
                     GradingConfig.Thresholds.Add(new GradeThreshold(percentile, label, color));
                 }
             }
@@ -377,7 +377,7 @@ namespace LiveSplit.GradingSplits.UI.Components
                 }
                 parent.AppendChild(thresholdsNode);
             }
-            
+
             // Hash thresholds
             foreach (var threshold in GradingConfig.Thresholds)
             {
