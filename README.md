@@ -5,9 +5,12 @@ A LiveSplit component that shows a percentile-based grade for your current split
 ## Features
 
 - **Real-time Grading**: See how your current split compares to your historical attempts on a percentile scale (0-100)
+- **Dynamic Comparison Label**: Shows which comparison you're grading against (e.g., "Personal Best's Grade:")
+- **Previous Split Comparison**: See how your previous split performed vs the comparison time
 - **Customizable Thresholds**: Define your own grade labels, percentile cutoffs, and colors
 - **Distribution Graph**: Optional visualization showing:
   - Normal distribution curve based on your historical data
+  - Historical attempts displayed as histogram (stacked dots) or scatter plot
   - Your current attempt position
   - Comparison time reference line
   - Mean (average) time line
@@ -16,6 +19,7 @@ A LiveSplit component that shows a percentile-based grade for your current split
   - Gold segments (personal best)
   - Worst segments
 - **Background Color Options**: Apply colors to the label background for better visibility
+- **Scrollable Settings**: Easy access to all configuration options
 
 ## Installation
 
@@ -72,14 +76,21 @@ These are based on standard deviation intervals:
   - Customize label and color
 - **Distribution Graph**: Toggle visualization on/off
   - Adjust graph height (default: 80px)
+  - Choose graph style: Histogram (stacked dots) or Scatter (line)
+- **Statistics Display**: Toggle statistics text below graph
+  - Adjust font size (6-24px)
+- **Previous Split**: Toggle previous split comparison display
+  - Shows "Previous: Achieved [grade] vs [comparison]'s [grade]"
+  - Displays "Previous: N/A" when no data available
+  - Adjust font size (6-24px)
 
 ### Graph Visualization
 When enabled, the graph shows:
 - **Bell curve**: Normal distribution based on your historical data
-- **Blue dots**: Your previous attempts for this split
+- **Yellow dots**: Your previous attempts for this split (histogram or scatter style)
 - **Red vertical line**: Your comparison time (e.g., PB pace)
 - **Green vertical line**: Mean (average) time
-- **Statistics**: Average time, current percentile, and sample size
+- **Statistics**: Average time, current percentile, and sample size (toggleable)
 
 ## Requirements
 
