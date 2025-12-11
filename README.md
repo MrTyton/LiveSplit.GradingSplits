@@ -19,7 +19,6 @@ A LiveSplit component that shows a percentile-based grade for your current split
   - Gold segments (personal best)
   - Worst segments
 - **Background Color Options**: Apply colors to the label background for better visibility
-- **Scrollable Settings**: Easy access to all configuration options
 
 ## Installation
 
