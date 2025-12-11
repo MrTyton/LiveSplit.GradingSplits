@@ -65,23 +65,7 @@ namespace LiveSplit.GradingSplits.Model
             return Math.Max(0, Math.Min(100, percentile));
         }
 
-        /// <summary>
-        /// Converts a percentile rank (0-100 scale) to a z-score.
-        /// Uses the inverse normal cumulative distribution function.
-        /// </summary>
-        /// <param name="percentile">The percentile to convert (0-100).</param>
-        /// <returns>The corresponding z-score.</returns>
-        public static double PercentileToZScore(double percentile)
-        {
-            // Clamp percentile to valid range to avoid numerical issues
-            percentile = Math.Max(0.01, Math.Min(99.99, percentile));
 
-            // Convert to probability (0-1)
-            double p = percentile / 100.0;
-
-            // Inverse normal CDF approximation
-            return InverseNormalCDF(p);
-        }
 
         /// <summary>
         /// Error function approximation using Abramowitz and Stegun formula 7.1.26.
@@ -110,33 +94,6 @@ namespace LiveSplit.GradingSplits.Model
             return sign * y;
         }
 
-        /// <summary>
-        /// Inverse normal cumulative distribution function using the Beasley-Springer-Moro algorithm.
-        /// Converts a probability (0-1) to a z-score.
-        /// </summary>
-        /// <param name="p">The probability value (0-1).</param>
-        /// <returns>The z-score corresponding to the probability.</returns>
-        private static double InverseNormalCDF(double p)
-        {
-            double[] c = { 0.3374754822726147, 0.9761690190917186, 0.1607979714918209,
-                          0.0276438810333863, 0.0038405729373609, 0.0003951896511919,
-                          0.0000321767881768, 0.0000002888167364, 0.0000003960315187 };
-            double[] b = { -8.47351093090, 23.08336743743, -21.06224101826, 3.13082909833 };
 
-            if (p <= 0.5)
-            {
-                double t = Math.Sqrt(-2.0 * Math.Log(p));
-                double numerator = ((((((((c[8] * t + c[7]) * t + c[6]) * t + c[5]) * t + c[4]) * t + c[3]) * t + c[2]) * t + c[1]) * t + c[0]);
-                double denominator = ((((b[3] * t + b[2]) * t + b[1]) * t + b[0]) * t + 1.0);
-                return -numerator / denominator;
-            }
-            else
-            {
-                double t = Math.Sqrt(-2.0 * Math.Log(1.0 - p));
-                double numerator = ((((((((c[8] * t + c[7]) * t + c[6]) * t + c[5]) * t + c[4]) * t + c[3]) * t + c[2]) * t + c[1]) * t + c[0]);
-                double denominator = ((((b[3] * t + b[2]) * t + b[1]) * t + b[0]) * t + 1.0);
-                return numerator / denominator;
-            }
-        }
     }
 }

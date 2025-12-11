@@ -1,3 +1,5 @@
+using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 
@@ -8,6 +10,37 @@ namespace LiveSplit.GradingSplits.Model
     /// </summary>
     public static class GradeCalculator
     {
+        /// <summary>
+        /// Tolerance in seconds for comparing segment times (1 millisecond).
+        /// </summary>
+        public const double TimeTolerance = 0.001;
+
+        /// <summary>
+        /// Determines if a segment time qualifies as a gold (best) split.
+        /// </summary>
+        /// <param name="segmentTime">The segment time in seconds.</param>
+        /// <param name="bestSegmentTime">The best segment time in seconds, or null if not available.</param>
+        /// <returns>True if this is a gold split.</returns>
+        public static bool IsGoldSplit(double segmentTime, double? bestSegmentTime)
+        {
+            if (!bestSegmentTime.HasValue)
+                return false;
+            return segmentTime <= bestSegmentTime.Value + TimeTolerance;
+        }
+
+        /// <summary>
+        /// Determines if a segment time qualifies as the worst split.
+        /// </summary>
+        /// <param name="segmentTime">The segment time in seconds.</param>
+        /// <param name="history">The segment history times in seconds.</param>
+        /// <returns>True if this is the worst split.</returns>
+        public static bool IsWorstSplit(double segmentTime, IEnumerable<double> history)
+        {
+            if (history == null || !history.Any())
+                return false;
+            var maxTime = history.Max();
+            return segmentTime >= maxTime - TimeTolerance;
+        }
         /// <summary>
         /// Calculates a grade and color based on a z-score and grading settings.
         /// </summary>

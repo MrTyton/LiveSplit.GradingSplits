@@ -172,56 +172,6 @@ namespace LiveSplit.GradingSplits.Tests
 
         #endregion
 
-        #region PercentileToZScore Tests
-
-        /// <summary>
-        /// Note: PercentileToZScore uses the Beasley-Springer-Moro approximation which has
-        /// limited accuracy. These tests verify the function produces reasonable results
-        /// and doesn't crash, but don't test for high precision since this function
-        /// is not used in production code.
-        /// </summary>
-        [Theory]
-        [InlineData(50.0)]    // 50th percentile = should be around 0
-        [InlineData(15.87)]   // ~16th percentile = should be negative
-        [InlineData(84.13)]   // ~84th percentile = should be positive
-        [InlineData(2.28)]    // ~2nd percentile = should be strongly negative
-        [InlineData(97.72)]   // ~98th percentile = should be strongly positive
-        public void PercentileToZScore_ReturnsReasonableValues(double percentile)
-        {
-            var result = Statistics.PercentileToZScore(percentile);
-            
-            // Just verify it returns a finite number and the sign is correct
-            Assert.False(double.IsNaN(result));
-            Assert.False(double.IsInfinity(result));
-            
-            if (percentile < 50)
-                Assert.True(result <= 0.5, $"Percentile {percentile} should give z-score near or below 0, got {result}");
-            else if (percentile > 50)
-                Assert.True(result >= -0.5, $"Percentile {percentile} should give z-score near or above 0, got {result}");
-        }
-
-        [Fact]
-        public void PercentileToZScore_ExtremeLow_DoesNotCrash()
-        {
-            // PercentileToZScore uses an approximation algorithm with limited accuracy.
-            // Just verify it doesn't crash at extreme values.
-            var result = Statistics.PercentileToZScore(0.01);
-            Assert.False(double.IsNaN(result));
-            Assert.False(double.IsInfinity(result));
-        }
-
-        [Fact]
-        public void PercentileToZScore_ExtremeHigh_DoesNotCrash()
-        {
-            // PercentileToZScore uses an approximation algorithm with limited accuracy.
-            // Just verify it doesn't crash at extreme values.
-            var result = Statistics.PercentileToZScore(99.99);
-            Assert.False(double.IsNaN(result));
-            Assert.False(double.IsInfinity(result));
-        }
-
-        #endregion
-
         #region ZScoreToPercentile Symmetry Tests
 
         [Theory]

@@ -257,9 +257,10 @@ namespace LiveSplit.GradingSplits.UI.Components
                 // Draw background for grade label only if enabled
                 if (Settings.GradingConfig.UseBackgroundColor)
                 {
-                    var backgroundBrush = new SolidBrush(Settings.GradingConfig.BackgroundColor);
-                    g.FillRectangle(backgroundBrush, GradeLabel.X, GradeLabel.Y, GradeLabel.Width, GradeLabel.Height);
-                    backgroundBrush.Dispose();
+                    using (var backgroundBrush = new SolidBrush(Settings.GradingConfig.BackgroundColor))
+                    {
+                        g.FillRectangle(backgroundBrush, GradeLabel.X, GradeLabel.Y, GradeLabel.Width, GradeLabel.Height);
+                    }
                 }
 
                 GradeLabel.Draw(g);
@@ -280,9 +281,10 @@ namespace LiveSplit.GradingSplits.UI.Components
                 // Draw background for grade label only if enabled
                 if (Settings.GradingConfig.UseBackgroundColor)
                 {
-                    var backgroundBrush = new SolidBrush(Settings.GradingConfig.BackgroundColor);
-                    g.FillRectangle(backgroundBrush, GradeLabel.X, GradeLabel.Y, GradeLabel.Width, GradeLabel.Height);
-                    backgroundBrush.Dispose();
+                    using (var backgroundBrush = new SolidBrush(Settings.GradingConfig.BackgroundColor))
+                    {
+                        g.FillRectangle(backgroundBrush, GradeLabel.X, GradeLabel.Y, GradeLabel.Width, GradeLabel.Height);
+                    }
                 }
 
                 GradeLabel.Draw(g);
@@ -324,62 +326,58 @@ namespace LiveSplit.GradingSplits.UI.Components
 
         private void DrawPreviousSplitComparison(Graphics g, LiveSplitState state, float width, float yOffset)
         {
-            var font = new Font(state.LayoutSettings.TextFont.FontFamily, Settings.GradingConfig.PreviousSplitFontSize, FontStyle.Regular);
-            var textBrush = new SolidBrush(state.LayoutSettings.TextColor);
-
-            // If no previous split data, show default text
-            if (!_hasPreviousSplitData)
+            using (var font = new Font(state.LayoutSettings.TextFont.FontFamily, Settings.GradingConfig.PreviousSplitFontSize, FontStyle.Regular))
+            using (var textBrush = new SolidBrush(state.LayoutSettings.TextColor))
             {
-                string defaultText = "Previous: N/A";
-                var defaultSize = g.MeasureString(defaultText, font);
-                float defaultX = (width - defaultSize.Width) / 2;
-                g.DrawString(defaultText, font, textBrush, defaultX, yOffset);
-                font.Dispose();
-                textBrush.Dispose();
-                return;
+                // If no previous split data, show default text
+                if (!_hasPreviousSplitData)
+                {
+                    string defaultText = "Previous: N/A";
+                    var defaultSize = g.MeasureString(defaultText, font);
+                    float defaultX = (width - defaultSize.Width) / 2;
+                    g.DrawString(defaultText, font, textBrush, defaultX, yOffset);
+                    return;
+                }
+
+                // Build the text parts - no extra space before "vs"
+                string prefix = "Previous: Achieved ";
+                string vs = " vs " + state.CurrentComparison + "'s ";
+
+                // Trim grades for proper spacing
+                string achievedDisplay = _previousAchievedGrade?.Trim() ?? "-";
+                string comparisonDisplay = _previousComparisonGrade?.Trim() ?? "-";
+
+                // Measure each part to position them
+                var prefixSize = g.MeasureString(prefix, font);
+                var achievedSize = g.MeasureString(achievedDisplay, font);
+                var vsSize = g.MeasureString(vs, font);
+                var comparisonSize = g.MeasureString(comparisonDisplay, font);
+
+                float totalWidth = prefixSize.Width + achievedSize.Width + vsSize.Width + comparisonSize.Width;
+                float startX = (width - totalWidth) / 2;
+                float currentX = startX;
+
+                // Draw prefix
+                g.DrawString(prefix, font, textBrush, currentX, yOffset);
+                currentX += prefixSize.Width;
+
+                // Draw achieved grade with its color
+                using (var achievedBrush = new SolidBrush(_previousAchievedColor))
+                {
+                    g.DrawString(achievedDisplay, font, achievedBrush, currentX, yOffset);
+                }
+                currentX += achievedSize.Width;
+
+                // Draw "vs comparison's"
+                g.DrawString(vs, font, textBrush, currentX, yOffset);
+                currentX += vsSize.Width;
+
+                // Draw comparison grade with its color
+                using (var comparisonBrush = new SolidBrush(_previousComparisonColor))
+                {
+                    g.DrawString(comparisonDisplay, font, comparisonBrush, currentX, yOffset);
+                }
             }
-
-            // Build the text parts - no extra space before "vs"
-            string prefix = "Previous: Achieved ";
-            string vs = " vs " + state.CurrentComparison + "'s ";
-
-            // Trim grades for proper spacing
-            string achievedDisplay = _previousAchievedGrade?.Trim() ?? "-";
-            string comparisonDisplay = _previousComparisonGrade?.Trim() ?? "-";
-
-            // Measure each part to position them
-            var prefixSize = g.MeasureString(prefix, font);
-            var achievedSize = g.MeasureString(achievedDisplay, font);
-            var vsSize = g.MeasureString(vs, font);
-            var comparisonSize = g.MeasureString(comparisonDisplay, font);
-
-            float totalWidth = prefixSize.Width + achievedSize.Width + vsSize.Width + comparisonSize.Width;
-            float startX = (width - totalWidth) / 2;
-            float currentX = startX;
-
-            // Draw prefix
-            g.DrawString(prefix, font, textBrush, currentX, yOffset);
-            currentX += prefixSize.Width;
-
-            // Draw achieved grade with its color
-            using (var achievedBrush = new SolidBrush(_previousAchievedColor))
-            {
-                g.DrawString(achievedDisplay, font, achievedBrush, currentX, yOffset);
-            }
-            currentX += achievedSize.Width;
-
-            // Draw "vs comparison's"
-            g.DrawString(vs, font, textBrush, currentX, yOffset);
-            currentX += vsSize.Width;
-
-            // Draw comparison grade with its color
-            using (var comparisonBrush = new SolidBrush(_previousComparisonColor))
-            {
-                g.DrawString(comparisonDisplay, font, comparisonBrush, currentX, yOffset);
-            }
-
-            font.Dispose();
-            textBrush.Dispose();
         }
 
         private void DrawDistributionGraph(Graphics g, LiveSplitState state, float width, float height, float yOffset)
@@ -390,7 +388,10 @@ namespace LiveSplit.GradingSplits.UI.Components
             var graphRect = new RectangleF(5, yOffset, width - 10, height);
 
             // Draw background
-            g.FillRectangle(new SolidBrush(Color.FromArgb(50, 0, 0, 0)), graphRect);
+            using (var bgBrush = new SolidBrush(Color.FromArgb(50, 0, 0, 0)))
+            {
+                g.FillRectangle(bgBrush, graphRect);
+            }
 
             // Calculate range for x-axis (mean ± 3 standard deviations)
             double minValue = _cachedMean - 3 * _cachedStdDev;
@@ -418,7 +419,10 @@ namespace LiveSplit.GradingSplits.UI.Components
 
             if (curvePoints.Count > 1)
             {
-                g.DrawLines(new Pen(Color.LightBlue, 2), curvePoints.ToArray());
+                using (var curvePen = new Pen(Color.LightBlue, 2))
+                {
+                    g.DrawLines(curvePen, curvePoints.ToArray());
+                }
             }
 
             // Draw historical points
@@ -474,19 +478,22 @@ namespace LiveSplit.GradingSplits.UI.Components
                         float binCenterX = graphRect.X + bin * binWidth + binWidth / 2;
 
                         // Stack dots from bottom up
-                        for (int dotIndex = 0; dotIndex < bins[bin]; dotIndex++)
+                        using (var dotBrush = new SolidBrush(Color.Yellow))
                         {
-                            float dotY = graphRect.Y + graphRect.Height - 8 - (dotIndex * dotSpacing);
+                            for (int dotIndex = 0; dotIndex < bins[bin]; dotIndex++)
+                            {
+                                float dotY = graphRect.Y + graphRect.Height - 8 - (dotIndex * dotSpacing);
 
-                            // Safety check - don't draw if we'd go above the graph area
-                            if (dotY < graphRect.Y + 5)
-                                break;
+                                // Safety check - don't draw if we'd go above the graph area
+                                if (dotY < graphRect.Y + 5)
+                                    break;
 
-                            g.FillEllipse(new SolidBrush(Color.Yellow),
-                                binCenterX - dotSize / 2,
-                                dotY - dotSize / 2,
-                                dotSize,
-                                dotSize);
+                                g.FillEllipse(dotBrush,
+                                    binCenterX - dotSize / 2,
+                                    dotY - dotSize / 2,
+                                    dotSize,
+                                    dotSize);
+                            }
                         }
                     }
                 }
@@ -494,12 +501,15 @@ namespace LiveSplit.GradingSplits.UI.Components
             else
             {
                 // Scatter mode: dots on a single line
-                foreach (var histValue in _cachedHistory)
+                using (var dotBrush = new SolidBrush(Color.Yellow))
                 {
-                    if (histValue >= minValue && histValue <= maxValue)
+                    foreach (var histValue in _cachedHistory)
                     {
-                        float x = graphRect.X + (float)((histValue - minValue) / range * graphRect.Width);
-                        g.FillEllipse(new SolidBrush(Color.Yellow), x - dotSize / 2, graphRect.Y + graphRect.Height - 10, dotSize, dotSize);
+                        if (histValue >= minValue && histValue <= maxValue)
+                        {
+                            float x = graphRect.X + (float)((histValue - minValue) / range * graphRect.Width);
+                            g.FillEllipse(dotBrush, x - dotSize / 2, graphRect.Y + graphRect.Height - 10, dotSize, dotSize);
+                        }
                     }
                 }
             }
@@ -508,12 +518,18 @@ namespace LiveSplit.GradingSplits.UI.Components
             if (_cachedComparisonTime >= minValue && _cachedComparisonTime <= maxValue)
             {
                 float x = graphRect.X + (float)((_cachedComparisonTime - minValue) / range * graphRect.Width);
-                g.DrawLine(new Pen(GradeLabel.ForeColor, 2), x, graphRect.Y, x, graphRect.Y + graphRect.Height);
+                using (var comparisonPen = new Pen(GradeLabel.ForeColor, 2))
+                {
+                    g.DrawLine(comparisonPen, x, graphRect.Y, x, graphRect.Y + graphRect.Height);
+                }
             }
 
             // Draw mean line
             float meanX = graphRect.X + (float)((_cachedMean - minValue) / range * graphRect.Width);
-            g.DrawLine(new Pen(Color.White, 1) { DashStyle = System.Drawing.Drawing2D.DashStyle.Dash }, meanX, graphRect.Y, meanX, graphRect.Y + graphRect.Height);
+            using (var meanPen = new Pen(Color.White, 1) { DashStyle = System.Drawing.Drawing2D.DashStyle.Dash })
+            {
+                g.DrawLine(meanPen, meanX, graphRect.Y, meanX, graphRect.Y + graphRect.Height);
+            }
         }
 
         private double NormalDistribution(double x, double mean, double stdDev)
@@ -524,18 +540,19 @@ namespace LiveSplit.GradingSplits.UI.Components
 
         private void DrawStatistics(Graphics g, LiveSplitState state, float width, float yOffset)
         {
-            var font = new Font(state.LayoutSettings.TextFont.FontFamily, Settings.GradingConfig.StatisticsFontSize, FontStyle.Regular);
-            var brush = new SolidBrush(state.LayoutSettings.TextColor);
+            using (var font = new Font(state.LayoutSettings.TextFont.FontFamily, Settings.GradingConfig.StatisticsFontSize, FontStyle.Regular))
+            using (var brush = new SolidBrush(state.LayoutSettings.TextColor))
+            {
+                // Calculate percentile from z-score
+                double percentile = Statistics.ZScoreToPercentile(_cachedZScore);
 
-            // Calculate percentile from z-score
-            double percentile = Statistics.ZScoreToPercentile(_cachedZScore);
+                string statsText = $"Average: {TimeSpan.FromSeconds(_cachedMean):mm\\:ss\\.ff}  Percentile: {percentile:F1}%  n={_cachedHistory.Count}";
 
-            string statsText = $"Average: {TimeSpan.FromSeconds(_cachedMean):mm\\:ss\\.ff}  Percentile: {percentile:F1}%  n={_cachedHistory.Count}";
+                var textSize = g.MeasureString(statsText, font);
+                float x = (width - textSize.Width) / 2;
 
-            var textSize = g.MeasureString(statsText, font);
-            float x = (width - textSize.Width) / 2;
-
-            g.DrawString(statsText, font, brush, x, yOffset);
+                g.DrawString(statsText, font, brush, x, yOffset);
+            }
         }
 
         public Control GetSettingsControl(LayoutMode mode)
@@ -656,18 +673,13 @@ namespace LiveSplit.GradingSplits.UI.Components
             // Calculate achieved grade if we have the time
             if (achievedSegmentTime.HasValue)
             {
-                double achievedZScore = Statistics.CalculateZScore(achievedSegmentTime.Value.TotalSeconds, mean, stdDev);
+                double achievedSeconds = achievedSegmentTime.Value.TotalSeconds;
+                double achievedZScore = Statistics.CalculateZScore(achievedSeconds, mean, stdDev);
 
-                // Check for gold/worst
-                bool isGold = false;
+                // Check for gold/worst using helper methods
                 var bestSegment = prevSegment.BestSegmentTime[method];
-                if (bestSegment.HasValue && Math.Abs(achievedSegmentTime.Value.TotalSeconds - bestSegment.Value.TotalSeconds) < 0.001)
-                    isGold = true;
-
-                bool isWorst = false;
-                var maxTime = history.Max();
-                if (Math.Abs(achievedSegmentTime.Value.TotalSeconds - maxTime) < 0.001)
-                    isWorst = true;
+                bool isGold = GradeCalculator.IsGoldSplit(achievedSeconds, bestSegment?.TotalSeconds);
+                bool isWorst = GradeCalculator.IsWorstSplit(achievedSeconds, history);
 
                 var achievedResult = GradeCalculator.CalculateGrade(achievedZScore, Settings.GradingConfig, isGold, isWorst);
                 _previousAchievedGrade = achievedResult.Grade;
@@ -682,18 +694,13 @@ namespace LiveSplit.GradingSplits.UI.Components
             // Calculate comparison grade if we have the time
             if (comparisonSegmentTime.HasValue)
             {
-                double comparisonZScore = Statistics.CalculateZScore(comparisonSegmentTime.Value.TotalSeconds, mean, stdDev);
+                double comparisonSeconds = comparisonSegmentTime.Value.TotalSeconds;
+                double comparisonZScore = Statistics.CalculateZScore(comparisonSeconds, mean, stdDev);
 
-                // Check for gold/worst for comparison
-                bool isGold = false;
+                // Check for gold/worst using helper methods
                 var bestSegment = prevSegment.BestSegmentTime[method];
-                if (bestSegment.HasValue && Math.Abs(comparisonSegmentTime.Value.TotalSeconds - bestSegment.Value.TotalSeconds) < 0.001)
-                    isGold = true;
-
-                bool isWorst = false;
-                var maxTime = history.Max();
-                if (Math.Abs(comparisonSegmentTime.Value.TotalSeconds - maxTime) < 0.001)
-                    isWorst = true;
+                bool isGold = GradeCalculator.IsGoldSplit(comparisonSeconds, bestSegment?.TotalSeconds);
+                bool isWorst = GradeCalculator.IsWorstSplit(comparisonSeconds, history);
 
                 var comparisonResult = GradeCalculator.CalculateGrade(comparisonZScore, Settings.GradingConfig, isGold, isWorst);
                 _previousComparisonGrade = comparisonResult.Grade;
@@ -782,30 +789,10 @@ namespace LiveSplit.GradingSplits.UI.Components
                 _cachedComparisonTime = segmentTime.Value.TotalSeconds;
                 _cachedZScore = Statistics.CalculateZScore(_cachedComparisonTime, _cachedMean, _cachedStdDev);
 
-                // Check if this is a gold split (best segment)
-                bool isGoldSplit = false;
+                // Check if this is a gold or worst split using helper methods
                 var bestSegment = segment.BestSegmentTime[method];
-                if (bestSegment != null)
-                {
-                    // Use tolerance for comparison - consider gold if within 1ms or equal/better
-                    double bestSeconds = bestSegment.Value.TotalSeconds;
-                    if (_cachedComparisonTime <= bestSeconds + 0.001)
-                    {
-                        isGoldSplit = true;
-                    }
-                }
-
-                // Check if this is the worst segment
-                bool isWorstSplit = false;
-                if (_cachedHistory.Count > 0)
-                {
-                    var maxSegmentTime = _cachedHistory.Max();
-                    // Use tolerance - consider worst if within 1ms or equal/worse
-                    if (_cachedComparisonTime >= maxSegmentTime - 0.001)
-                    {
-                        isWorstSplit = true;
-                    }
-                }
+                bool isGoldSplit = GradeCalculator.IsGoldSplit(_cachedComparisonTime, bestSegment?.TotalSeconds);
+                bool isWorstSplit = GradeCalculator.IsWorstSplit(_cachedComparisonTime, _cachedHistory);
 
                 return GradeCalculator.CalculateGrade(_cachedZScore, Settings.GradingConfig, isGoldSplit, isWorstSplit);
             }

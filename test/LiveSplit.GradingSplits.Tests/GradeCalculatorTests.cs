@@ -331,5 +331,121 @@ namespace LiveSplit.GradingSplits.Tests
         }
 
         #endregion
+
+        #region IsGoldSplit Tests
+
+        [Fact]
+        public void IsGoldSplit_ExactMatch_ReturnsTrue()
+        {
+            Assert.True(GradeCalculator.IsGoldSplit(10.0, 10.0));
+        }
+
+        [Fact]
+        public void IsGoldSplit_BetterThanBest_ReturnsTrue()
+        {
+            Assert.True(GradeCalculator.IsGoldSplit(9.5, 10.0));
+        }
+
+        [Fact]
+        public void IsGoldSplit_WithinTolerance_ReturnsTrue()
+        {
+            // Within 1ms tolerance
+            Assert.True(GradeCalculator.IsGoldSplit(10.0005, 10.0));
+        }
+
+        [Fact]
+        public void IsGoldSplit_OutsideTolerance_ReturnsFalse()
+        {
+            // More than 1ms worse
+            Assert.False(GradeCalculator.IsGoldSplit(10.002, 10.0));
+        }
+
+        [Fact]
+        public void IsGoldSplit_NullBestTime_ReturnsFalse()
+        {
+            Assert.False(GradeCalculator.IsGoldSplit(10.0, null));
+        }
+
+        [Theory]
+        [InlineData(59.999, 60.0, true)]   // Just under best
+        [InlineData(60.0, 60.0, true)]     // Exact match
+        [InlineData(60.001, 60.0, true)]   // Within tolerance
+        [InlineData(60.002, 60.0, false)]  // Outside tolerance
+        [InlineData(55.0, 60.0, true)]     // Much better
+        public void IsGoldSplit_VariousScenarios(double segmentTime, double bestTime, bool expected)
+        {
+            Assert.Equal(expected, GradeCalculator.IsGoldSplit(segmentTime, bestTime));
+        }
+
+        #endregion
+
+        #region IsWorstSplit Tests
+
+        [Fact]
+        public void IsWorstSplit_ExactMatch_ReturnsTrue()
+        {
+            var history = new[] { 10.0, 15.0, 20.0 };
+            Assert.True(GradeCalculator.IsWorstSplit(20.0, history));
+        }
+
+        [Fact]
+        public void IsWorstSplit_WorseThanMax_ReturnsTrue()
+        {
+            var history = new[] { 10.0, 15.0, 20.0 };
+            Assert.True(GradeCalculator.IsWorstSplit(25.0, history));
+        }
+
+        [Fact]
+        public void IsWorstSplit_WithinTolerance_ReturnsTrue()
+        {
+            var history = new[] { 10.0, 15.0, 20.0 };
+            // Within 1ms tolerance of max
+            Assert.True(GradeCalculator.IsWorstSplit(19.9995, history));
+        }
+
+        [Fact]
+        public void IsWorstSplit_OutsideTolerance_ReturnsFalse()
+        {
+            var history = new[] { 10.0, 15.0, 20.0 };
+            // More than 1ms better than max
+            Assert.False(GradeCalculator.IsWorstSplit(19.998, history));
+        }
+
+        [Fact]
+        public void IsWorstSplit_EmptyHistory_ReturnsFalse()
+        {
+            Assert.False(GradeCalculator.IsWorstSplit(10.0, new double[0]));
+        }
+
+        [Fact]
+        public void IsWorstSplit_NullHistory_ReturnsFalse()
+        {
+            Assert.False(GradeCalculator.IsWorstSplit(10.0, null));
+        }
+
+        [Theory]
+        [InlineData(19.990, false)]  // Better than max by more than tolerance
+        [InlineData(19.998, false)]  // Just outside tolerance  
+        [InlineData(19.9995, true)]  // Within tolerance
+        [InlineData(20.0, true)]     // Exact match
+        [InlineData(20.001, true)]   // Slightly worse
+        [InlineData(25.0, true)]     // Much worse
+        public void IsWorstSplit_VariousScenarios(double segmentTime, bool expected)
+        {
+            var history = new[] { 10.0, 15.0, 20.0 };
+            Assert.Equal(expected, GradeCalculator.IsWorstSplit(segmentTime, history));
+        }
+
+        #endregion
+
+        #region TimeTolerance Constant Tests
+
+        [Fact]
+        public void TimeTolerance_Is1Millisecond()
+        {
+            Assert.Equal(0.001, GradeCalculator.TimeTolerance);
+        }
+
+        #endregion
     }
 }
