@@ -28,6 +28,13 @@ namespace LiveSplit.GradingSplits.UI.Components
         private double _cachedStdDev = 0;
         private double _cachedComparisonTime = 0;
         private double _cachedZScore = 0;
+        
+        // Previous split comparison data
+        private string _previousAchievedGrade = null;
+        private Color _previousAchievedColor = Color.White;
+        private string _previousComparisonGrade = null;
+        private Color _previousComparisonColor = Color.White;
+        private bool _hasPreviousSplitData = false;
 
         public string ComponentName => "Grading Splits";
 
@@ -37,12 +44,19 @@ namespace LiveSplit.GradingSplits.UI.Components
         {
             get
             {
-                if (!Settings.GradingConfig.ShowGraph)
-                    return 25f;
+                float height = 25f; // Base height for grade label
                 
-                float height = 25 + Settings.GradingConfig.GraphHeight;
-                if (Settings.GradingConfig.ShowStatistics)
-                    height += Settings.GradingConfig.StatisticsFontSize + 10; // Font size + padding
+                if (Settings.GradingConfig.ShowGraph)
+                {
+                    height += Settings.GradingConfig.GraphHeight;
+                    
+                    if (Settings.GradingConfig.ShowStatistics)
+                        height += Settings.GradingConfig.StatisticsFontSize + 10;
+                }
+                
+                if (Settings.GradingConfig.ShowPreviousSplit)
+                    height += Settings.GradingConfig.PreviousSplitFontSize + 10;
+                    
                 return height;
             }
         }
@@ -157,15 +171,94 @@ namespace LiveSplit.GradingSplits.UI.Components
                 float graphY = 25; // Position graph below the grade label
                 DrawDistributionGraph(g, state, width, Settings.GradingConfig.GraphHeight, graphY);
                 
-                // Draw statistics text below graph if enabled
-                if (Settings.GradingConfig.ShowStatistics)
+                // Position for elements below the graph
+                float belowGraphY = graphY + Settings.GradingConfig.GraphHeight + 2;
+                
+                // Handle order of statistics and previous split
+                if (Settings.GradingConfig.PreviousSplitFirst)
                 {
-                    float statsY = graphY + Settings.GradingConfig.GraphHeight + 2;
-                    DrawStatistics(g, state, width, statsY);
+                    // Previous split first, then statistics
+                    if (Settings.GradingConfig.ShowPreviousSplit && _hasPreviousSplitData)
+                    {
+                        DrawPreviousSplitComparison(g, state, width, belowGraphY);
+                        belowGraphY += Settings.GradingConfig.PreviousSplitFontSize + 10;
+                    }
+                    
+                    if (Settings.GradingConfig.ShowStatistics)
+                    {
+                        DrawStatistics(g, state, width, belowGraphY);
+                    }
+                }
+                else
+                {
+                    // Statistics first, then previous split (default)
+                    if (Settings.GradingConfig.ShowStatistics)
+                    {
+                        DrawStatistics(g, state, width, belowGraphY);
+                        belowGraphY += Settings.GradingConfig.StatisticsFontSize + 10;
+                    }
+                    
+                    if (Settings.GradingConfig.ShowPreviousSplit && _hasPreviousSplitData)
+                    {
+                        DrawPreviousSplitComparison(g, state, width, belowGraphY);
+                    }
+                }
+            }
+            else
+            {
+                // No graph - just draw previous split if enabled
+                if (Settings.GradingConfig.ShowPreviousSplit && _hasPreviousSplitData)
+                {
+                    float prevY = 25;
+                    DrawPreviousSplitComparison(g, state, width, prevY);
                 }
             }
 
             g.Transform = oldMatrix;
+        }
+
+        private void DrawPreviousSplitComparison(Graphics g, LiveSplitState state, float width, float yOffset)
+        {
+            var font = new Font(state.LayoutSettings.TextFont.FontFamily, Settings.GradingConfig.PreviousSplitFontSize, FontStyle.Regular);
+            var textBrush = new SolidBrush(state.LayoutSettings.TextColor);
+            
+            // Build the text parts
+            string prefix = "Previous: Achieved ";
+            string vs = " vs " + state.CurrentComparison + "'s ";
+            
+            // Measure each part to position them
+            var prefixSize = g.MeasureString(prefix, font);
+            var achievedSize = g.MeasureString(_previousAchievedGrade, font);
+            var vsSize = g.MeasureString(vs, font);
+            var comparisonSize = g.MeasureString(_previousComparisonGrade, font);
+            
+            float totalWidth = prefixSize.Width + achievedSize.Width + vsSize.Width + comparisonSize.Width;
+            float startX = (width - totalWidth) / 2;
+            float currentX = startX;
+            
+            // Draw prefix
+            g.DrawString(prefix, font, textBrush, currentX, yOffset);
+            currentX += prefixSize.Width;
+            
+            // Draw achieved grade with its color
+            using (var achievedBrush = new SolidBrush(_previousAchievedColor))
+            {
+                g.DrawString(_previousAchievedGrade, font, achievedBrush, currentX, yOffset);
+            }
+            currentX += achievedSize.Width;
+            
+            // Draw "vs comparison's"
+            g.DrawString(vs, font, textBrush, currentX, yOffset);
+            currentX += vsSize.Width;
+            
+            // Draw comparison grade with its color
+            using (var comparisonBrush = new SolidBrush(_previousComparisonColor))
+            {
+                g.DrawString(_previousComparisonGrade, font, comparisonBrush, currentX, yOffset);
+            }
+            
+            font.Dispose();
+            textBrush.Dispose();
         }
 
         private void DrawDistributionGraph(Graphics g, LiveSplitState state, float width, float height, float yOffset)
@@ -362,6 +455,117 @@ namespace LiveSplit.GradingSplits.UI.Components
             var gradeResult = CalculateGradeForSplit(state, index);
             GradeLabel.Text = gradeResult.Grade;
             GradeLabel.ForeColor = gradeResult.Color;
+            
+            // Calculate previous split comparison data
+            UpdatePreviousSplitData(state, index);
+        }
+        
+        private void UpdatePreviousSplitData(LiveSplitState state, int currentIndex)
+        {
+            _hasPreviousSplitData = false;
+            
+            // Need at least one previous split
+            if (currentIndex <= 0)
+                return;
+            
+            int prevIndex = currentIndex - 1;
+            var prevSegment = state.Run[prevIndex];
+            var method = state.CurrentTimingMethod;
+            
+            // Get the actual achieved time for the previous split
+            var prevSplitTime = prevSegment.SplitTime[method];
+            var prevPrevSplitTime = prevIndex > 0 ? state.Run[prevIndex - 1].SplitTime[method] : TimeSpan.Zero;
+            
+            TimeSpan? achievedSegmentTime = null;
+            if (prevSplitTime.HasValue)
+            {
+                achievedSegmentTime = prevSplitTime.Value - (prevPrevSplitTime ?? TimeSpan.Zero);
+            }
+            
+            // Get the comparison time for the previous split
+            var comparison = state.CurrentComparison;
+            var comparisonSplitTime = prevSegment.Comparisons[comparison][method];
+            var comparisonPrevSplitTime = prevIndex > 0 ? state.Run[prevIndex - 1].Comparisons[comparison][method] : TimeSpan.Zero;
+            
+            TimeSpan? comparisonSegmentTime = null;
+            if (comparisonSplitTime.HasValue)
+            {
+                comparisonSegmentTime = comparisonSplitTime.Value - (comparisonPrevSplitTime ?? TimeSpan.Zero);
+            }
+            
+            // Calculate statistics for the previous segment
+            var history = new List<double>();
+            foreach (var historyItem in prevSegment.SegmentHistory)
+            {
+                var time = historyItem.Value[method];
+                if (time.HasValue)
+                {
+                    history.Add(time.Value.TotalSeconds);
+                }
+            }
+            
+            if (history.Count < 2)
+                return;
+            
+            var mean = Statistics.CalculateMean(history);
+            var stdDev = Statistics.CalculateStandardDeviation(history);
+            
+            if (stdDev == 0)
+                return;
+            
+            // Calculate achieved grade if we have the time
+            if (achievedSegmentTime.HasValue)
+            {
+                double achievedZScore = Statistics.CalculateZScore(achievedSegmentTime.Value.TotalSeconds, mean, stdDev);
+                
+                // Check for gold/worst
+                bool isGold = false;
+                var bestSegment = prevSegment.BestSegmentTime[method];
+                if (bestSegment.HasValue && Math.Abs(achievedSegmentTime.Value.TotalSeconds - bestSegment.Value.TotalSeconds) < 0.001)
+                    isGold = true;
+                
+                bool isWorst = false;
+                var maxTime = history.Max();
+                if (Math.Abs(achievedSegmentTime.Value.TotalSeconds - maxTime) < 0.001)
+                    isWorst = true;
+                
+                var achievedResult = GradeCalculator.CalculateGrade(achievedZScore, Settings.GradingConfig, isGold, isWorst);
+                _previousAchievedGrade = achievedResult.Grade;
+                _previousAchievedColor = achievedResult.Color;
+            }
+            else
+            {
+                _previousAchievedGrade = "-";
+                _previousAchievedColor = state.LayoutSettings.TextColor;
+            }
+            
+            // Calculate comparison grade if we have the time
+            if (comparisonSegmentTime.HasValue)
+            {
+                double comparisonZScore = Statistics.CalculateZScore(comparisonSegmentTime.Value.TotalSeconds, mean, stdDev);
+                
+                // Check for gold/worst for comparison
+                bool isGold = false;
+                var bestSegment = prevSegment.BestSegmentTime[method];
+                if (bestSegment.HasValue && Math.Abs(comparisonSegmentTime.Value.TotalSeconds - bestSegment.Value.TotalSeconds) < 0.001)
+                    isGold = true;
+                
+                bool isWorst = false;
+                var maxTime = history.Max();
+                if (Math.Abs(comparisonSegmentTime.Value.TotalSeconds - maxTime) < 0.001)
+                    isWorst = true;
+                
+                var comparisonResult = GradeCalculator.CalculateGrade(comparisonZScore, Settings.GradingConfig, isGold, isWorst);
+                _previousComparisonGrade = comparisonResult.Grade;
+                _previousComparisonColor = comparisonResult.Color;
+            }
+            else
+            {
+                _previousComparisonGrade = "-";
+                _previousComparisonColor = state.LayoutSettings.TextColor;
+            }
+            
+            _hasPreviousSplitData = true;
         }
 
         private (string Grade, Color Color) CalculateGradeForSplit(LiveSplitState state, int index)

@@ -57,6 +57,10 @@ namespace LiveSplit.GradingSplits.UI.Components
             this.chkShowStatistics = new System.Windows.Forms.CheckBox();
             this.lblStatsFontSize = new System.Windows.Forms.Label();
             this.numStatsFontSize = new System.Windows.Forms.NumericUpDown();
+            this.chkShowPreviousSplit = new System.Windows.Forms.CheckBox();
+            this.lblPrevFontSize = new System.Windows.Forms.Label();
+            this.numPrevFontSize = new System.Windows.Forms.NumericUpDown();
+            this.chkPrevSplitFirst = new System.Windows.Forms.CheckBox();
             this.btnResetDefaults = new System.Windows.Forms.Button();
             this.tableLayoutPanel1.SuspendLayout();
             this.groupBox1.SuspendLayout();
@@ -67,6 +71,7 @@ namespace LiveSplit.GradingSplits.UI.Components
             this.tableLayoutPanel2.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.numGraphHeight)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.numStatsFontSize)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.numPrevFontSize)).BeginInit();
             this.SuspendLayout();
             // 
             // tableLayoutPanel1
@@ -229,17 +234,24 @@ namespace LiveSplit.GradingSplits.UI.Components
             this.tableLayoutPanel2.Controls.Add(this.chkShowStatistics, 0, 5);
             this.tableLayoutPanel2.Controls.Add(this.lblStatsFontSize, 1, 5);
             this.tableLayoutPanel2.Controls.Add(this.numStatsFontSize, 2, 5);
+            this.tableLayoutPanel2.Controls.Add(this.chkShowPreviousSplit, 0, 6);
+            this.tableLayoutPanel2.Controls.Add(this.lblPrevFontSize, 1, 6);
+            this.tableLayoutPanel2.Controls.Add(this.numPrevFontSize, 2, 6);
+            this.tableLayoutPanel2.Controls.Add(this.chkPrevSplitFirst, 0, 7);
+            this.tableLayoutPanel2.SetColumnSpan(this.chkPrevSplitFirst, 3);
             this.tableLayoutPanel2.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tableLayoutPanel2.Location = new System.Drawing.Point(3, 16);
             this.tableLayoutPanel2.Name = "tableLayoutPanel2";
-            this.tableLayoutPanel2.RowCount = 6;
+            this.tableLayoutPanel2.RowCount = 8;
             this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 30F));
             this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 30F));
             this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 30F));
             this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 30F));
             this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 30F));
             this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 30F));
-            this.tableLayoutPanel2.Size = new System.Drawing.Size(450, 180);
+            this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 30F));
+            this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 30F));
+            this.tableLayoutPanel2.Size = new System.Drawing.Size(450, 240);
             this.tableLayoutPanel2.TabIndex = 0;
             // 
             // chkUseBackground
@@ -404,6 +416,49 @@ namespace LiveSplit.GradingSplits.UI.Components
             this.numStatsFontSize.TabIndex = 15;
             this.numStatsFontSize.Value = new decimal(new int[] { 10, 0, 0, 0 });
             // 
+            // chkShowPreviousSplit
+            // 
+            this.chkShowPreviousSplit.Anchor = System.Windows.Forms.AnchorStyles.Left;
+            this.chkShowPreviousSplit.AutoSize = true;
+            this.chkShowPreviousSplit.Location = new System.Drawing.Point(3, 186);
+            this.chkShowPreviousSplit.Name = "chkShowPreviousSplit";
+            this.chkShowPreviousSplit.Size = new System.Drawing.Size(132, 17);
+            this.chkShowPreviousSplit.TabIndex = 16;
+            this.chkShowPreviousSplit.Text = "Show Previous Split";
+            this.chkShowPreviousSplit.UseVisualStyleBackColor = true;
+            // 
+            // lblPrevFontSize
+            // 
+            this.lblPrevFontSize.Anchor = System.Windows.Forms.AnchorStyles.Left;
+            this.lblPrevFontSize.AutoSize = true;
+            this.lblPrevFontSize.Location = new System.Drawing.Point(153, 188);
+            this.lblPrevFontSize.Name = "lblPrevFontSize";
+            this.lblPrevFontSize.Size = new System.Drawing.Size(55, 13);
+            this.lblPrevFontSize.TabIndex = 17;
+            this.lblPrevFontSize.Text = "Font Size:";
+            // 
+            // numPrevFontSize
+            // 
+            this.numPrevFontSize.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
+            this.numPrevFontSize.Location = new System.Drawing.Point(373, 185);
+            this.numPrevFontSize.Maximum = new decimal(new int[] { 24, 0, 0, 0 });
+            this.numPrevFontSize.Minimum = new decimal(new int[] { 6, 0, 0, 0 });
+            this.numPrevFontSize.Name = "numPrevFontSize";
+            this.numPrevFontSize.Size = new System.Drawing.Size(74, 20);
+            this.numPrevFontSize.TabIndex = 18;
+            this.numPrevFontSize.Value = new decimal(new int[] { 10, 0, 0, 0 });
+            // 
+            // chkPrevSplitFirst
+            // 
+            this.chkPrevSplitFirst.Anchor = System.Windows.Forms.AnchorStyles.Left;
+            this.chkPrevSplitFirst.AutoSize = true;
+            this.chkPrevSplitFirst.Location = new System.Drawing.Point(3, 216);
+            this.chkPrevSplitFirst.Name = "chkPrevSplitFirst";
+            this.chkPrevSplitFirst.Size = new System.Drawing.Size(225, 17);
+            this.chkPrevSplitFirst.TabIndex = 19;
+            this.chkPrevSplitFirst.Text = "Show Previous Split Above Statistics";
+            this.chkPrevSplitFirst.UseVisualStyleBackColor = true;
+            // 
             // btnResetDefaults
             // 
             this.btnResetDefaults.Anchor = System.Windows.Forms.AnchorStyles.Right;
@@ -434,6 +489,7 @@ namespace LiveSplit.GradingSplits.UI.Components
             this.tableLayoutPanel2.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.numGraphHeight)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.numStatsFontSize)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.numPrevFontSize)).EndInit();
             this.ResumeLayout(false);
 
         }
@@ -461,6 +517,10 @@ namespace LiveSplit.GradingSplits.UI.Components
         private System.Windows.Forms.CheckBox chkShowStatistics;
         private System.Windows.Forms.Label lblStatsFontSize;
         private System.Windows.Forms.NumericUpDown numStatsFontSize;
+        private System.Windows.Forms.CheckBox chkShowPreviousSplit;
+        private System.Windows.Forms.Label lblPrevFontSize;
+        private System.Windows.Forms.NumericUpDown numPrevFontSize;
+        private System.Windows.Forms.CheckBox chkPrevSplitFirst;
         private System.Windows.Forms.Button btnResetDefaults;
         private System.Windows.Forms.DataGridViewTextBoxColumn colZScore;
         private System.Windows.Forms.DataGridViewTextBoxColumn colLabel;
