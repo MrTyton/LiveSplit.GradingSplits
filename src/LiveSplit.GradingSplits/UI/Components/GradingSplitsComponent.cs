@@ -237,67 +237,72 @@ namespace LiveSplit.GradingSplits.UI.Components
             Label.HasShadow = state.LayoutSettings.DropShadows;
             Label.ShadowColor = state.LayoutSettings.ShadowsColor;
             Label.Font = state.LayoutSettings.TextFont;
-            GradeLabel.Font = state.LayoutSettings.TextFont;
-
-            GradeLabel.HasShadow = state.LayoutSettings.DropShadows;
-            GradeLabel.ShadowColor = state.LayoutSettings.ShadowsColor;
-
-            // Calculate sizes
-            Label.SetActualWidth(g);
-            GradeLabel.SetActualWidth(g);
-
-            if (horizontal)
+            
+            // Use configurable font size for grade label
+            using (var gradeFont = new Font(state.LayoutSettings.TextFont.FontFamily, Settings.GradingConfig.CurrentGradeFontSize, FontStyle.Bold))
             {
-                if (Settings.GradingConfig.ShowCurrentGrade)
+                GradeLabel.Font = gradeFont;
+
+                GradeLabel.HasShadow = state.LayoutSettings.DropShadows;
+                GradeLabel.ShadowColor = state.LayoutSettings.ShadowsColor;
+
+                // Calculate sizes
+                Label.SetActualWidth(g);
+                GradeLabel.SetActualWidth(g);
+
+                if (horizontal)
                 {
-                    Label.X = 0;
-                    Label.Y = 0;
-                    Label.Width = Label.ActualWidth;
-                    Label.Height = 25; // Fixed height for label at top
-                    Label.Draw(g);
-
-                    GradeLabel.X = Label.ActualWidth + 5;
-                    GradeLabel.Y = 0;
-                    GradeLabel.Width = GradeLabel.ActualWidth;
-                    GradeLabel.Height = 25; // Fixed height for grade at top
-
-                    // Draw background for grade label only if enabled
-                    if (Settings.GradingConfig.UseBackgroundColor)
+                    if (Settings.GradingConfig.ShowCurrentGrade)
                     {
-                        using (var backgroundBrush = new SolidBrush(Settings.GradingConfig.BackgroundColor))
-                        {
-                            g.FillRectangle(backgroundBrush, GradeLabel.X, GradeLabel.Y, GradeLabel.Width, GradeLabel.Height);
-                        }
-                    }
+                        Label.X = 0;
+                        Label.Y = 0;
+                        Label.Width = Label.ActualWidth;
+                        Label.Height = 25; // Fixed height for label at top
+                        Label.Draw(g);
 
-                    GradeLabel.Draw(g);
+                        GradeLabel.X = Label.ActualWidth + 5;
+                        GradeLabel.Y = 0;
+                        GradeLabel.Width = GradeLabel.ActualWidth;
+                        GradeLabel.Height = 25; // Fixed height for grade at top
+
+                        // Draw background for grade label only if enabled
+                        if (Settings.GradingConfig.UseBackgroundColor)
+                        {
+                            using (var backgroundBrush = new SolidBrush(Settings.GradingConfig.BackgroundColor))
+                            {
+                                g.FillRectangle(backgroundBrush, GradeLabel.X, GradeLabel.Y, GradeLabel.Width, GradeLabel.Height);
+                            }
+                        }
+
+                        GradeLabel.Draw(g);
+                    }
                 }
-            }
-            else
-            {
-                if (Settings.GradingConfig.ShowCurrentGrade)
+                else
                 {
-                    Label.X = 5;
-                    Label.Y = 0;
-                    Label.Width = width - GradeLabel.ActualWidth - 10;
-                    Label.Height = 25; // Fixed height for label at top
-                    Label.Draw(g);
-
-                    GradeLabel.X = width - GradeLabel.ActualWidth - 5;
-                    GradeLabel.Y = 0;
-                    GradeLabel.Width = GradeLabel.ActualWidth;
-                    GradeLabel.Height = 25; // Fixed height for grade at top
-
-                    // Draw background for grade label only if enabled
-                    if (Settings.GradingConfig.UseBackgroundColor)
+                    if (Settings.GradingConfig.ShowCurrentGrade)
                     {
-                        using (var backgroundBrush = new SolidBrush(Settings.GradingConfig.BackgroundColor))
-                        {
-                            g.FillRectangle(backgroundBrush, GradeLabel.X, GradeLabel.Y, GradeLabel.Width, GradeLabel.Height);
-                        }
-                    }
+                        Label.X = 5;
+                        Label.Y = 0;
+                        Label.Width = width - GradeLabel.ActualWidth - 10;
+                        Label.Height = 25; // Fixed height for label at top
+                        Label.Draw(g);
 
-                    GradeLabel.Draw(g);
+                        GradeLabel.X = width - GradeLabel.ActualWidth - 5;
+                        GradeLabel.Y = 0;
+                        GradeLabel.Width = GradeLabel.ActualWidth;
+                        GradeLabel.Height = 25; // Fixed height for grade at top
+
+                        // Draw background for grade label only if enabled
+                        if (Settings.GradingConfig.UseBackgroundColor)
+                        {
+                            using (var backgroundBrush = new SolidBrush(Settings.GradingConfig.BackgroundColor))
+                            {
+                                g.FillRectangle(backgroundBrush, GradeLabel.X, GradeLabel.Y, GradeLabel.Width, GradeLabel.Height);
+                            }
+                        }
+
+                        GradeLabel.Draw(g);
+                    }
                 }
             }
 

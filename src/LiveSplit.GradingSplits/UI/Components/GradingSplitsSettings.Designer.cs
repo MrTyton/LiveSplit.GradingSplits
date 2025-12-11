@@ -61,6 +61,8 @@ namespace LiveSplit.GradingSplits.UI.Components
             this.lblPrevFontSize = new System.Windows.Forms.Label();
             this.numPrevFontSize = new System.Windows.Forms.NumericUpDown();
             this.chkShowCurrentGrade = new System.Windows.Forms.CheckBox();
+            this.lblCurrentGradeFontSize = new System.Windows.Forms.Label();
+            this.numCurrentGradeFontSize = new System.Windows.Forms.NumericUpDown();
             this.chkShowSplitNameGrades = new System.Windows.Forms.CheckBox();
             this.txtSplitNameFormat = new System.Windows.Forms.TextBox();
             this.toolTip1 = new System.Windows.Forms.ToolTip();
@@ -75,6 +77,7 @@ namespace LiveSplit.GradingSplits.UI.Components
             ((System.ComponentModel.ISupportInitialize)(this.numGraphHeight)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.numStatsFontSize)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.numPrevFontSize)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.numCurrentGradeFontSize)).BeginInit();
             this.SuspendLayout();
             // 
             // tableLayoutPanel1
@@ -244,7 +247,8 @@ namespace LiveSplit.GradingSplits.UI.Components
             this.tableLayoutPanel2.Controls.Add(this.lblPrevFontSize, 1, 6);
             this.tableLayoutPanel2.Controls.Add(this.numPrevFontSize, 2, 6);
             this.tableLayoutPanel2.Controls.Add(this.chkShowCurrentGrade, 0, 7);
-            this.tableLayoutPanel2.SetColumnSpan(this.chkShowCurrentGrade, 3);
+            this.tableLayoutPanel2.Controls.Add(this.lblCurrentGradeFontSize, 1, 7);
+            this.tableLayoutPanel2.Controls.Add(this.numCurrentGradeFontSize, 2, 7);
             this.tableLayoutPanel2.Controls.Add(this.chkShowSplitNameGrades, 0, 8);
             this.tableLayoutPanel2.Controls.Add(this.txtSplitNameFormat, 1, 8);
             this.tableLayoutPanel2.SetColumnSpan(this.txtSplitNameFormat, 2);
@@ -470,6 +474,27 @@ namespace LiveSplit.GradingSplits.UI.Components
             this.chkShowCurrentGrade.Text = "Show Current Grade";
             this.chkShowCurrentGrade.UseVisualStyleBackColor = true;
             // 
+            // lblCurrentGradeFontSize
+            // 
+            this.lblCurrentGradeFontSize.Anchor = System.Windows.Forms.AnchorStyles.Left;
+            this.lblCurrentGradeFontSize.AutoSize = true;
+            this.lblCurrentGradeFontSize.Location = new System.Drawing.Point(153, 218);
+            this.lblCurrentGradeFontSize.Name = "lblCurrentGradeFontSize";
+            this.lblCurrentGradeFontSize.Size = new System.Drawing.Size(55, 13);
+            this.lblCurrentGradeFontSize.TabIndex = 22;
+            this.lblCurrentGradeFontSize.Text = "Font Size:";
+            // 
+            // numCurrentGradeFontSize
+            // 
+            this.numCurrentGradeFontSize.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
+            this.numCurrentGradeFontSize.Location = new System.Drawing.Point(373, 215);
+            this.numCurrentGradeFontSize.Maximum = new decimal(new int[] { 48, 0, 0, 0 });
+            this.numCurrentGradeFontSize.Minimum = new decimal(new int[] { 8, 0, 0, 0 });
+            this.numCurrentGradeFontSize.Name = "numCurrentGradeFontSize";
+            this.numCurrentGradeFontSize.Size = new System.Drawing.Size(74, 20);
+            this.numCurrentGradeFontSize.TabIndex = 23;
+            this.numCurrentGradeFontSize.Value = new decimal(new int[] { 15, 0, 0, 0 });
+            // 
             // chkShowSplitNameGrades
             // 
             this.chkShowSplitNameGrades.Anchor = System.Windows.Forms.AnchorStyles.Left;
@@ -521,6 +546,7 @@ namespace LiveSplit.GradingSplits.UI.Components
             ((System.ComponentModel.ISupportInitialize)(this.numGraphHeight)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.numStatsFontSize)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.numPrevFontSize)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.numCurrentGradeFontSize)).EndInit();
             this.ResumeLayout(false);
 
         }
@@ -552,6 +578,8 @@ namespace LiveSplit.GradingSplits.UI.Components
         private System.Windows.Forms.Label lblPrevFontSize;
         private System.Windows.Forms.NumericUpDown numPrevFontSize;
         private System.Windows.Forms.CheckBox chkShowCurrentGrade;
+        private System.Windows.Forms.Label lblCurrentGradeFontSize;
+        private System.Windows.Forms.NumericUpDown numCurrentGradeFontSize;
         private System.Windows.Forms.CheckBox chkShowSplitNameGrades;
         private System.Windows.Forms.TextBox txtSplitNameFormat;
         private System.Windows.Forms.ToolTip toolTip1;

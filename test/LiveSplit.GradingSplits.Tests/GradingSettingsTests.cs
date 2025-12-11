@@ -130,6 +130,13 @@ namespace LiveSplit.GradingSplits.Tests
             Assert.Equal("{Name} [{Grade}]", settings.SplitNameFormat);
         }
 
+        [Fact]
+        public void Constructor_DefaultCurrentGradeFontSize_Is15()
+        {
+            var settings = new GradingSettings();
+            Assert.Equal(15, settings.CurrentGradeFontSize);
+        }
+
         #endregion
 
         #region Clone Tests
@@ -213,7 +220,8 @@ namespace LiveSplit.GradingSplits.Tests
             {
                 GraphHeight = 150,
                 StatisticsFontSize = 14,
-                PreviousSplitFontSize = 12
+                PreviousSplitFontSize = 12,
+                CurrentGradeFontSize = 20
             };
             
             var clone = original.Clone();
@@ -221,6 +229,7 @@ namespace LiveSplit.GradingSplits.Tests
             Assert.Equal(original.GraphHeight, clone.GraphHeight);
             Assert.Equal(original.StatisticsFontSize, clone.StatisticsFontSize);
             Assert.Equal(original.PreviousSplitFontSize, clone.PreviousSplitFontSize);
+            Assert.Equal(original.CurrentGradeFontSize, clone.CurrentGradeFontSize);
         }
 
         [Fact]
