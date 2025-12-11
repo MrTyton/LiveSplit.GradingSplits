@@ -91,6 +91,17 @@ namespace LiveSplit.GradingSplits.Model
         public int PreviousSplitFontSize { get; set; }
 
         /// <summary>
+        /// Whether to show grades in split names (e.g., "Split Name [A]").
+        /// </summary>
+        public bool ShowGradeInSplitNames { get; set; }
+
+        /// <summary>
+        /// The format string for split names with grades.
+        /// Use {Name} for split name and {Grade} for the grade.
+        /// </summary>
+        public string SplitNameFormat { get; set; }
+
+        /// <summary>
         /// Creates a new GradingSettings instance with default values.
         /// Default thresholds use percentiles where 0=fastest and 100=slowest.
         /// </summary>
@@ -121,6 +132,8 @@ namespace LiveSplit.GradingSplits.Model
             StatisticsFontSize = 10;
             ShowPreviousSplit = false;
             PreviousSplitFontSize = 10;
+            ShowGradeInSplitNames = false;
+            SplitNameFormat = "{Name} [{Grade}]";
         }
 
         /// <summary>
@@ -146,7 +159,9 @@ namespace LiveSplit.GradingSplits.Model
                 ShowStatistics = ShowStatistics,
                 StatisticsFontSize = StatisticsFontSize,
                 ShowPreviousSplit = ShowPreviousSplit,
-                PreviousSplitFontSize = PreviousSplitFontSize
+                PreviousSplitFontSize = PreviousSplitFontSize,
+                ShowGradeInSplitNames = ShowGradeInSplitNames,
+                SplitNameFormat = SplitNameFormat
             };
             return clone;
         }

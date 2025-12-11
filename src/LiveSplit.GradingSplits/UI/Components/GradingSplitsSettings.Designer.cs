@@ -60,6 +60,9 @@ namespace LiveSplit.GradingSplits.UI.Components
             this.chkShowPreviousSplit = new System.Windows.Forms.CheckBox();
             this.lblPrevFontSize = new System.Windows.Forms.Label();
             this.numPrevFontSize = new System.Windows.Forms.NumericUpDown();
+            this.chkShowSplitNameGrades = new System.Windows.Forms.CheckBox();
+            this.txtSplitNameFormat = new System.Windows.Forms.TextBox();
+            this.toolTip1 = new System.Windows.Forms.ToolTip();
             this.btnResetDefaults = new System.Windows.Forms.Button();
             this.tableLayoutPanel1.SuspendLayout();
             this.groupBox1.SuspendLayout();
@@ -208,7 +211,7 @@ namespace LiveSplit.GradingSplits.UI.Components
             this.groupBox2.Dock = System.Windows.Forms.DockStyle.Top;
             this.groupBox2.Location = new System.Drawing.Point(3, 333);
             this.groupBox2.Name = "groupBox2";
-            this.groupBox2.Size = new System.Drawing.Size(456, 280);
+            this.groupBox2.Size = new System.Drawing.Size(456, 310);
             this.groupBox2.TabIndex = 1;
             this.groupBox2.TabStop = false;
             this.groupBox2.Text = "Display Options";
@@ -239,10 +242,14 @@ namespace LiveSplit.GradingSplits.UI.Components
             this.tableLayoutPanel2.Controls.Add(this.chkShowPreviousSplit, 0, 6);
             this.tableLayoutPanel2.Controls.Add(this.lblPrevFontSize, 1, 6);
             this.tableLayoutPanel2.Controls.Add(this.numPrevFontSize, 2, 6);
+            this.tableLayoutPanel2.Controls.Add(this.chkShowSplitNameGrades, 0, 7);
+            this.tableLayoutPanel2.Controls.Add(this.txtSplitNameFormat, 1, 7);
+            this.tableLayoutPanel2.SetColumnSpan(this.txtSplitNameFormat, 2);
             this.tableLayoutPanel2.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tableLayoutPanel2.Location = new System.Drawing.Point(3, 16);
             this.tableLayoutPanel2.Name = "tableLayoutPanel2";
-            this.tableLayoutPanel2.RowCount = 7;
+            this.tableLayoutPanel2.RowCount = 8;
+            this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 30F));
             this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 30F));
             this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 30F));
             this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 30F));
@@ -251,7 +258,7 @@ namespace LiveSplit.GradingSplits.UI.Components
             this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 30F));
             this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 30F));
             this.tableLayoutPanel2.AutoSize = true;
-            this.tableLayoutPanel2.Size = new System.Drawing.Size(450, 210);
+            this.tableLayoutPanel2.Size = new System.Drawing.Size(450, 240);
             this.tableLayoutPanel2.TabIndex = 0;
             // 
             // chkUseBackground
@@ -448,6 +455,26 @@ namespace LiveSplit.GradingSplits.UI.Components
             this.numPrevFontSize.TabIndex = 18;
             this.numPrevFontSize.Value = new decimal(new int[] { 10, 0, 0, 0 });
             // 
+            // chkShowSplitNameGrades
+            // 
+            this.chkShowSplitNameGrades.Anchor = System.Windows.Forms.AnchorStyles.Left;
+            this.chkShowSplitNameGrades.AutoSize = true;
+            this.chkShowSplitNameGrades.Location = new System.Drawing.Point(3, 216);
+            this.chkShowSplitNameGrades.Name = "chkShowSplitNameGrades";
+            this.chkShowSplitNameGrades.Size = new System.Drawing.Size(154, 17);
+            this.chkShowSplitNameGrades.TabIndex = 19;
+            this.chkShowSplitNameGrades.Text = "Split Name Grades:";
+            this.chkShowSplitNameGrades.UseVisualStyleBackColor = true;
+            // 
+            // txtSplitNameFormat
+            // 
+            this.txtSplitNameFormat.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
+            this.txtSplitNameFormat.Location = new System.Drawing.Point(153, 215);
+            this.txtSplitNameFormat.Name = "txtSplitNameFormat";
+            this.txtSplitNameFormat.Size = new System.Drawing.Size(294, 20);
+            this.txtSplitNameFormat.TabIndex = 20;
+            this.toolTip1.SetToolTip(this.txtSplitNameFormat, "Format string for split names.\nUse {Name} for the original split name.\nUse {Grade} for the grade.\n\nExamples:\n  {Name} [{Grade}]\n  [{Grade}] {Name}\n  {Name} ({Grade})");
+            // 
             // btnResetDefaults
             // 
             this.btnResetDefaults.Anchor = System.Windows.Forms.AnchorStyles.Right;
@@ -509,6 +536,9 @@ namespace LiveSplit.GradingSplits.UI.Components
         private System.Windows.Forms.CheckBox chkShowPreviousSplit;
         private System.Windows.Forms.Label lblPrevFontSize;
         private System.Windows.Forms.NumericUpDown numPrevFontSize;
+        private System.Windows.Forms.CheckBox chkShowSplitNameGrades;
+        private System.Windows.Forms.TextBox txtSplitNameFormat;
+        private System.Windows.Forms.ToolTip toolTip1;
         private System.Windows.Forms.Button btnResetDefaults;
         private System.Windows.Forms.DataGridViewTextBoxColumn colZScore;
         private System.Windows.Forms.DataGridViewTextBoxColumn colLabel;

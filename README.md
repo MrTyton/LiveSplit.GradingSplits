@@ -7,6 +7,7 @@ A LiveSplit component that shows a percentile-based grade for your current split
 - **Real-time Grading**: See how your current split compares to your historical attempts on a percentile scale (0-100)
 - **Dynamic Comparison Label**: Shows which comparison you're grading against (e.g., "Personal Best's Grade:")
 - **Previous Split Comparison**: See how your previous split performed vs the comparison time
+- **Split Name Grades**: Optionally display grades directly in split names with customizable format
 - **Customizable Thresholds**: Define your own grade labels, percentile cutoffs, and colors
 - **Distribution Graph**: Optional visualization showing:
   - Normal distribution curve based on your historical data
@@ -82,6 +83,11 @@ These are based on standard deviation intervals:
   - Shows "Previous: Achieved [grade] vs [comparison]'s [grade]"
   - Displays "Previous: N/A" when no data available
   - Adjust font size (6-24px)
+- **Split Name Grades**: Display grades directly in split names
+  - Customizable format string using `{Name}` and `{Grade}` placeholders
+  - Examples: `{Name} [{Grade}]`, `[{Grade}] {Name}`, `{Name} ({Grade})`
+  - Shows comparison grade for upcoming splits, achieved grade for completed splits
+  - Automatically reverts to original names on reset
 
 ### Graph Visualization
 When enabled, the graph shows:

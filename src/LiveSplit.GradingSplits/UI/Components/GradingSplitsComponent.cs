@@ -36,6 +36,11 @@ namespace LiveSplit.GradingSplits.UI.Components
         private Color _previousComparisonColor = Color.White;
         private bool _hasPreviousSplitData = false;
 
+        // Split name grading
+        private Dictionary<int, string> _originalSplitNames = new Dictionary<int, string>();
+        private bool _splitNamesModified = false;
+        private IRun _gradedRun = null;
+
         public string ComponentName => "Grading Splits";
 
         public float HorizontalWidth => Label.ActualWidth + GradeLabel.ActualWidth + 5;
@@ -88,6 +93,121 @@ namespace LiveSplit.GradingSplits.UI.Components
                 VerticalAlignment = StringAlignment.Center,
                 HorizontalAlignment = StringAlignment.Near
             };
+
+            // Subscribe to state events for split name management
+            _state.OnReset += State_OnReset;
+            _state.OnStart += State_OnStart;
+        }
+
+        private void State_OnStart(object sender, EventArgs e)
+        {
+            // Only store original names if we haven't already for this run
+            // This prevents storing already-modified names as "original"
+            if (_originalSplitNames.Count == 0 || _gradedRun != _state.Run)
+            {
+                StoreOriginalSplitNames();
+            }
+        }
+
+        private void State_OnReset(object sender, TimerPhase e)
+        {
+            // Restore original names when run resets
+            RestoreOriginalSplitNames();
+        }
+
+        private void StoreOriginalSplitNames()
+        {
+            if (_state.Run == null) return;
+
+            // First restore any previously modified names before storing new originals
+            if (_splitNamesModified && _gradedRun != null)
+            {
+                RestoreOriginalSplitNames();
+            }
+
+            _originalSplitNames.Clear();
+            _gradedRun = _state.Run;
+
+            for (int i = 0; i < _state.Run.Count; i++)
+            {
+                _originalSplitNames[i] = _state.Run[i].Name;
+            }
+
+            _splitNamesModified = false;
+        }
+
+        private void RestoreOriginalSplitNames()
+        {
+            if (!_splitNamesModified || _gradedRun == null) return;
+
+            foreach (var kvp in _originalSplitNames)
+            {
+                if (kvp.Key < _gradedRun.Count)
+                {
+                    _gradedRun[kvp.Key].Name = kvp.Value;
+                }
+            }
+
+            _originalSplitNames.Clear();
+            _splitNamesModified = false;
+            _gradedRun = null;
+        }
+
+        private void UpdateSplitNamesWithGrades(LiveSplitState state)
+        {
+            if (state.Run == null) return;
+
+            // If the feature is disabled, restore original names if modified
+            if (!Settings.GradingConfig.ShowGradeInSplitNames)
+            {
+                if (_splitNamesModified)
+                {
+                    RestoreOriginalSplitNames();
+                }
+                return;
+            }
+
+            // Make sure we have original names stored
+            if (_originalSplitNames.Count == 0 || _gradedRun != state.Run)
+            {
+                StoreOriginalSplitNames();
+            }
+
+            for (int i = 0; i < state.Run.Count; i++)
+            {
+                string originalName = _originalSplitNames.ContainsKey(i) ? _originalSplitNames[i] : state.Run[i].Name;
+                string grade;
+
+                if (i < state.CurrentSplitIndex)
+                {
+                    // Completed split - show achieved grade
+                    var result = CalculateGradeForSplit(state, i, useActualTime: true);
+                    grade = result.Grade;
+                }
+                else
+                {
+                    // Upcoming split - show comparison grade
+                    var result = CalculateGradeForSplit(state, i, useActualTime: false);
+                    grade = result.Grade;
+                }
+
+                if (grade != "-" && !string.IsNullOrEmpty(grade))
+                {
+                    // Use the customizable format string
+                    string format = Settings.GradingConfig.SplitNameFormat;
+                    if (string.IsNullOrEmpty(format))
+                        format = "{Name} [{Grade}]";
+                    
+                    state.Run[i].Name = format
+                        .Replace("{Name}", originalName)
+                        .Replace("{Grade}", grade);
+                    _splitNamesModified = true;
+                }
+                else
+                {
+                    state.Run[i].Name = originalName;
+                }
+            }
         }
 
         public void DrawHorizontal(Graphics g, LiveSplitState state, float height, Region clipRegion)
@@ -436,6 +556,7 @@ namespace LiveSplit.GradingSplits.UI.Components
         public void Update(IInvalidator invalidator, LiveSplitState state, float width, float height, LayoutMode mode)
         {
             UpdateGrade(state);
+            UpdateSplitNamesWithGrades(state);
 
             if (invalidator != null)
             {
@@ -589,6 +710,11 @@ namespace LiveSplit.GradingSplits.UI.Components
 
         private (string Grade, Color Color) CalculateGradeForSplit(LiveSplitState state, int index)
         {
+            return CalculateGradeForSplit(state, index, useActualTime: false);
+        }
+
+        private (string Grade, Color Color) CalculateGradeForSplit(LiveSplitState state, int index, bool useActualTime)
+        {
             if (index < 0 || index >= state.Run.Count)
             {
                 _cachedHistory.Clear();
@@ -624,16 +750,31 @@ namespace LiveSplit.GradingSplits.UI.Components
                 return ("-", state.LayoutSettings.TextColor);
             }
 
-            // Get the comparison segment time for the current split
+            // Get the segment time - either actual or comparison based on parameter
             TimeSpan? segmentTime = null;
-            var comparison = state.CurrentComparison;
-
-            var splitTime = segment.Comparisons[comparison][method];
-            var prevSplitTime = index > 0 ? state.Run[index - 1].Comparisons[comparison][method] : TimeSpan.Zero;
-
-            if (splitTime != null && prevSplitTime != null)
+            
+            if (useActualTime)
             {
-                segmentTime = splitTime - prevSplitTime;
+                // Use the actual segment time from the current run
+                var splitTime = segment.SplitTime[method];
+                var prevSplitTime = index > 0 ? state.Run[index - 1].SplitTime[method] : TimeSpan.Zero;
+                
+                if (splitTime != null && prevSplitTime != null)
+                {
+                    segmentTime = splitTime - prevSplitTime;
+                }
+            }
+            else
+            {
+                // Use comparison segment time
+                var comparison = state.CurrentComparison;
+                var splitTime = segment.Comparisons[comparison][method];
+                var prevSplitTime = index > 0 ? state.Run[index - 1].Comparisons[comparison][method] : TimeSpan.Zero;
+
+                if (splitTime != null && prevSplitTime != null)
+                {
+                    segmentTime = splitTime - prevSplitTime;
+                }
             }
 
             if (segmentTime != null)
@@ -644,9 +785,14 @@ namespace LiveSplit.GradingSplits.UI.Components
                 // Check if this is a gold split (best segment)
                 bool isGoldSplit = false;
                 var bestSegment = segment.BestSegmentTime[method];
-                if (bestSegment != null && segmentTime.Value == bestSegment.Value)
+                if (bestSegment != null)
                 {
-                    isGoldSplit = true;
+                    // Use tolerance for comparison - consider gold if within 1ms or equal/better
+                    double bestSeconds = bestSegment.Value.TotalSeconds;
+                    if (_cachedComparisonTime <= bestSeconds + 0.001)
+                    {
+                        isGoldSplit = true;
+                    }
                 }
 
                 // Check if this is the worst segment
@@ -654,7 +800,8 @@ namespace LiveSplit.GradingSplits.UI.Components
                 if (_cachedHistory.Count > 0)
                 {
                     var maxSegmentTime = _cachedHistory.Max();
-                    if (Math.Abs(_cachedComparisonTime - maxSegmentTime) < 0.001) // Small epsilon for float comparison
+                    // Use tolerance - consider worst if within 1ms or equal/worse
+                    if (_cachedComparisonTime >= maxSegmentTime - 0.001)
                     {
                         isWorstSplit = true;
                     }
@@ -668,6 +815,16 @@ namespace LiveSplit.GradingSplits.UI.Components
 
         public void Dispose()
         {
+            // Restore original split names before disposing
+            RestoreOriginalSplitNames();
+            
+            // Unsubscribe from events
+            if (_state != null)
+            {
+                _state.OnReset -= State_OnReset;
+                _state.OnStart -= State_OnStart;
+            }
+            
             Settings.Dispose();
         }
     }
