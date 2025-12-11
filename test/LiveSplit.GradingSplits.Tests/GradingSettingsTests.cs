@@ -18,7 +18,7 @@ namespace LiveSplit.GradingSplits.Tests
         public void Constructor_SetsDefaultThresholds()
         {
             var settings = new GradingSettings();
-            
+
             Assert.NotNull(settings.Thresholds);
             Assert.Equal(5, settings.Thresholds.Count);
         }
@@ -27,10 +27,10 @@ namespace LiveSplit.GradingSplits.Tests
         public void Constructor_DefaultThresholdsAreOrdered()
         {
             var settings = new GradingSettings();
-            
+
             var percentiles = settings.Thresholds.Select(t => t.PercentileThreshold).ToList();
             var orderedPercentiles = percentiles.OrderBy(p => p).ToList();
-            
+
             Assert.Equal(orderedPercentiles, percentiles);
         }
 
@@ -38,9 +38,9 @@ namespace LiveSplit.GradingSplits.Tests
         public void Constructor_DefaultThresholdsHaveCorrectLabels()
         {
             var settings = new GradingSettings();
-            
+
             var labels = settings.Thresholds.Select(t => t.Label).ToList();
-            
+
             Assert.Contains("S", labels);
             Assert.Contains("A", labels);
             Assert.Contains("B", labels);
@@ -63,7 +63,7 @@ namespace LiveSplit.GradingSplits.Tests
             var settings = new GradingSettings();
             var property = typeof(GradingSettings).GetProperty(propertyName);
             var actualValue = (bool)property.GetValue(settings);
-            
+
             Assert.Equal(expectedValue, actualValue);
         }
 
@@ -146,7 +146,7 @@ namespace LiveSplit.GradingSplits.Tests
         {
             var original = new GradingSettings();
             var clone = original.Clone();
-            
+
             Assert.NotSame(original, clone);
         }
 
@@ -165,9 +165,9 @@ namespace LiveSplit.GradingSplits.Tests
                 ShowCurrentGrade = false,
                 ShowGradeInSplitNames = true
             };
-            
+
             var clone = original.Clone();
-            
+
             Assert.Equal(original.UseBackgroundColor, clone.UseBackgroundColor);
             Assert.Equal(original.UseGoldGrade, clone.UseGoldGrade);
             Assert.Equal(original.UseWorstGrade, clone.UseWorstGrade);
@@ -188,9 +188,9 @@ namespace LiveSplit.GradingSplits.Tests
                 GoldColor = Color.Magenta,
                 WorstColor = Color.Cyan
             };
-            
+
             var clone = original.Clone();
-            
+
             Assert.Equal(original.BackgroundColor, clone.BackgroundColor);
             Assert.Equal(original.GoldColor, clone.GoldColor);
             Assert.Equal(original.WorstColor, clone.WorstColor);
@@ -205,9 +205,9 @@ namespace LiveSplit.GradingSplits.Tests
                 WorstLabel = "BAD!",
                 SplitNameFormat = "[{Grade}] {Name}"
             };
-            
+
             var clone = original.Clone();
-            
+
             Assert.Equal(original.GoldLabel, clone.GoldLabel);
             Assert.Equal(original.WorstLabel, clone.WorstLabel);
             Assert.Equal(original.SplitNameFormat, clone.SplitNameFormat);
@@ -223,9 +223,9 @@ namespace LiveSplit.GradingSplits.Tests
                 PreviousSplitFontSize = 12,
                 CurrentGradeFontSize = 20
             };
-            
+
             var clone = original.Clone();
-            
+
             Assert.Equal(original.GraphHeight, clone.GraphHeight);
             Assert.Equal(original.StatisticsFontSize, clone.StatisticsFontSize);
             Assert.Equal(original.PreviousSplitFontSize, clone.PreviousSplitFontSize);
@@ -237,10 +237,10 @@ namespace LiveSplit.GradingSplits.Tests
         {
             var original = new GradingSettings();
             var clone = original.Clone();
-            
+
             // Thresholds list should be different instance
             Assert.NotSame(original.Thresholds, clone.Thresholds);
-            
+
             // Each threshold should be different instance
             for (int i = 0; i < original.Thresholds.Count; i++)
             {
@@ -253,9 +253,9 @@ namespace LiveSplit.GradingSplits.Tests
         {
             var original = new GradingSettings();
             var clone = original.Clone();
-            
+
             Assert.Equal(original.Thresholds.Count, clone.Thresholds.Count);
-            
+
             for (int i = 0; i < original.Thresholds.Count; i++)
             {
                 Assert.Equal(original.Thresholds[i].PercentileThreshold, clone.Thresholds[i].PercentileThreshold);
@@ -269,13 +269,13 @@ namespace LiveSplit.GradingSplits.Tests
         {
             var original = new GradingSettings();
             var clone = original.Clone();
-            
+
             // Modify clone
             clone.UseGoldGrade = false;
             clone.GoldLabel = "MODIFIED";
             clone.GraphHeight = 200;
             clone.Thresholds.Clear();
-            
+
             // Original should be unchanged
             Assert.True(original.UseGoldGrade);
             Assert.Equal("★", original.GoldLabel);
@@ -292,7 +292,7 @@ namespace LiveSplit.GradingSplits.Tests
         {
             var settings = new GradingSettings();
             var maxThreshold = settings.Thresholds.Max(t => t.PercentileThreshold);
-            
+
             Assert.Equal(100, maxThreshold);
         }
 
@@ -300,7 +300,7 @@ namespace LiveSplit.GradingSplits.Tests
         public void DefaultThresholds_AllHaveNonEmptyLabels()
         {
             var settings = new GradingSettings();
-            
+
             foreach (var threshold in settings.Thresholds)
             {
                 Assert.False(string.IsNullOrEmpty(threshold.Label));
@@ -311,7 +311,7 @@ namespace LiveSplit.GradingSplits.Tests
         public void DefaultThresholds_AllHaveNonDefaultColors()
         {
             var settings = new GradingSettings();
-            
+
             foreach (var threshold in settings.Thresholds)
             {
                 Assert.NotEqual(Color.Empty, threshold.ForegroundColor);

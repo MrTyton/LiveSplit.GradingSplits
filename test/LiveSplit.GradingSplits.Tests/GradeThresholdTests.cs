@@ -16,7 +16,7 @@ namespace LiveSplit.GradingSplits.Tests
         public void Constructor_SetsAllProperties()
         {
             var threshold = new GradeThreshold(50.0, "A", Color.Green);
-            
+
             Assert.Equal(50.0, threshold.PercentileThreshold);
             Assert.Equal("A", threshold.Label);
             Assert.Equal(Color.Green, threshold.ForegroundColor);
@@ -32,7 +32,7 @@ namespace LiveSplit.GradingSplits.Tests
         {
             var color = Color.FromName(colorName);
             var threshold = new GradeThreshold(percentile, label, color);
-            
+
             Assert.Equal(percentile, threshold.PercentileThreshold);
             Assert.Equal(label, threshold.Label);
             Assert.Equal(color, threshold.ForegroundColor);
@@ -84,7 +84,7 @@ namespace LiveSplit.GradingSplits.Tests
         {
             var threshold = new GradeThreshold(50.0, "A", Color.Green);
             threshold.PercentileThreshold = 75.0;
-            
+
             Assert.Equal(75.0, threshold.PercentileThreshold);
         }
 
@@ -93,7 +93,7 @@ namespace LiveSplit.GradingSplits.Tests
         {
             var threshold = new GradeThreshold(50.0, "A", Color.Green);
             threshold.Label = "B";
-            
+
             Assert.Equal("B", threshold.Label);
         }
 
@@ -102,7 +102,7 @@ namespace LiveSplit.GradingSplits.Tests
         {
             var threshold = new GradeThreshold(50.0, "A", Color.Green);
             threshold.ForegroundColor = Color.Red;
-            
+
             Assert.Equal(Color.Red, threshold.ForegroundColor);
         }
 
@@ -115,7 +115,7 @@ namespace LiveSplit.GradingSplits.Tests
         {
             var original = new GradeThreshold(50.0, "A", Color.Green);
             var clone = original.Clone();
-            
+
             Assert.NotSame(original, clone);
         }
 
@@ -124,7 +124,7 @@ namespace LiveSplit.GradingSplits.Tests
         {
             var original = new GradeThreshold(75.5, "Custom", Color.Magenta);
             var clone = original.Clone();
-            
+
             Assert.Equal(original.PercentileThreshold, clone.PercentileThreshold);
             Assert.Equal(original.Label, clone.Label);
             Assert.Equal(original.ForegroundColor, clone.ForegroundColor);
@@ -135,11 +135,11 @@ namespace LiveSplit.GradingSplits.Tests
         {
             var original = new GradeThreshold(50.0, "A", Color.Green);
             var clone = original.Clone();
-            
+
             clone.PercentileThreshold = 100.0;
             clone.Label = "F";
             clone.ForegroundColor = Color.Red;
-            
+
             Assert.Equal(50.0, original.PercentileThreshold);
             Assert.Equal("A", original.Label);
             Assert.Equal(Color.Green, original.ForegroundColor);
@@ -150,7 +150,7 @@ namespace LiveSplit.GradingSplits.Tests
         {
             var original = new GradeThreshold(7.0, "★", Color.Gold);
             var clone = original.Clone();
-            
+
             Assert.Equal("★", clone.Label);
         }
 
@@ -164,7 +164,7 @@ namespace LiveSplit.GradingSplits.Tests
         {
             var original = new GradeThreshold(percentile, "Test", Color.White);
             var clone = original.Clone();
-            
+
             Assert.Equal(percentile, clone.PercentileThreshold);
         }
 
@@ -184,7 +184,7 @@ namespace LiveSplit.GradingSplits.Tests
         {
             var customColor = Color.FromArgb(128, 64, 192);
             var threshold = new GradeThreshold(50.0, "A", customColor);
-            
+
             Assert.Equal(128, threshold.ForegroundColor.R);
             Assert.Equal(64, threshold.ForegroundColor.G);
             Assert.Equal(192, threshold.ForegroundColor.B);
@@ -195,7 +195,7 @@ namespace LiveSplit.GradingSplits.Tests
         {
             var transparentColor = Color.FromArgb(128, 255, 0, 0); // Semi-transparent red
             var threshold = new GradeThreshold(50.0, "A", transparentColor);
-            
+
             Assert.Equal(128, threshold.ForegroundColor.A);
         }
 

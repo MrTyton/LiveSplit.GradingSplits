@@ -59,7 +59,7 @@ namespace LiveSplit.GradingSplits.Tests
         {
             var settings = CreateDefaultSettings();
             var result = GradeCalculator.CalculateGrade(zScore, settings);
-            
+
             // Should return a color from the thresholds, not the fallback white
             Assert.NotEqual(Color.White, result.Color);
         }
@@ -75,9 +75,9 @@ namespace LiveSplit.GradingSplits.Tests
             settings.UseGoldGrade = true;
             settings.GoldLabel = "★";
             settings.GoldColor = Color.Gold;
-            
+
             var result = GradeCalculator.CalculateGrade(0.0, settings, isGold: true);
-            
+
             Assert.Equal("★", result.Grade);
             Assert.Equal(Color.Gold, result.Color);
         }
@@ -87,9 +87,9 @@ namespace LiveSplit.GradingSplits.Tests
         {
             var settings = CreateDefaultSettings();
             settings.UseGoldGrade = false;
-            
+
             var result = GradeCalculator.CalculateGrade(0.0, settings, isGold: true);
-            
+
             // Should return B grade (z=0 is average)
             Assert.Equal("B", result.Grade);
         }
@@ -104,9 +104,9 @@ namespace LiveSplit.GradingSplits.Tests
             var settings = CreateDefaultSettings();
             settings.UseGoldGrade = true;
             settings.GoldLabel = customLabel;
-            
+
             var result = GradeCalculator.CalculateGrade(0.0, settings, isGold: true);
-            
+
             Assert.Equal(customLabel, result.Grade);
         }
 
@@ -116,9 +116,9 @@ namespace LiveSplit.GradingSplits.Tests
             var settings = CreateDefaultSettings();
             settings.UseGoldGrade = true;
             settings.GoldColor = Color.Magenta;
-            
+
             var result = GradeCalculator.CalculateGrade(0.0, settings, isGold: true);
-            
+
             Assert.Equal(Color.Magenta, result.Color);
         }
 
@@ -133,9 +133,9 @@ namespace LiveSplit.GradingSplits.Tests
             settings.UseWorstGrade = true;
             settings.WorstLabel = "✗";
             settings.WorstColor = Color.DarkRed;
-            
+
             var result = GradeCalculator.CalculateGrade(0.0, settings, isWorst: true);
-            
+
             Assert.Equal("✗", result.Grade);
             Assert.Equal(Color.DarkRed, result.Color);
         }
@@ -145,9 +145,9 @@ namespace LiveSplit.GradingSplits.Tests
         {
             var settings = CreateDefaultSettings();
             settings.UseWorstGrade = false;
-            
+
             var result = GradeCalculator.CalculateGrade(0.0, settings, isWorst: true);
-            
+
             // Should return B grade (z=0 is average)
             Assert.Equal("B", result.Grade);
         }
@@ -162,9 +162,9 @@ namespace LiveSplit.GradingSplits.Tests
             var settings = CreateDefaultSettings();
             settings.UseWorstGrade = true;
             settings.WorstLabel = customLabel;
-            
+
             var result = GradeCalculator.CalculateGrade(0.0, settings, isWorst: true);
-            
+
             Assert.Equal(customLabel, result.Grade);
         }
 
@@ -180,10 +180,10 @@ namespace LiveSplit.GradingSplits.Tests
             settings.UseWorstGrade = true;
             settings.GoldLabel = "★";
             settings.WorstLabel = "✗";
-            
+
             // If somehow both flags are true, gold should take priority
             var result = GradeCalculator.CalculateGrade(0.0, settings, isGold: true, isWorst: true);
-            
+
             Assert.Equal("★", result.Grade);
         }
 
@@ -200,12 +200,12 @@ namespace LiveSplit.GradingSplits.Tests
                 new GradeThreshold(100, "BAD", Color.Red)
             };
             var settings = CreateCustomSettings(thresholds);
-            
+
             // z = -0.1 → ~46th percentile → GOOD
             var goodResult = GradeCalculator.CalculateGrade(-0.1, settings);
             Assert.Equal("GOOD", goodResult.Grade);
             Assert.Equal(Color.Green, goodResult.Color);
-            
+
             // z = 0.1 → ~54th percentile → BAD
             var badResult = GradeCalculator.CalculateGrade(0.1, settings);
             Assert.Equal("BAD", badResult.Grade);
@@ -220,7 +220,7 @@ namespace LiveSplit.GradingSplits.Tests
                 new GradeThreshold(100, "PASS", Color.Green)
             };
             var settings = CreateCustomSettings(thresholds);
-            
+
             // Any z-score should return PASS
             Assert.Equal("PASS", GradeCalculator.CalculateGrade(-3.0, settings).Grade);
             Assert.Equal("PASS", GradeCalculator.CalculateGrade(0.0, settings).Grade);
@@ -244,23 +244,23 @@ namespace LiveSplit.GradingSplits.Tests
                 new GradeThreshold(100, "F", Color.DarkRed)
             };
             var settings = CreateCustomSettings(thresholds);
-            
+
             // Test various percentiles
             var s_plus = GradeCalculator.CalculateGrade(-2.5, settings); // ~0.6 percentile → S+ (≤10)
             Assert.Equal("S+", s_plus.Grade);
-            
+
             // z=-0.01 → ~49.6th percentile → B+ (≤50)
             var b_plus = GradeCalculator.CalculateGrade(-0.01, settings);
             Assert.Equal("B+", b_plus.Grade);
-            
+
             // z=0.15 → ~56th percentile → B (>50, ≤60)
             var b = GradeCalculator.CalculateGrade(0.15, settings);
             Assert.Equal("B", b.Grade);
-            
+
             // z=-0.26 → ~39.7th percentile → A (≤40)
             var a = GradeCalculator.CalculateGrade(-0.26, settings);
             Assert.Equal("A", a.Grade);
-            
+
             var f = GradeCalculator.CalculateGrade(3.0, settings); // ~99.9 percentile → F (≤100)
             Assert.Equal("F", f.Grade);
         }
@@ -269,9 +269,9 @@ namespace LiveSplit.GradingSplits.Tests
         public void CalculateGrade_EmptyThresholds_ReturnsFallback()
         {
             var settings = CreateCustomSettings(new List<GradeThreshold>());
-            
+
             var result = GradeCalculator.CalculateGrade(0.0, settings);
-            
+
             Assert.Equal("?", result.Grade);
             Assert.Equal(Color.White, result.Color);
         }
@@ -286,10 +286,10 @@ namespace LiveSplit.GradingSplits.Tests
         public void CalculateGrade_ExtremeZScores_DoesNotCrash(double extremeZScore)
         {
             var settings = CreateDefaultSettings();
-            
+
             // Should not throw
             var result = GradeCalculator.CalculateGrade(extremeZScore, settings);
-            
+
             // Should return a valid grade
             Assert.False(string.IsNullOrEmpty(result.Grade));
         }
@@ -298,9 +298,9 @@ namespace LiveSplit.GradingSplits.Tests
         public void CalculateGrade_ZeroZScore_ReturnsAverageGrade()
         {
             var settings = CreateDefaultSettings();
-            
+
             var result = GradeCalculator.CalculateGrade(0.0, settings);
-            
+
             // z=0 means exactly average, which is B with default thresholds
             Assert.Equal("B", result.Grade);
         }
@@ -313,19 +313,19 @@ namespace LiveSplit.GradingSplits.Tests
         public void CalculateGrade_DefaultThresholds_ReturnsExpectedColors()
         {
             var settings = CreateDefaultSettings();
-            
+
             var sGrade = GradeCalculator.CalculateGrade(-2.0, settings);
             Assert.Equal(Color.Gold, sGrade.Color);
-            
+
             var aGrade = GradeCalculator.CalculateGrade(-1.0, settings);
             Assert.Equal(Color.Green, aGrade.Color);
-            
+
             var bGrade = GradeCalculator.CalculateGrade(0.0, settings);
             Assert.Equal(Color.LightGreen, bGrade.Color);
-            
+
             var cGrade = GradeCalculator.CalculateGrade(1.0, settings);
             Assert.Equal(Color.Yellow, cGrade.Color);
-            
+
             var fGrade = GradeCalculator.CalculateGrade(2.0, settings);
             Assert.Equal(Color.Red, fGrade.Color);
         }

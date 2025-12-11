@@ -184,7 +184,7 @@ namespace LiveSplit.GradingSplits.Tests
         {
             var percentilePositive = Statistics.ZScoreToPercentile(Math.Abs(zScore));
             var percentileNegative = Statistics.ZScoreToPercentile(-Math.Abs(zScore));
-            
+
             // Sum should be close to 100 due to symmetry
             var sum = percentilePositive + percentileNegative;
             Assert.Equal(100.0, sum, 1);
@@ -199,20 +199,20 @@ namespace LiveSplit.GradingSplits.Tests
         {
             // Simulate a split with times in seconds: 60s average, varying by ~5s
             var splitTimes = new List<double> { 55.2, 58.1, 60.0, 61.3, 64.8, 59.5, 62.1, 57.9 };
-            
+
             var mean = Statistics.CalculateMean(splitTimes);
             var stdDev = Statistics.CalculateStandardDeviation(splitTimes);
-            
+
             // Check mean is roughly 60
             Assert.InRange(mean, 58, 62);
-            
+
             // Check stddev is reasonable (should be around 3)
             Assert.InRange(stdDev, 2, 5);
-            
+
             // A fast time (55s) should have negative z-score
             var fastZScore = Statistics.CalculateZScore(55.0, mean, stdDev);
             Assert.True(fastZScore < 0);
-            
+
             // A slow time (65s) should have positive z-score
             var slowZScore = Statistics.CalculateZScore(65.0, mean, stdDev);
             Assert.True(slowZScore > 0);
@@ -223,9 +223,9 @@ namespace LiveSplit.GradingSplits.Tests
         {
             // Consistent runner: all times within 1 second
             var splitTimes = new List<double> { 30.0, 30.2, 30.1, 29.9, 30.3, 30.0, 30.1 };
-            
+
             var stdDev = Statistics.CalculateStandardDeviation(splitTimes);
-            
+
             // Standard deviation should be very low
             Assert.True(stdDev < 0.5);
         }
@@ -235,9 +235,9 @@ namespace LiveSplit.GradingSplits.Tests
         {
             // Inconsistent runner: times vary by 20+ seconds
             var splitTimes = new List<double> { 30.0, 45.0, 35.0, 50.0, 28.0, 55.0, 40.0 };
-            
+
             var stdDev = Statistics.CalculateStandardDeviation(splitTimes);
-            
+
             // Standard deviation should be high
             Assert.True(stdDev > 8);
         }

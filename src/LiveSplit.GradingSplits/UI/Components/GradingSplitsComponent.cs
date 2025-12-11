@@ -139,7 +139,7 @@ namespace LiveSplit.GradingSplits.UI.Components
                 string name = _state.Run[i].Name;
                 string cleanedName = StripGradeFromName(name);
                 _originalSplitNames[i] = cleanedName;
-                
+
                 // If we cleaned the name, also update the run to use the clean name
                 if (cleanedName != name)
                 {
@@ -180,7 +180,7 @@ namespace LiveSplit.GradingSplits.UI.Components
             {
                 string formatted = format.Replace("{Grade}", grade);
                 // Now we have something like "{Name} [A]" or "[A] {Name}"
-                
+
                 // Find where {Name} is in the formatted string
                 int nameIndex = formatted.IndexOf("{Name}");
                 if (nameIndex < 0) continue;
@@ -261,7 +261,7 @@ namespace LiveSplit.GradingSplits.UI.Components
                     string format = Settings.GradingConfig.SplitNameFormat;
                     if (string.IsNullOrEmpty(format))
                         format = "{Name} [{Grade}]";
-                    
+
                     state.Run[i].Name = format
                         .Replace("{Name}", originalName)
                         .Replace("{Grade}", grade);
@@ -296,7 +296,7 @@ namespace LiveSplit.GradingSplits.UI.Components
             Label.HasShadow = state.LayoutSettings.DropShadows;
             Label.ShadowColor = state.LayoutSettings.ShadowsColor;
             Label.Font = state.LayoutSettings.TextFont;
-            
+
             // Use configurable font size for grade label
             using (var gradeFont = new Font(state.LayoutSettings.TextFont.FontFamily, Settings.GradingConfig.CurrentGradeFontSize, FontStyle.Bold))
             {
@@ -837,13 +837,13 @@ namespace LiveSplit.GradingSplits.UI.Components
 
             // Get the segment time - either actual or comparison based on parameter
             TimeSpan? segmentTime = null;
-            
+
             if (useActualTime)
             {
                 // Use the actual segment time from the current run
                 var splitTime = segment.SplitTime[method];
                 var prevSplitTime = index > 0 ? state.Run[index - 1].SplitTime[method] : TimeSpan.Zero;
-                
+
                 if (splitTime != null && prevSplitTime != null)
                 {
                     segmentTime = splitTime - prevSplitTime;
@@ -882,14 +882,14 @@ namespace LiveSplit.GradingSplits.UI.Components
         {
             // Restore original split names before disposing
             RestoreOriginalSplitNames();
-            
+
             // Unsubscribe from events
             if (_state != null)
             {
                 _state.OnReset -= State_OnReset;
                 _state.OnStart -= State_OnStart;
             }
-            
+
             Settings.Dispose();
         }
     }
