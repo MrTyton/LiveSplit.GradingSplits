@@ -164,6 +164,8 @@ namespace LiveSplit.GradingSplits.UI.Components
             {
                 numGraphHeight.Enabled = chkShowGraph.Checked;
                 cboGraphStyle.Enabled = chkShowGraph.Checked;
+                chkShowStatistics.Enabled = chkShowGraph.Checked;
+                numStatsFontSize.Enabled = chkShowGraph.Checked && chkShowStatistics.Checked;
                 GradingConfig.ShowGraph = chkShowGraph.Checked;
             };
 
@@ -175,6 +177,17 @@ namespace LiveSplit.GradingSplits.UI.Components
             cboGraphStyle.SelectedIndexChanged += (s, e) =>
             {
                 GradingConfig.UseHistogramGraph = cboGraphStyle.SelectedIndex == 0;
+            };
+
+            chkShowStatistics.CheckedChanged += (s, e) =>
+            {
+                numStatsFontSize.Enabled = chkShowStatistics.Checked;
+                GradingConfig.ShowStatistics = chkShowStatistics.Checked;
+            };
+
+            numStatsFontSize.ValueChanged += (s, e) =>
+            {
+                GradingConfig.StatisticsFontSize = (int)numStatsFontSize.Value;
             };
 
             btnResetDefaults.Click += (s, e) =>
@@ -218,6 +231,10 @@ namespace LiveSplit.GradingSplits.UI.Components
             numGraphHeight.Enabled = GradingConfig.ShowGraph;
             cboGraphStyle.SelectedIndex = GradingConfig.UseHistogramGraph ? 0 : 1;
             cboGraphStyle.Enabled = GradingConfig.ShowGraph;
+            chkShowStatistics.Checked = GradingConfig.ShowStatistics;
+            chkShowStatistics.Enabled = GradingConfig.ShowGraph;
+            numStatsFontSize.Value = GradingConfig.StatisticsFontSize;
+            numStatsFontSize.Enabled = GradingConfig.ShowGraph && GradingConfig.ShowStatistics;
 
             // Populate thresholds grid
             dgvThresholds.Rows.Clear();
@@ -252,6 +269,8 @@ namespace LiveSplit.GradingSplits.UI.Components
             GradingConfig.ShowGraph = SettingsHelper.ParseBool(element["ShowGraph"], false);
             GradingConfig.GraphHeight = SettingsHelper.ParseInt(element["GraphHeight"], 80);
             GradingConfig.UseHistogramGraph = SettingsHelper.ParseBool(element["UseHistogramGraph"], true);
+            GradingConfig.ShowStatistics = SettingsHelper.ParseBool(element["ShowStatistics"], true);
+            GradingConfig.StatisticsFontSize = SettingsHelper.ParseInt(element["StatisticsFontSize"], 10);
 
             // Parse thresholds
             var thresholdsNode = element["Thresholds"];
@@ -322,6 +341,8 @@ namespace LiveSplit.GradingSplits.UI.Components
             hash ^= SettingsHelper.CreateSetting(document, parent, "ShowGraph", GradingConfig.ShowGraph);
             hash ^= SettingsHelper.CreateSetting(document, parent, "GraphHeight", GradingConfig.GraphHeight);
             hash ^= SettingsHelper.CreateSetting(document, parent, "UseHistogramGraph", GradingConfig.UseHistogramGraph);
+            hash ^= SettingsHelper.CreateSetting(document, parent, "ShowStatistics", GradingConfig.ShowStatistics);
+            hash ^= SettingsHelper.CreateSetting(document, parent, "StatisticsFontSize", GradingConfig.StatisticsFontSize);
 
             // Save thresholds
             if (document != null)

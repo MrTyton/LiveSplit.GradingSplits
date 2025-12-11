@@ -33,7 +33,19 @@ namespace LiveSplit.GradingSplits.UI.Components
 
         public float HorizontalWidth => Label.ActualWidth + GradeLabel.ActualWidth + 5;
         public float MinimumHeight => Settings.GradingConfig.ShowGraph ? 25 + Settings.GradingConfig.GraphHeight + 30 : 25;
-        public float VerticalHeight => Settings.GradingConfig.ShowGraph ? 25 + Settings.GradingConfig.GraphHeight + 30 : 25f;
+        public float VerticalHeight
+        {
+            get
+            {
+                if (!Settings.GradingConfig.ShowGraph)
+                    return 25f;
+                
+                float height = 25 + Settings.GradingConfig.GraphHeight;
+                if (Settings.GradingConfig.ShowStatistics)
+                    height += Settings.GradingConfig.StatisticsFontSize + 10; // Font size + padding
+                return height;
+            }
+        }
         public float MinimumWidth => 100;
 
         public float PaddingTop => 7f;
@@ -145,9 +157,12 @@ namespace LiveSplit.GradingSplits.UI.Components
                 float graphY = 25; // Position graph below the grade label
                 DrawDistributionGraph(g, state, width, Settings.GradingConfig.GraphHeight, graphY);
                 
-                // Draw statistics text below graph
-                float statsY = graphY + Settings.GradingConfig.GraphHeight + 2;
-                DrawStatistics(g, state, width, statsY);
+                // Draw statistics text below graph if enabled
+                if (Settings.GradingConfig.ShowStatistics)
+                {
+                    float statsY = graphY + Settings.GradingConfig.GraphHeight + 2;
+                    DrawStatistics(g, state, width, statsY);
+                }
             }
 
             g.Transform = oldMatrix;
@@ -277,7 +292,7 @@ namespace LiveSplit.GradingSplits.UI.Components
 
         private void DrawStatistics(Graphics g, LiveSplitState state, float width, float yOffset)
         {
-            var font = new Font(state.LayoutSettings.TextFont.FontFamily, 8, FontStyle.Regular);
+            var font = new Font(state.LayoutSettings.TextFont.FontFamily, Settings.GradingConfig.StatisticsFontSize, FontStyle.Regular);
             var brush = new SolidBrush(state.LayoutSettings.TextColor);
             
             // Calculate percentile from z-score

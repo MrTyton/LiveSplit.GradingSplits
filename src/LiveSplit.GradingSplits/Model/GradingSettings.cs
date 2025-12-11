@@ -69,6 +69,16 @@ namespace LiveSplit.GradingSplits.Model
         /// Whether to show historical points as a histogram (stacked dots) or a scatter line.
         /// </summary>
         public bool UseHistogramGraph { get; set; }
+        
+        /// <summary>
+        /// Whether to show statistics text below the graph.
+        /// </summary>
+        public bool ShowStatistics { get; set; }
+        
+        /// <summary>
+        /// The font size for the statistics text.
+        /// </summary>
+        public int StatisticsFontSize { get; set; }
 
         /// <summary>
         /// Creates a new GradingSettings instance with default values.
@@ -97,6 +107,8 @@ namespace LiveSplit.GradingSplits.Model
             ShowGraph = false;
             GraphHeight = 80;
             UseHistogramGraph = true;
+            ShowStatistics = true;
+            StatisticsFontSize = 10;
         }
 
         /// <summary>
@@ -118,7 +130,9 @@ namespace LiveSplit.GradingSplits.Model
                 WorstColor = WorstColor,
                 ShowGraph = ShowGraph,
                 GraphHeight = GraphHeight,
-                UseHistogramGraph = UseHistogramGraph
+                UseHistogramGraph = UseHistogramGraph,
+                ShowStatistics = ShowStatistics,
+                StatisticsFontSize = StatisticsFontSize
             };
             return clone;
         }

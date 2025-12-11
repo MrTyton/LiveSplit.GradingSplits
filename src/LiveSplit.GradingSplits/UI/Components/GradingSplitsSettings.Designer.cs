@@ -54,6 +54,9 @@ namespace LiveSplit.GradingSplits.UI.Components
             this.numGraphHeight = new System.Windows.Forms.NumericUpDown();
             this.lblGraphStyle = new System.Windows.Forms.Label();
             this.cboGraphStyle = new System.Windows.Forms.ComboBox();
+            this.chkShowStatistics = new System.Windows.Forms.CheckBox();
+            this.lblStatsFontSize = new System.Windows.Forms.Label();
+            this.numStatsFontSize = new System.Windows.Forms.NumericUpDown();
             this.btnResetDefaults = new System.Windows.Forms.Button();
             this.tableLayoutPanel1.SuspendLayout();
             this.groupBox1.SuspendLayout();
@@ -63,6 +66,7 @@ namespace LiveSplit.GradingSplits.UI.Components
             this.groupBox2.SuspendLayout();
             this.tableLayoutPanel2.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.numGraphHeight)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.numStatsFontSize)).BeginInit();
             this.SuspendLayout();
             // 
             // tableLayoutPanel1
@@ -222,16 +226,20 @@ namespace LiveSplit.GradingSplits.UI.Components
             this.tableLayoutPanel2.Controls.Add(this.lblGraphStyle, 0, 4);
             this.tableLayoutPanel2.Controls.Add(this.cboGraphStyle, 1, 4);
             this.tableLayoutPanel2.SetColumnSpan(this.cboGraphStyle, 2);
+            this.tableLayoutPanel2.Controls.Add(this.chkShowStatistics, 0, 5);
+            this.tableLayoutPanel2.Controls.Add(this.lblStatsFontSize, 1, 5);
+            this.tableLayoutPanel2.Controls.Add(this.numStatsFontSize, 2, 5);
             this.tableLayoutPanel2.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tableLayoutPanel2.Location = new System.Drawing.Point(3, 16);
             this.tableLayoutPanel2.Name = "tableLayoutPanel2";
-            this.tableLayoutPanel2.RowCount = 5;
+            this.tableLayoutPanel2.RowCount = 6;
             this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 30F));
             this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 30F));
             this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 30F));
             this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 30F));
             this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 30F));
-            this.tableLayoutPanel2.Size = new System.Drawing.Size(450, 150);
+            this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 30F));
+            this.tableLayoutPanel2.Size = new System.Drawing.Size(450, 180);
             this.tableLayoutPanel2.TabIndex = 0;
             // 
             // chkUseBackground
@@ -364,6 +372,38 @@ namespace LiveSplit.GradingSplits.UI.Components
             this.cboGraphStyle.Size = new System.Drawing.Size(294, 21);
             this.cboGraphStyle.TabIndex = 12;
             // 
+            // chkShowStatistics
+            // 
+            this.chkShowStatistics.Anchor = System.Windows.Forms.AnchorStyles.Left;
+            this.chkShowStatistics.AutoSize = true;
+            this.chkShowStatistics.Location = new System.Drawing.Point(3, 156);
+            this.chkShowStatistics.Name = "chkShowStatistics";
+            this.chkShowStatistics.Size = new System.Drawing.Size(98, 17);
+            this.chkShowStatistics.TabIndex = 13;
+            this.chkShowStatistics.Text = "Show Statistics";
+            this.chkShowStatistics.UseVisualStyleBackColor = true;
+            // 
+            // lblStatsFontSize
+            // 
+            this.lblStatsFontSize.Anchor = System.Windows.Forms.AnchorStyles.Left;
+            this.lblStatsFontSize.AutoSize = true;
+            this.lblStatsFontSize.Location = new System.Drawing.Point(153, 158);
+            this.lblStatsFontSize.Name = "lblStatsFontSize";
+            this.lblStatsFontSize.Size = new System.Drawing.Size(55, 13);
+            this.lblStatsFontSize.TabIndex = 14;
+            this.lblStatsFontSize.Text = "Font Size:";
+            // 
+            // numStatsFontSize
+            // 
+            this.numStatsFontSize.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
+            this.numStatsFontSize.Location = new System.Drawing.Point(373, 155);
+            this.numStatsFontSize.Maximum = new decimal(new int[] { 24, 0, 0, 0 });
+            this.numStatsFontSize.Minimum = new decimal(new int[] { 6, 0, 0, 0 });
+            this.numStatsFontSize.Name = "numStatsFontSize";
+            this.numStatsFontSize.Size = new System.Drawing.Size(74, 20);
+            this.numStatsFontSize.TabIndex = 15;
+            this.numStatsFontSize.Value = new decimal(new int[] { 10, 0, 0, 0 });
+            // 
             // btnResetDefaults
             // 
             this.btnResetDefaults.Anchor = System.Windows.Forms.AnchorStyles.Right;
@@ -393,6 +433,7 @@ namespace LiveSplit.GradingSplits.UI.Components
             this.tableLayoutPanel2.ResumeLayout(false);
             this.tableLayoutPanel2.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.numGraphHeight)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.numStatsFontSize)).EndInit();
             this.ResumeLayout(false);
 
         }
@@ -417,6 +458,9 @@ namespace LiveSplit.GradingSplits.UI.Components
         private System.Windows.Forms.NumericUpDown numGraphHeight;
         private System.Windows.Forms.Label lblGraphStyle;
         private System.Windows.Forms.ComboBox cboGraphStyle;
+        private System.Windows.Forms.CheckBox chkShowStatistics;
+        private System.Windows.Forms.Label lblStatsFontSize;
+        private System.Windows.Forms.NumericUpDown numStatsFontSize;
         private System.Windows.Forms.Button btnResetDefaults;
         private System.Windows.Forms.DataGridViewTextBoxColumn colZScore;
         private System.Windows.Forms.DataGridViewTextBoxColumn colLabel;
