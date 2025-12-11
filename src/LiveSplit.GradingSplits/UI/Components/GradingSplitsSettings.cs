@@ -201,6 +201,11 @@ namespace LiveSplit.GradingSplits.UI.Components
                 GradingConfig.PreviousSplitFontSize = (int)numPrevFontSize.Value;
             };
 
+            chkShowCurrentGrade.CheckedChanged += (s, e) =>
+            {
+                GradingConfig.ShowCurrentGrade = chkShowCurrentGrade.Checked;
+            };
+
             chkShowSplitNameGrades.CheckedChanged += (s, e) =>
             {
                 GradingConfig.ShowGradeInSplitNames = chkShowSplitNameGrades.Checked;
@@ -262,6 +267,8 @@ namespace LiveSplit.GradingSplits.UI.Components
             numPrevFontSize.Value = GradingConfig.PreviousSplitFontSize;
             numPrevFontSize.Enabled = GradingConfig.ShowPreviousSplit;
 
+            chkShowCurrentGrade.Checked = GradingConfig.ShowCurrentGrade;
+
             chkShowSplitNameGrades.Checked = GradingConfig.ShowGradeInSplitNames;
             txtSplitNameFormat.Text = GradingConfig.SplitNameFormat;
             txtSplitNameFormat.Enabled = GradingConfig.ShowGradeInSplitNames;
@@ -303,6 +310,7 @@ namespace LiveSplit.GradingSplits.UI.Components
             GradingConfig.StatisticsFontSize = SettingsHelper.ParseInt(element["StatisticsFontSize"], 10);
             GradingConfig.ShowPreviousSplit = SettingsHelper.ParseBool(element["ShowPreviousSplit"], false);
             GradingConfig.PreviousSplitFontSize = SettingsHelper.ParseInt(element["PreviousSplitFontSize"], 10);
+            GradingConfig.ShowCurrentGrade = SettingsHelper.ParseBool(element["ShowCurrentGrade"], true);
             GradingConfig.ShowGradeInSplitNames = SettingsHelper.ParseBool(element["ShowGradeInSplitNames"], false);
             GradingConfig.SplitNameFormat = SettingsHelper.ParseString(element["SplitNameFormat"], "{Name} [{Grade}]");
 
@@ -379,6 +387,7 @@ namespace LiveSplit.GradingSplits.UI.Components
             hash ^= SettingsHelper.CreateSetting(document, parent, "StatisticsFontSize", GradingConfig.StatisticsFontSize);
             hash ^= SettingsHelper.CreateSetting(document, parent, "ShowPreviousSplit", GradingConfig.ShowPreviousSplit);
             hash ^= SettingsHelper.CreateSetting(document, parent, "PreviousSplitFontSize", GradingConfig.PreviousSplitFontSize);
+            hash ^= SettingsHelper.CreateSetting(document, parent, "ShowCurrentGrade", GradingConfig.ShowCurrentGrade);
             hash ^= SettingsHelper.CreateSetting(document, parent, "ShowGradeInSplitNames", GradingConfig.ShowGradeInSplitNames);
             hash ^= SettingsHelper.CreateSetting(document, parent, "SplitNameFormat", GradingConfig.SplitNameFormat);
 

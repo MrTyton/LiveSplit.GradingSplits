@@ -49,7 +49,11 @@ namespace LiveSplit.GradingSplits.UI.Components
         {
             get
             {
-                float height = 25f; // Base height for grade label
+                float height = 0f;
+
+                // Base height for grade label (only if showing current grade)
+                if (Settings.GradingConfig.ShowCurrentGrade)
+                    height += 25f;
 
                 if (Settings.GradingConfig.ShowGraph)
                 {
@@ -62,7 +66,8 @@ namespace LiveSplit.GradingSplits.UI.Components
                 if (Settings.GradingConfig.ShowPreviousSplit)
                     height += Settings.GradingConfig.PreviousSplitFontSize + 10;
 
-                return height;
+                // Minimum height of 1 to prevent issues when everything is hidden
+                return Math.Max(1f, height);
             }
         }
         public float MinimumWidth => 100;
@@ -243,57 +248,66 @@ namespace LiveSplit.GradingSplits.UI.Components
 
             if (horizontal)
             {
-                Label.X = 0;
-                Label.Y = 0;
-                Label.Width = Label.ActualWidth;
-                Label.Height = 25; // Fixed height for label at top
-                Label.Draw(g);
-
-                GradeLabel.X = Label.ActualWidth + 5;
-                GradeLabel.Y = 0;
-                GradeLabel.Width = GradeLabel.ActualWidth;
-                GradeLabel.Height = 25; // Fixed height for grade at top
-
-                // Draw background for grade label only if enabled
-                if (Settings.GradingConfig.UseBackgroundColor)
+                if (Settings.GradingConfig.ShowCurrentGrade)
                 {
-                    using (var backgroundBrush = new SolidBrush(Settings.GradingConfig.BackgroundColor))
-                    {
-                        g.FillRectangle(backgroundBrush, GradeLabel.X, GradeLabel.Y, GradeLabel.Width, GradeLabel.Height);
-                    }
-                }
+                    Label.X = 0;
+                    Label.Y = 0;
+                    Label.Width = Label.ActualWidth;
+                    Label.Height = 25; // Fixed height for label at top
+                    Label.Draw(g);
 
-                GradeLabel.Draw(g);
+                    GradeLabel.X = Label.ActualWidth + 5;
+                    GradeLabel.Y = 0;
+                    GradeLabel.Width = GradeLabel.ActualWidth;
+                    GradeLabel.Height = 25; // Fixed height for grade at top
+
+                    // Draw background for grade label only if enabled
+                    if (Settings.GradingConfig.UseBackgroundColor)
+                    {
+                        using (var backgroundBrush = new SolidBrush(Settings.GradingConfig.BackgroundColor))
+                        {
+                            g.FillRectangle(backgroundBrush, GradeLabel.X, GradeLabel.Y, GradeLabel.Width, GradeLabel.Height);
+                        }
+                    }
+
+                    GradeLabel.Draw(g);
+                }
             }
             else
             {
-                Label.X = 5;
-                Label.Y = 0;
-                Label.Width = width - GradeLabel.ActualWidth - 10;
-                Label.Height = 25; // Fixed height for label at top
-                Label.Draw(g);
-
-                GradeLabel.X = width - GradeLabel.ActualWidth - 5;
-                GradeLabel.Y = 0;
-                GradeLabel.Width = GradeLabel.ActualWidth;
-                GradeLabel.Height = 25; // Fixed height for grade at top
-
-                // Draw background for grade label only if enabled
-                if (Settings.GradingConfig.UseBackgroundColor)
+                if (Settings.GradingConfig.ShowCurrentGrade)
                 {
-                    using (var backgroundBrush = new SolidBrush(Settings.GradingConfig.BackgroundColor))
-                    {
-                        g.FillRectangle(backgroundBrush, GradeLabel.X, GradeLabel.Y, GradeLabel.Width, GradeLabel.Height);
-                    }
-                }
+                    Label.X = 5;
+                    Label.Y = 0;
+                    Label.Width = width - GradeLabel.ActualWidth - 10;
+                    Label.Height = 25; // Fixed height for label at top
+                    Label.Draw(g);
 
-                GradeLabel.Draw(g);
+                    GradeLabel.X = width - GradeLabel.ActualWidth - 5;
+                    GradeLabel.Y = 0;
+                    GradeLabel.Width = GradeLabel.ActualWidth;
+                    GradeLabel.Height = 25; // Fixed height for grade at top
+
+                    // Draw background for grade label only if enabled
+                    if (Settings.GradingConfig.UseBackgroundColor)
+                    {
+                        using (var backgroundBrush = new SolidBrush(Settings.GradingConfig.BackgroundColor))
+                        {
+                            g.FillRectangle(backgroundBrush, GradeLabel.X, GradeLabel.Y, GradeLabel.Width, GradeLabel.Height);
+                        }
+                    }
+
+                    GradeLabel.Draw(g);
+                }
             }
+
+            // Calculate starting Y position for elements below grade row
+            float baseY = Settings.GradingConfig.ShowCurrentGrade ? 25f : 0f;
 
             // Draw graph if enabled
             if (Settings.GradingConfig.ShowGraph && _cachedHistory.Count >= 2)
             {
-                float graphY = 25; // Position graph below the grade label
+                float graphY = baseY; // Position graph below the grade label (or at top if grade hidden)
                 DrawDistributionGraph(g, state, width, Settings.GradingConfig.GraphHeight, graphY);
 
                 // Position for elements below the graph
@@ -316,7 +330,7 @@ namespace LiveSplit.GradingSplits.UI.Components
                 // No graph - just draw previous split if enabled
                 if (Settings.GradingConfig.ShowPreviousSplit)
                 {
-                    float prevY = 25;
+                    float prevY = baseY;
                     DrawPreviousSplitComparison(g, state, width, prevY);
                 }
             }

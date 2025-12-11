@@ -91,6 +91,11 @@ namespace LiveSplit.GradingSplits.Model
         public int PreviousSplitFontSize { get; set; }
 
         /// <summary>
+        /// Whether to show the current grade row in the component display.
+        /// </summary>
+        public bool ShowCurrentGrade { get; set; }
+
+        /// <summary>
         /// Whether to show grades in split names (e.g., "Split Name [A]").
         /// </summary>
         public bool ShowGradeInSplitNames { get; set; }
@@ -132,6 +137,7 @@ namespace LiveSplit.GradingSplits.Model
             StatisticsFontSize = 10;
             ShowPreviousSplit = false;
             PreviousSplitFontSize = 10;
+            ShowCurrentGrade = true;
             ShowGradeInSplitNames = false;
             SplitNameFormat = "{Name} [{Grade}]";
         }
@@ -160,6 +166,7 @@ namespace LiveSplit.GradingSplits.Model
                 StatisticsFontSize = StatisticsFontSize,
                 ShowPreviousSplit = ShowPreviousSplit,
                 PreviousSplitFontSize = PreviousSplitFontSize,
+                ShowCurrentGrade = ShowCurrentGrade,
                 ShowGradeInSplitNames = ShowGradeInSplitNames,
                 SplitNameFormat = SplitNameFormat
             };

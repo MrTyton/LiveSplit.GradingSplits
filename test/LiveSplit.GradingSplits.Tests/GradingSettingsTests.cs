@@ -56,6 +56,7 @@ namespace LiveSplit.GradingSplits.Tests
         [InlineData(nameof(GradingSettings.UseHistogramGraph), true)]
         [InlineData(nameof(GradingSettings.ShowStatistics), true)]
         [InlineData(nameof(GradingSettings.ShowPreviousSplit), false)]
+        [InlineData(nameof(GradingSettings.ShowCurrentGrade), true)]
         [InlineData(nameof(GradingSettings.ShowGradeInSplitNames), false)]
         public void Constructor_BooleanDefaults_AreCorrect(string propertyName, bool expectedValue)
         {
@@ -154,6 +155,7 @@ namespace LiveSplit.GradingSplits.Tests
                 UseHistogramGraph = false,
                 ShowStatistics = false,
                 ShowPreviousSplit = true,
+                ShowCurrentGrade = false,
                 ShowGradeInSplitNames = true
             };
             
@@ -166,6 +168,7 @@ namespace LiveSplit.GradingSplits.Tests
             Assert.Equal(original.UseHistogramGraph, clone.UseHistogramGraph);
             Assert.Equal(original.ShowStatistics, clone.ShowStatistics);
             Assert.Equal(original.ShowPreviousSplit, clone.ShowPreviousSplit);
+            Assert.Equal(original.ShowCurrentGrade, clone.ShowCurrentGrade);
             Assert.Equal(original.ShowGradeInSplitNames, clone.ShowGradeInSplitNames);
         }
 
