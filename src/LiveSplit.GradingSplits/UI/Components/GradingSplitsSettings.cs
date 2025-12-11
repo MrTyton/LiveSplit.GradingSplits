@@ -193,18 +193,12 @@ namespace LiveSplit.GradingSplits.UI.Components
             chkShowPreviousSplit.CheckedChanged += (s, e) =>
             {
                 numPrevFontSize.Enabled = chkShowPreviousSplit.Checked;
-                chkPrevSplitFirst.Enabled = chkShowPreviousSplit.Checked;
                 GradingConfig.ShowPreviousSplit = chkShowPreviousSplit.Checked;
             };
 
             numPrevFontSize.ValueChanged += (s, e) =>
             {
                 GradingConfig.PreviousSplitFontSize = (int)numPrevFontSize.Value;
-            };
-
-            chkPrevSplitFirst.CheckedChanged += (s, e) =>
-            {
-                GradingConfig.PreviousSplitFirst = chkPrevSplitFirst.Checked;
             };
 
             btnResetDefaults.Click += (s, e) =>
@@ -256,8 +250,6 @@ namespace LiveSplit.GradingSplits.UI.Components
             chkShowPreviousSplit.Checked = GradingConfig.ShowPreviousSplit;
             numPrevFontSize.Value = GradingConfig.PreviousSplitFontSize;
             numPrevFontSize.Enabled = GradingConfig.ShowPreviousSplit;
-            chkPrevSplitFirst.Checked = GradingConfig.PreviousSplitFirst;
-            chkPrevSplitFirst.Enabled = GradingConfig.ShowPreviousSplit;
 
             // Populate thresholds grid
             dgvThresholds.Rows.Clear();
@@ -296,7 +288,6 @@ namespace LiveSplit.GradingSplits.UI.Components
             GradingConfig.StatisticsFontSize = SettingsHelper.ParseInt(element["StatisticsFontSize"], 10);
             GradingConfig.ShowPreviousSplit = SettingsHelper.ParseBool(element["ShowPreviousSplit"], false);
             GradingConfig.PreviousSplitFontSize = SettingsHelper.ParseInt(element["PreviousSplitFontSize"], 10);
-            GradingConfig.PreviousSplitFirst = SettingsHelper.ParseBool(element["PreviousSplitFirst"], false);
 
             // Parse thresholds
             var thresholdsNode = element["Thresholds"];
@@ -371,7 +362,6 @@ namespace LiveSplit.GradingSplits.UI.Components
             hash ^= SettingsHelper.CreateSetting(document, parent, "StatisticsFontSize", GradingConfig.StatisticsFontSize);
             hash ^= SettingsHelper.CreateSetting(document, parent, "ShowPreviousSplit", GradingConfig.ShowPreviousSplit);
             hash ^= SettingsHelper.CreateSetting(document, parent, "PreviousSplitFontSize", GradingConfig.PreviousSplitFontSize);
-            hash ^= SettingsHelper.CreateSetting(document, parent, "PreviousSplitFirst", GradingConfig.PreviousSplitFirst);
 
             // Save thresholds
             if (document != null)

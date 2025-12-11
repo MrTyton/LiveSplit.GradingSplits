@@ -104,6 +104,9 @@ namespace LiveSplit.GradingSplits.UI.Components
         {
             var oldMatrix = g.Transform;
 
+            // Update label text with current comparison
+            Label.Text = state.CurrentComparison + "'s Grade:";
+
             // Basic layout
             Label.ForeColor = state.LayoutSettings.TextColor;
             Label.HasShadow = state.LayoutSettings.DropShadows;
@@ -174,40 +177,22 @@ namespace LiveSplit.GradingSplits.UI.Components
                 // Position for elements below the graph
                 float belowGraphY = graphY + Settings.GradingConfig.GraphHeight + 2;
                 
-                // Handle order of statistics and previous split
-                if (Settings.GradingConfig.PreviousSplitFirst)
+                // Statistics first, then previous split
+                if (Settings.GradingConfig.ShowStatistics)
                 {
-                    // Previous split first, then statistics
-                    if (Settings.GradingConfig.ShowPreviousSplit && _hasPreviousSplitData)
-                    {
-                        DrawPreviousSplitComparison(g, state, width, belowGraphY);
-                        belowGraphY += Settings.GradingConfig.PreviousSplitFontSize + 10;
-                    }
-                    
-                    if (Settings.GradingConfig.ShowStatistics)
-                    {
-                        DrawStatistics(g, state, width, belowGraphY);
-                    }
+                    DrawStatistics(g, state, width, belowGraphY);
+                    belowGraphY += Settings.GradingConfig.StatisticsFontSize + 10;
                 }
-                else
+                
+                if (Settings.GradingConfig.ShowPreviousSplit)
                 {
-                    // Statistics first, then previous split (default)
-                    if (Settings.GradingConfig.ShowStatistics)
-                    {
-                        DrawStatistics(g, state, width, belowGraphY);
-                        belowGraphY += Settings.GradingConfig.StatisticsFontSize + 10;
-                    }
-                    
-                    if (Settings.GradingConfig.ShowPreviousSplit && _hasPreviousSplitData)
-                    {
-                        DrawPreviousSplitComparison(g, state, width, belowGraphY);
-                    }
+                    DrawPreviousSplitComparison(g, state, width, belowGraphY);
                 }
             }
             else
             {
                 // No graph - just draw previous split if enabled
-                if (Settings.GradingConfig.ShowPreviousSplit && _hasPreviousSplitData)
+                if (Settings.GradingConfig.ShowPreviousSplit)
                 {
                     float prevY = 25;
                     DrawPreviousSplitComparison(g, state, width, prevY);
@@ -222,15 +207,31 @@ namespace LiveSplit.GradingSplits.UI.Components
             var font = new Font(state.LayoutSettings.TextFont.FontFamily, Settings.GradingConfig.PreviousSplitFontSize, FontStyle.Regular);
             var textBrush = new SolidBrush(state.LayoutSettings.TextColor);
             
-            // Build the text parts
+            // If no previous split data, show default text
+            if (!_hasPreviousSplitData)
+            {
+                string defaultText = "Previous: N/A";
+                var defaultSize = g.MeasureString(defaultText, font);
+                float defaultX = (width - defaultSize.Width) / 2;
+                g.DrawString(defaultText, font, textBrush, defaultX, yOffset);
+                font.Dispose();
+                textBrush.Dispose();
+                return;
+            }
+            
+            // Build the text parts - no extra space before "vs"
             string prefix = "Previous: Achieved ";
             string vs = " vs " + state.CurrentComparison + "'s ";
             
+            // Trim grades for proper spacing
+            string achievedDisplay = _previousAchievedGrade?.Trim() ?? "-";
+            string comparisonDisplay = _previousComparisonGrade?.Trim() ?? "-";
+            
             // Measure each part to position them
             var prefixSize = g.MeasureString(prefix, font);
-            var achievedSize = g.MeasureString(_previousAchievedGrade, font);
+            var achievedSize = g.MeasureString(achievedDisplay, font);
             var vsSize = g.MeasureString(vs, font);
-            var comparisonSize = g.MeasureString(_previousComparisonGrade, font);
+            var comparisonSize = g.MeasureString(comparisonDisplay, font);
             
             float totalWidth = prefixSize.Width + achievedSize.Width + vsSize.Width + comparisonSize.Width;
             float startX = (width - totalWidth) / 2;
@@ -243,7 +244,7 @@ namespace LiveSplit.GradingSplits.UI.Components
             // Draw achieved grade with its color
             using (var achievedBrush = new SolidBrush(_previousAchievedColor))
             {
-                g.DrawString(_previousAchievedGrade, font, achievedBrush, currentX, yOffset);
+                g.DrawString(achievedDisplay, font, achievedBrush, currentX, yOffset);
             }
             currentX += achievedSize.Width;
             
@@ -254,7 +255,7 @@ namespace LiveSplit.GradingSplits.UI.Components
             // Draw comparison grade with its color
             using (var comparisonBrush = new SolidBrush(_previousComparisonColor))
             {
-                g.DrawString(_previousComparisonGrade, font, comparisonBrush, currentX, yOffset);
+                g.DrawString(comparisonDisplay, font, comparisonBrush, currentX, yOffset);
             }
             
             font.Dispose();

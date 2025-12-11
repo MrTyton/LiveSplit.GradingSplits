@@ -60,7 +60,6 @@ namespace LiveSplit.GradingSplits.UI.Components
             this.chkShowPreviousSplit = new System.Windows.Forms.CheckBox();
             this.lblPrevFontSize = new System.Windows.Forms.Label();
             this.numPrevFontSize = new System.Windows.Forms.NumericUpDown();
-            this.chkPrevSplitFirst = new System.Windows.Forms.CheckBox();
             this.btnResetDefaults = new System.Windows.Forms.Button();
             this.tableLayoutPanel1.SuspendLayout();
             this.groupBox1.SuspendLayout();
@@ -81,14 +80,15 @@ namespace LiveSplit.GradingSplits.UI.Components
             this.tableLayoutPanel1.Controls.Add(this.groupBox1, 0, 0);
             this.tableLayoutPanel1.Controls.Add(this.groupBox2, 0, 1);
             this.tableLayoutPanel1.Controls.Add(this.btnResetDefaults, 0, 2);
-            this.tableLayoutPanel1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.tableLayoutPanel1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) | System.Windows.Forms.AnchorStyles.Right)));
             this.tableLayoutPanel1.Location = new System.Drawing.Point(7, 7);
             this.tableLayoutPanel1.Name = "tableLayoutPanel1";
             this.tableLayoutPanel1.RowCount = 3;
-            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 65F));
-            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 35F));
+            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 330F));
+            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.AutoSize));
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 35F));
-            this.tableLayoutPanel1.Size = new System.Drawing.Size(462, 536);
+            this.tableLayoutPanel1.AutoSize = true;
+            this.tableLayoutPanel1.Size = new System.Drawing.Size(462, 680);
             this.tableLayoutPanel1.TabIndex = 0;
             // 
             // groupBox1
@@ -203,10 +203,12 @@ namespace LiveSplit.GradingSplits.UI.Components
             // groupBox2
             // 
             this.groupBox2.Controls.Add(this.tableLayoutPanel2);
-            this.groupBox2.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.groupBox2.Location = new System.Drawing.Point(3, 328);
+            this.groupBox2.AutoSize = true;
+            this.groupBox2.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
+            this.groupBox2.Dock = System.Windows.Forms.DockStyle.Top;
+            this.groupBox2.Location = new System.Drawing.Point(3, 333);
             this.groupBox2.Name = "groupBox2";
-            this.groupBox2.Size = new System.Drawing.Size(456, 169);
+            this.groupBox2.Size = new System.Drawing.Size(456, 280);
             this.groupBox2.TabIndex = 1;
             this.groupBox2.TabStop = false;
             this.groupBox2.Text = "Display Options";
@@ -237,12 +239,10 @@ namespace LiveSplit.GradingSplits.UI.Components
             this.tableLayoutPanel2.Controls.Add(this.chkShowPreviousSplit, 0, 6);
             this.tableLayoutPanel2.Controls.Add(this.lblPrevFontSize, 1, 6);
             this.tableLayoutPanel2.Controls.Add(this.numPrevFontSize, 2, 6);
-            this.tableLayoutPanel2.Controls.Add(this.chkPrevSplitFirst, 0, 7);
-            this.tableLayoutPanel2.SetColumnSpan(this.chkPrevSplitFirst, 3);
             this.tableLayoutPanel2.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tableLayoutPanel2.Location = new System.Drawing.Point(3, 16);
             this.tableLayoutPanel2.Name = "tableLayoutPanel2";
-            this.tableLayoutPanel2.RowCount = 8;
+            this.tableLayoutPanel2.RowCount = 7;
             this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 30F));
             this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 30F));
             this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 30F));
@@ -250,8 +250,8 @@ namespace LiveSplit.GradingSplits.UI.Components
             this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 30F));
             this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 30F));
             this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 30F));
-            this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 30F));
-            this.tableLayoutPanel2.Size = new System.Drawing.Size(450, 240);
+            this.tableLayoutPanel2.AutoSize = true;
+            this.tableLayoutPanel2.Size = new System.Drawing.Size(450, 210);
             this.tableLayoutPanel2.TabIndex = 0;
             // 
             // chkUseBackground
@@ -448,17 +448,6 @@ namespace LiveSplit.GradingSplits.UI.Components
             this.numPrevFontSize.TabIndex = 18;
             this.numPrevFontSize.Value = new decimal(new int[] { 10, 0, 0, 0 });
             // 
-            // chkPrevSplitFirst
-            // 
-            this.chkPrevSplitFirst.Anchor = System.Windows.Forms.AnchorStyles.Left;
-            this.chkPrevSplitFirst.AutoSize = true;
-            this.chkPrevSplitFirst.Location = new System.Drawing.Point(3, 216);
-            this.chkPrevSplitFirst.Name = "chkPrevSplitFirst";
-            this.chkPrevSplitFirst.Size = new System.Drawing.Size(225, 17);
-            this.chkPrevSplitFirst.TabIndex = 19;
-            this.chkPrevSplitFirst.Text = "Show Previous Split Above Statistics";
-            this.chkPrevSplitFirst.UseVisualStyleBackColor = true;
-            // 
             // btnResetDefaults
             // 
             this.btnResetDefaults.Anchor = System.Windows.Forms.AnchorStyles.Right;
@@ -520,7 +509,6 @@ namespace LiveSplit.GradingSplits.UI.Components
         private System.Windows.Forms.CheckBox chkShowPreviousSplit;
         private System.Windows.Forms.Label lblPrevFontSize;
         private System.Windows.Forms.NumericUpDown numPrevFontSize;
-        private System.Windows.Forms.CheckBox chkPrevSplitFirst;
         private System.Windows.Forms.Button btnResetDefaults;
         private System.Windows.Forms.DataGridViewTextBoxColumn colZScore;
         private System.Windows.Forms.DataGridViewTextBoxColumn colLabel;

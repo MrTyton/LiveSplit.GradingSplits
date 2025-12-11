@@ -89,11 +89,6 @@ namespace LiveSplit.GradingSplits.Model
         /// The font size for the previous split comparison text.
         /// </summary>
         public int PreviousSplitFontSize { get; set; }
-        
-        /// <summary>
-        /// Whether to show the previous split info before statistics (true) or after (false).
-        /// </summary>
-        public bool PreviousSplitFirst { get; set; }
 
         /// <summary>
         /// Creates a new GradingSettings instance with default values.
@@ -126,7 +121,6 @@ namespace LiveSplit.GradingSplits.Model
             StatisticsFontSize = 10;
             ShowPreviousSplit = false;
             PreviousSplitFontSize = 10;
-            PreviousSplitFirst = false;
         }
 
         /// <summary>
@@ -152,8 +146,7 @@ namespace LiveSplit.GradingSplits.Model
                 ShowStatistics = ShowStatistics,
                 StatisticsFontSize = StatisticsFontSize,
                 ShowPreviousSplit = ShowPreviousSplit,
-                PreviousSplitFontSize = PreviousSplitFontSize,
-                PreviousSplitFirst = PreviousSplitFirst
+                PreviousSplitFontSize = PreviousSplitFontSize
             };
             return clone;
         }
