@@ -326,9 +326,27 @@ namespace LiveSplit.GradingSplits.UI.Components
                 int maxBinCount = bins.Max();
                 if (maxBinCount == 0) maxBinCount = 1;
                 
-                // Draw dots for each bin, stacked vertically
+                // Calculate available height for dots (leave some margin at top and bottom)
+                float availableHeight = graphRect.Height - 18; // 10px top margin, 8px bottom margin
                 float dotSpacing = dotSize + 1;
                 
+                // Calculate how many dots can fit without scaling
+                int maxDotsUnscaled = (int)(availableHeight / dotSpacing);
+                
+                // Determine if we need to scale
+                float scaleFactor = 1.0f;
+                if (maxBinCount > maxDotsUnscaled)
+                {
+                    // Scale the spacing so all dots fit
+                    scaleFactor = availableHeight / (maxBinCount * dotSpacing);
+                    dotSpacing *= scaleFactor;
+                    dotSize *= scaleFactor;
+                    // Ensure minimum visibility
+                    if (dotSize < 2) dotSize = 2;
+                    if (dotSpacing < dotSize + 0.5f) dotSpacing = dotSize + 0.5f;
+                }
+                
+                // Draw dots for each bin, stacked vertically
                 for (int bin = 0; bin < numBins; bin++)
                 {
                     if (bins[bin] > 0)
@@ -340,8 +358,8 @@ namespace LiveSplit.GradingSplits.UI.Components
                         {
                             float dotY = graphRect.Y + graphRect.Height - 8 - (dotIndex * dotSpacing);
                             
-                            // Don't draw if we'd go above the graph area
-                            if (dotY < graphRect.Y + 10)
+                            // Safety check - don't draw if we'd go above the graph area
+                            if (dotY < graphRect.Y + 5)
                                 break;
                                 
                             g.FillEllipse(new SolidBrush(Color.Yellow), 
