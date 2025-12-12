@@ -318,13 +318,13 @@ namespace LiveSplit.GradingSplits.Tests
             Assert.Equal(Color.Gold, sGrade.Color);
 
             var aGrade = GradeCalculator.CalculateGrade(-1.0, settings);
-            Assert.Equal(Color.Green, aGrade.Color);
+            Assert.Equal(Color.LimeGreen, aGrade.Color);
 
             var bGrade = GradeCalculator.CalculateGrade(0.0, settings);
             Assert.Equal(Color.LightGreen, bGrade.Color);
 
             var cGrade = GradeCalculator.CalculateGrade(1.0, settings);
-            Assert.Equal(Color.Yellow, cGrade.Color);
+            Assert.Equal(Color.Orange, cGrade.Color);
 
             var fGrade = GradeCalculator.CalculateGrade(2.0, settings);
             Assert.Equal(Color.Red, fGrade.Color);

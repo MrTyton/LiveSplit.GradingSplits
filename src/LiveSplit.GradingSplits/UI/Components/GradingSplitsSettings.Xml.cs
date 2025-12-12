@@ -42,6 +42,7 @@ namespace LiveSplit.GradingSplits.UI.Components
             GradingConfig.ShowGradeInSplitNames = SettingsHelper.ParseBool(element["ShowGradeInSplitNames"], false);
             GradingConfig.SplitNameFormat = SettingsHelper.ParseString(element["SplitNameFormat"], "{Name} [{Grade}]");
             GradingConfig.ShowGradeIcons = SettingsHelper.ParseBool(element["ShowGradeIcons"], false);
+            GradingConfig.IconFolderPath = SettingsHelper.ParseString(element["IconFolderPath"], null);
 
             ParseThresholds(element);
 
@@ -88,8 +89,12 @@ namespace LiveSplit.GradingSplits.UI.Components
 
                     var label = SettingsHelper.ParseString(thresholdNode["Label"], "?");
                     var color = SettingsHelper.ParseColor(thresholdNode["Color"], Color.White);
+                    var customIconPath = SettingsHelper.ParseString(thresholdNode["CustomIconPath"], null);
 
-                    GradingConfig.Thresholds.Add(new GradeThreshold(percentile, label, color));
+                    GradingConfig.Thresholds.Add(new GradeThreshold(percentile, label, color)
+                    {
+                        CustomIconPath = customIconPath
+                    });
                 }
             }
         }
@@ -151,6 +156,7 @@ namespace LiveSplit.GradingSplits.UI.Components
             hash ^= SettingsHelper.CreateSetting(document, parent, "SplitNameFormat", GradingConfig.SplitNameFormat);
             hash ^= SettingsHelper.CreateSetting(document, parent, "ShowGradeIcons", GradingConfig.ShowGradeIcons);
             hash ^= SettingsHelper.CreateSetting(document, parent, "CurrentGradeDisplayStyle", GradingConfig.CurrentGradeDisplayStyle.ToString());
+            hash ^= SettingsHelper.CreateSetting(document, parent, "IconFolderPath", GradingConfig.IconFolderPath ?? "");
             return hash;
         }
 
@@ -168,6 +174,10 @@ namespace LiveSplit.GradingSplits.UI.Components
                     SettingsHelper.CreateSetting(document, thresholdNode, "Percentile", threshold.PercentileThreshold);
                     SettingsHelper.CreateSetting(document, thresholdNode, "Label", threshold.Label);
                     SettingsHelper.CreateSetting(document, thresholdNode, "Color", threshold.ForegroundColor);
+                    if (!string.IsNullOrEmpty(threshold.CustomIconPath))
+                    {
+                        SettingsHelper.CreateSetting(document, thresholdNode, "CustomIconPath", threshold.CustomIconPath);
+                    }
                     thresholdsNode.AppendChild(thresholdNode);
                 }
                 parent.AppendChild(thresholdsNode);
@@ -179,6 +189,10 @@ namespace LiveSplit.GradingSplits.UI.Components
                 hash ^= threshold.PercentileThreshold.GetHashCode();
                 hash ^= threshold.Label.GetHashCode();
                 hash ^= threshold.ForegroundColor.GetHashCode();
+                if (!string.IsNullOrEmpty(threshold.CustomIconPath))
+                {
+                    hash ^= threshold.CustomIconPath.GetHashCode();
+                }
             }
 
             return hash;

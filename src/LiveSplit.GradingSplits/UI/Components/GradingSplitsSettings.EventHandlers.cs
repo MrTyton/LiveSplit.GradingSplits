@@ -282,6 +282,7 @@ namespace LiveSplit.GradingSplits.UI.Components
             chkShowGradeIcons.CheckedChanged += (s, e) =>
             {
                 GradingConfig.ShowGradeIcons = chkShowGradeIcons.Checked;
+                UpdateIconFolderControlsState();
             };
         }
 

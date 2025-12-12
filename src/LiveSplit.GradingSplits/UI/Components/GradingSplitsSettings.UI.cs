@@ -1,5 +1,6 @@
 using LiveSplit.GradingSplits.Model;
 using System;
+using System.Drawing;
 using System.Windows.Forms;
 
 namespace LiveSplit.GradingSplits.UI.Components
@@ -10,6 +11,131 @@ namespace LiveSplit.GradingSplits.UI.Components
     /// </summary>
     public partial class GradingSplitsSettings
     {
+        // Custom icon controls (created programmatically)
+        private Label lblIconFolder;
+        private TextBox txtIconFolderPath;
+        private Button btnBrowseIconFolder;
+        private Button btnClearIconFolder;
+        private Label lblIconFolderHelp;
+
+        /// <summary>
+        /// Creates the custom icon folder UI controls programmatically.
+        /// </summary>
+        private void CreateIconFolderControls()
+        {
+            // Find the tableLayoutPanel2 and add a new row for icon folder settings
+            // We'll add these controls after the Show Grade Icons checkbox
+
+            // Create label
+            lblIconFolder = new Label
+            {
+                Text = "Custom Icon Folder:",
+                AutoSize = true,
+                Anchor = AnchorStyles.Left,
+                Padding = new Padding(15, 0, 0, 0) // Indent to show it's related to grade icons
+            };
+
+            // Create textbox for path
+            txtIconFolderPath = new TextBox
+            {
+                Anchor = AnchorStyles.Left | AnchorStyles.Right,
+                ReadOnly = true
+            };
+
+            // Create browse button
+            btnBrowseIconFolder = new Button
+            {
+                Text = "Browse...",
+                Size = new Size(74, 23),
+                Anchor = AnchorStyles.Left | AnchorStyles.Right
+            };
+            btnBrowseIconFolder.Click += BtnBrowseIconFolder_Click;
+
+            // Create clear button
+            btnClearIconFolder = new Button
+            {
+                Text = "Clear",
+                Size = new Size(50, 23),
+                Anchor = AnchorStyles.Left
+            };
+            btnClearIconFolder.Click += BtnClearIconFolder_Click;
+
+            // Create help label with explanation
+            lblIconFolderHelp = new Label
+            {
+                Text = "Icon files should be named: S.png, A.png, B.png, etc. (matching grade labels)\n" +
+                       "Use Best.png for gold/best splits, Worst.png for worst splits.\n" +
+                       "Supported formats: PNG, JPG, GIF, BMP, ICO",
+                AutoSize = true,
+                ForeColor = SystemColors.GrayText,
+                Padding = new Padding(15, 0, 0, 5),
+                Dock = DockStyle.Fill
+            };
+
+            // Add new rows to tableLayoutPanel2
+            // First, increase row count and add row styles
+            tableLayoutPanel2.RowCount += 2;
+            tableLayoutPanel2.RowStyles.Add(new RowStyle(SizeType.Absolute, 30F));
+            tableLayoutPanel2.RowStyles.Add(new RowStyle(SizeType.AutoSize));
+
+            // Create a flow panel for browse and clear buttons
+            var buttonPanel = new FlowLayoutPanel
+            {
+                FlowDirection = FlowDirection.LeftToRight,
+                AutoSize = true,
+                Margin = new Padding(0)
+            };
+            buttonPanel.Controls.Add(btnBrowseIconFolder);
+            buttonPanel.Controls.Add(btnClearIconFolder);
+
+            // Add controls to the new rows (after row 10 which is chkShowGradeIcons)
+            tableLayoutPanel2.Controls.Add(lblIconFolder, 0, 11);
+            tableLayoutPanel2.Controls.Add(txtIconFolderPath, 1, 11);
+            tableLayoutPanel2.Controls.Add(buttonPanel, 2, 11);
+            tableLayoutPanel2.Controls.Add(lblIconFolderHelp, 0, 12);
+            tableLayoutPanel2.SetColumnSpan(lblIconFolderHelp, 3);
+        }
+
+        private void BtnBrowseIconFolder_Click(object sender, EventArgs e)
+        {
+            using (var folderDialog = new FolderBrowserDialog())
+            {
+                folderDialog.Description = "Select folder containing custom grade icons";
+                folderDialog.ShowNewFolderButton = false;
+
+                if (!string.IsNullOrEmpty(GradingConfig.IconFolderPath))
+                {
+                    folderDialog.SelectedPath = GradingConfig.IconFolderPath;
+                }
+
+                if (folderDialog.ShowDialog(this.FindForm()) == DialogResult.OK)
+                {
+                    GradingConfig.IconFolderPath = folderDialog.SelectedPath;
+                    txtIconFolderPath.Text = folderDialog.SelectedPath;
+                    CustomIconLoader.ClearCache();
+                    UpdateIconFolderControlsState();
+                }
+            }
+        }
+
+        private void BtnClearIconFolder_Click(object sender, EventArgs e)
+        {
+            GradingConfig.IconFolderPath = null;
+            txtIconFolderPath.Text = "";
+            CustomIconLoader.ClearCache();
+            UpdateIconFolderControlsState();
+        }
+
+        private void UpdateIconFolderControlsState()
+        {
+            bool enabled = chkShowGradeIcons.Checked;
+            lblIconFolder.Enabled = enabled;
+            txtIconFolderPath.Enabled = enabled;
+            btnBrowseIconFolder.Enabled = enabled;
+            btnClearIconFolder.Enabled = enabled && !string.IsNullOrEmpty(GradingConfig.IconFolderPath);
+            lblIconFolderHelp.Enabled = enabled;
+        }
+
         /// <summary>
         /// Resets all settings to their default values.
         /// </summary>
@@ -98,6 +224,10 @@ namespace LiveSplit.GradingSplits.UI.Components
             txtSplitNameFormat.Enabled = GradingConfig.ShowGradeInSplitNames;
 
             chkShowGradeIcons.Checked = GradingConfig.ShowGradeIcons;
+
+            // Load icon folder settings
+            txtIconFolderPath.Text = GradingConfig.IconFolderPath ?? "";
+            UpdateIconFolderControlsState();
         }
 
         private void LoadThresholdsGrid()

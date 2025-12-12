@@ -24,6 +24,12 @@ namespace LiveSplit.GradingSplits.Model
         public Color ForegroundColor { get; set; }
 
         /// <summary>
+        /// Optional path to a custom icon file for this grade.
+        /// If set, this overrides both the folder-based icon and the generated icon.
+        /// </summary>
+        public string CustomIconPath { get; set; }
+
+        /// <summary>
         /// Creates a new grade threshold.
         /// </summary>
         /// <param name="percentileThreshold">The percentile cutoff (0-100).</param>
@@ -34,6 +40,7 @@ namespace LiveSplit.GradingSplits.Model
             PercentileThreshold = percentileThreshold;
             Label = label;
             ForegroundColor = foregroundColor;
+            CustomIconPath = null;
         }
 
         /// <summary>
@@ -42,7 +49,10 @@ namespace LiveSplit.GradingSplits.Model
         /// <returns>A new GradeThreshold with the same values.</returns>
         public GradeThreshold Clone()
         {
-            return new GradeThreshold(PercentileThreshold, Label, ForegroundColor);
+            return new GradeThreshold(PercentileThreshold, Label, ForegroundColor)
+            {
+                CustomIconPath = CustomIconPath
+            };
         }
     }
 }

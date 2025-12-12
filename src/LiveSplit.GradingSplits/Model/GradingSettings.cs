@@ -138,6 +138,13 @@ namespace LiveSplit.GradingSplits.Model
         public bool ShowGradeIcons { get; set; }
 
         /// <summary>
+        /// Optional folder path containing custom grade icons.
+        /// Icons should be named after the grade label (e.g., "S.png", "A.png").
+        /// Special icons: "Best.png" for gold splits, "Worst.png" for worst splits.
+        /// </summary>
+        public string IconFolderPath { get; set; }
+
+        /// <summary>
         /// Creates a new GradingSettings instance with default values.
         /// Default thresholds use percentiles where 0=fastest and 100=slowest.
         /// </summary>
@@ -174,6 +181,7 @@ namespace LiveSplit.GradingSplits.Model
             ShowGradeInSplitNames = false;
             SplitNameFormat = "{Name} [{Grade}]";
             ShowGradeIcons = false;
+            IconFolderPath = null;
         }
 
         /// <summary>
@@ -205,7 +213,8 @@ namespace LiveSplit.GradingSplits.Model
                 CurrentGradeDisplayStyle = CurrentGradeDisplayStyle,
                 ShowGradeInSplitNames = ShowGradeInSplitNames,
                 SplitNameFormat = SplitNameFormat,
-                ShowGradeIcons = ShowGradeIcons
+                ShowGradeIcons = ShowGradeIcons,
+                IconFolderPath = IconFolderPath
             };
             return clone;
         }

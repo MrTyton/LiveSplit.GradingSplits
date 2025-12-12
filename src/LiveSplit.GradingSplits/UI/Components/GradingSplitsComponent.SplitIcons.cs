@@ -1,6 +1,7 @@
 using LiveSplit.Model;
 using LiveSplit.GradingSplits.Model;
 using System.Drawing;
+using System.Linq;
 
 namespace LiveSplit.GradingSplits.UI.Components
 {
@@ -10,6 +11,11 @@ namespace LiveSplit.GradingSplits.UI.Components
     /// </summary>
     public partial class GradingSplitsComponent
     {
+        /// <summary>
+        /// Tracks the last icon folder path to detect changes.
+        /// </summary>
+        private string _lastIconFolderPath;
+
         private void StoreOriginalSplitIcons()
         {
             if (_state.Run == null) return;
@@ -84,9 +90,17 @@ namespace LiveSplit.GradingSplits.UI.Components
             {
                 needsFullUpdate = true;
             }
+            // Icon folder path changed
+            else if (_lastIconFolderPath != Settings.GradingConfig.IconFolderPath)
+            {
+                needsFullUpdate = true;
+                _splitIconCache.Clear();
+                CustomIconLoader.ClearCacheIfFolderChanged(Settings.GradingConfig.IconFolderPath);
+            }
 
             _lastShowGradeIconsSetting = settingEnabled;
             _lastIconUpdateSplitIndex = state.CurrentSplitIndex;
+            _lastIconFolderPath = Settings.GradingConfig.IconFolderPath;
 
             if (!needsFullUpdate)
             {
@@ -103,6 +117,8 @@ namespace LiveSplit.GradingSplits.UI.Components
             {
                 string grade;
                 Color color;
+                bool isGold = false;
+                bool isWorst = false;
 
                 if (i < state.CurrentSplitIndex)
                 {
@@ -110,6 +126,10 @@ namespace LiveSplit.GradingSplits.UI.Components
                     var result = CalculateGradeForSplit(state, i, useActualTime: true);
                     grade = result.Grade;
                     color = result.Color;
+                    
+                    // Check if this was a gold or worst split
+                    isGold = Settings.GradingConfig.UseGoldGrade && grade == Settings.GradingConfig.GoldLabel;
+                    isWorst = Settings.GradingConfig.UseWorstGrade && grade == Settings.GradingConfig.WorstLabel;
                 }
                 else
                 {
@@ -132,8 +152,19 @@ namespace LiveSplit.GradingSplits.UI.Components
 
                     if (grade != "-" && !string.IsNullOrEmpty(grade))
                     {
-                        // Generate and set the grade icon
-                        state.Run[i].Icon = GradeIconGenerator.GenerateIcon(grade, color);
+                        // Try to get a custom icon first
+                        var threshold = Settings.GradingConfig.Thresholds.FirstOrDefault(t => t.Label == grade);
+                        var customIcon = CustomIconLoader.GetCustomIcon(grade, Settings.GradingConfig, threshold, isGold, isWorst);
+                        
+                        if (customIcon != null)
+                        {
+                            state.Run[i].Icon = customIcon;
+                        }
+                        else
+                        {
+                            // Fall back to generated icon
+                            state.Run[i].Icon = GradeIconGenerator.GenerateIcon(grade, color);
+                        }
                         _splitIconsModified = true;
                     }
                     else

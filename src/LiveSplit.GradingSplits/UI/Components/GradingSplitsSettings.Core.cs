@@ -23,6 +23,7 @@ namespace LiveSplit.GradingSplits.UI.Components
             InitializeComponent();
             GradingConfig = new GradingSettings();
             Load += GradingSplitsSettings_Load;
+            CreateIconFolderControls();
             WireUpEventHandlers();
             LoadSettingsToUI();
         }
