@@ -11,9 +11,14 @@ namespace LiveSplit.GradingSplits.Model
     public static class GradeIconGenerator
     {
         /// <summary>
-        /// The default icon size (24x24 pixels).
+        /// The default icon size (24x24 pixels) for split icons.
         /// </summary>
         public const int IconSize = 24;
+
+        /// <summary>
+        /// The small icon size (20x20 pixels) for inline display in text rows.
+        /// </summary>
+        public const int SmallIconSize = 20;
 
         /// <summary>
         /// Generates a grade icon with the specified label and colors.
@@ -24,7 +29,27 @@ namespace LiveSplit.GradingSplits.Model
         /// <returns>A 24x24 bitmap of the grade icon.</returns>
         public static Image GenerateIcon(string label, Color foregroundColor, Color? backgroundColor = null)
         {
-            var bitmap = new Bitmap(IconSize, IconSize);
+            return GenerateIconInternal(label, foregroundColor, backgroundColor, IconSize);
+        }
+
+        /// <summary>
+        /// Generates a smaller grade icon suitable for inline display in text rows.
+        /// </summary>
+        /// <param name="label">The grade label (e.g., "S", "A+", "★").</param>
+        /// <param name="foregroundColor">The color for the label text and border.</param>
+        /// <param name="backgroundColor">Optional background color. If null, uses a darker version of foreground.</param>
+        /// <returns>A 20x20 bitmap of the grade icon.</returns>
+        public static Image GenerateSmallIcon(string label, Color foregroundColor, Color? backgroundColor = null)
+        {
+            return GenerateIconInternal(label, foregroundColor, backgroundColor, SmallIconSize);
+        }
+
+        /// <summary>
+        /// Internal method to generate icons at any size.
+        /// </summary>
+        private static Image GenerateIconInternal(string label, Color foregroundColor, Color? backgroundColor, int size)
+        {
+            var bitmap = new Bitmap(size, size);
             
             using (var g = Graphics.FromImage(bitmap))
             {
@@ -36,22 +61,22 @@ namespace LiveSplit.GradingSplits.Model
                 Color bgColor = backgroundColor ?? GetBackgroundColor(foregroundColor);
 
                 // Draw rounded rectangle background
-                int cornerRadius = 4;
+                int cornerRadius = size == SmallIconSize ? 3 : 4;
                 using (var bgBrush = new SolidBrush(bgColor))
-                using (var path = CreateRoundedRectangle(1, 1, IconSize - 2, IconSize - 2, cornerRadius))
+                using (var path = CreateRoundedRectangle(1, 1, size - 2, size - 2, cornerRadius))
                 {
                     g.FillPath(bgBrush, path);
                 }
 
                 // Draw border
                 using (var borderPen = new Pen(foregroundColor, 1.5f))
-                using (var path = CreateRoundedRectangle(1, 1, IconSize - 3, IconSize - 3, cornerRadius))
+                using (var path = CreateRoundedRectangle(1, 1, size - 3, size - 3, cornerRadius))
                 {
                     g.DrawPath(borderPen, path);
                 }
 
                 // Draw label text
-                DrawCenteredText(g, label, foregroundColor);
+                DrawCenteredText(g, label, foregroundColor, size);
             }
 
             return bitmap;
@@ -81,12 +106,13 @@ namespace LiveSplit.GradingSplits.Model
         /// <summary>
         /// Draws centered text on the icon.
         /// </summary>
-        private static void DrawCenteredText(Graphics g, string label, Color textColor)
+        private static void DrawCenteredText(Graphics g, string label, Color textColor, int size)
         {
             if (string.IsNullOrEmpty(label)) return;
 
-            // Larger font sizes now that we have more space with square shape
-            float fontSize = label.Length <= 1 ? 14f : (label.Length == 2 ? 11f : 9f);
+            // Scale font sizes based on icon size
+            float baseFontSize = label.Length <= 1 ? 14f : (label.Length == 2 ? 11f : 9f);
+            float fontSize = baseFontSize * size / IconSize;
             
             using (var font = new Font("Segoe UI", fontSize, FontStyle.Bold, GraphicsUnit.Pixel))
             using (var textBrush = new SolidBrush(textColor))
@@ -95,7 +121,7 @@ namespace LiveSplit.GradingSplits.Model
                 format.Alignment = StringAlignment.Center;
                 format.LineAlignment = StringAlignment.Center;
                 
-                var rect = new RectangleF(0, 0, IconSize, IconSize);
+                var rect = new RectangleF(0, 0, size, size);
                 g.DrawString(label, font, textBrush, rect, format);
             }
         }

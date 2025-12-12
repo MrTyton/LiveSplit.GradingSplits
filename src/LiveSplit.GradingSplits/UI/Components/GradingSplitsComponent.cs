@@ -35,6 +35,8 @@ namespace LiveSplit.GradingSplits.UI.Components
         private string _previousComparisonGrade = null;
         private Color _previousComparisonColor = Color.White;
         private bool _hasPreviousSplitData = false;
+        private Image _previousAchievedIcon = null;
+        private Image _previousComparisonIcon = null;
 
         // Split name grading
         private Dictionary<int, string> _originalSplitNames = new Dictionary<int, string>();
@@ -44,6 +46,9 @@ namespace LiveSplit.GradingSplits.UI.Components
         // Split icon grading
         private Dictionary<int, Image> _originalSplitIcons = new Dictionary<int, Image>();
         private bool _splitIconsModified = false;
+        private int _lastIconUpdateSplitIndex = -1;
+        private bool _lastShowGradeIconsSetting = false;
+        private Dictionary<int, (string Grade, Color Color)> _splitIconCache = new Dictionary<int, (string, Color)>();
 
         // Cached current grade icon for component display
         private Image _currentGradeIcon = null;
@@ -269,14 +274,46 @@ namespace LiveSplit.GradingSplits.UI.Components
         {
             if (state.Run == null) return;
 
+            bool settingEnabled = Settings.GradingConfig.ShowGradeIcons;
+
             // If the feature is disabled, restore original icons if modified
-            if (!Settings.GradingConfig.ShowGradeIcons)
+            if (!settingEnabled)
             {
                 if (_splitIconsModified)
                 {
                     RestoreOriginalSplitIcons();
+                    _splitIconCache.Clear();
                 }
+                _lastShowGradeIconsSetting = false;
                 return;
+            }
+
+            // Check if we need to update icons
+            bool needsFullUpdate = false;
+
+            // Setting was just enabled
+            if (!_lastShowGradeIconsSetting && settingEnabled)
+            {
+                needsFullUpdate = true;
+            }
+            // Run changed
+            else if (_gradedRun != state.Run)
+            {
+                needsFullUpdate = true;
+                _splitIconCache.Clear();
+            }
+            // Split index changed (a split was completed)
+            else if (_lastIconUpdateSplitIndex != state.CurrentSplitIndex)
+            {
+                needsFullUpdate = true;
+            }
+
+            _lastShowGradeIconsSetting = settingEnabled;
+            _lastIconUpdateSplitIndex = state.CurrentSplitIndex;
+
+            if (!needsFullUpdate)
+            {
+                return; // Icons are up to date
             }
 
             // Make sure we have original icons stored
@@ -305,18 +342,30 @@ namespace LiveSplit.GradingSplits.UI.Components
                     color = result.Color;
                 }
 
-                if (grade != "-" && !string.IsNullOrEmpty(grade))
+                // Check if this split's grade changed from cached value
+                bool gradeChanged = true;
+                if (_splitIconCache.TryGetValue(i, out var cached))
                 {
-                    // Generate and set the grade icon
-                    state.Run[i].Icon = GradeIconGenerator.GenerateIcon(grade, color);
-                    _splitIconsModified = true;
+                    gradeChanged = cached.Grade != grade || cached.Color.ToArgb() != color.ToArgb();
                 }
-                else
+
+                if (gradeChanged)
                 {
-                    // Restore original icon for splits without grades
-                    if (_originalSplitIcons.ContainsKey(i))
+                    _splitIconCache[i] = (grade, color);
+
+                    if (grade != "-" && !string.IsNullOrEmpty(grade))
                     {
-                        state.Run[i].Icon = _originalSplitIcons[i];
+                        // Generate and set the grade icon
+                        state.Run[i].Icon = GradeIconGenerator.GenerateIcon(grade, color);
+                        _splitIconsModified = true;
+                    }
+                    else
+                    {
+                        // Restore original icon for splits without grades
+                        if (_originalSplitIcons.ContainsKey(i))
+                        {
+                            state.Run[i].Icon = _originalSplitIcons[i];
+                        }
                     }
                 }
             }
@@ -404,7 +453,7 @@ namespace LiveSplit.GradingSplits.UI.Components
 
             // Determine if we're using icon or text display
             bool useIconDisplay = Settings.GradingConfig.CurrentGradeDisplayStyle == GradeDisplayStyle.Icon;
-            float gradeDisplayWidth = useIconDisplay ? GradeIconGenerator.IconSize : 0;
+            float gradeDisplayWidth = useIconDisplay ? GradeIconGenerator.SmallIconSize : 0;
 
             // Use configurable font size for grade label (only needed for text display)
             using (var gradeFont = new Font(state.LayoutSettings.TextFont.FontFamily, Settings.GradingConfig.CurrentGradeFontSize, FontStyle.Bold))
@@ -436,9 +485,9 @@ namespace LiveSplit.GradingSplits.UI.Components
 
                         if (useIconDisplay && _currentGradeIcon != null)
                         {
-                            // Draw icon centered vertically
-                            float iconY = (25 - GradeIconGenerator.IconSize) / 2f;
-                            g.DrawImage(_currentGradeIcon, gradeX, iconY, GradeIconGenerator.IconSize, GradeIconGenerator.IconSize);
+                            // Draw small icon centered vertically in 25px row
+                            float iconY = (25 - GradeIconGenerator.SmallIconSize) / 2f;
+                            g.DrawImage(_currentGradeIcon, gradeX, iconY, GradeIconGenerator.SmallIconSize, GradeIconGenerator.SmallIconSize);
                         }
                         else
                         {
@@ -470,9 +519,9 @@ namespace LiveSplit.GradingSplits.UI.Components
 
                         if (useIconDisplay && _currentGradeIcon != null)
                         {
-                            // Draw icon centered vertically
-                            float iconY = (25 - GradeIconGenerator.IconSize) / 2f;
-                            g.DrawImage(_currentGradeIcon, gradeX, iconY, GradeIconGenerator.IconSize, GradeIconGenerator.IconSize);
+                            // Draw small icon centered vertically in 25px row
+                            float iconY = (25 - GradeIconGenerator.SmallIconSize) / 2f;
+                            g.DrawImage(_currentGradeIcon, gradeX, iconY, GradeIconGenerator.SmallIconSize, GradeIconGenerator.SmallIconSize);
                         }
                         else
                         {
@@ -547,7 +596,7 @@ namespace LiveSplit.GradingSplits.UI.Components
                     return;
                 }
 
-                // Build the text parts - no extra space before "vs"
+                // Build the text parts
                 string prefix = "Previous: Achieved ";
                 string vs = " vs " + state.CurrentComparison + "'s ";
 
@@ -555,35 +604,58 @@ namespace LiveSplit.GradingSplits.UI.Components
                 string achievedDisplay = _previousAchievedGrade?.Trim() ?? "-";
                 string comparisonDisplay = _previousComparisonGrade?.Trim() ?? "-";
 
+                // Determine if we're using icons
+                bool useIcons = Settings.GradingConfig.ShowGradeIcons && _previousAchievedIcon != null && _previousComparisonIcon != null;
+                int iconSize = GradeIconGenerator.SmallIconSize;
+                float iconPadding = 2f;
+
                 // Measure each part to position them
                 var prefixSize = g.MeasureString(prefix, font);
-                var achievedSize = g.MeasureString(achievedDisplay, font);
+                var achievedSize = useIcons ? new SizeF(iconSize + iconPadding, font.Height) : g.MeasureString(achievedDisplay, font);
                 var vsSize = g.MeasureString(vs, font);
-                var comparisonSize = g.MeasureString(comparisonDisplay, font);
+                var comparisonSize = useIcons ? new SizeF(iconSize + iconPadding, font.Height) : g.MeasureString(comparisonDisplay, font);
 
                 float totalWidth = prefixSize.Width + achievedSize.Width + vsSize.Width + comparisonSize.Width;
                 float startX = (width - totalWidth) / 2;
                 float currentX = startX;
 
+                // Calculate vertical centering for icons
+                float iconY = yOffset + (font.Height - iconSize) / 2;
+
                 // Draw prefix
                 g.DrawString(prefix, font, textBrush, currentX, yOffset);
                 currentX += prefixSize.Width;
 
-                // Draw achieved grade with its color
-                using (var achievedBrush = new SolidBrush(_previousAchievedColor))
+                // Draw achieved grade (icon or text)
+                if (useIcons)
                 {
-                    g.DrawString(achievedDisplay, font, achievedBrush, currentX, yOffset);
+                    g.DrawImage(_previousAchievedIcon, currentX, iconY, iconSize, iconSize);
+                    currentX += iconSize + iconPadding;
                 }
-                currentX += achievedSize.Width;
+                else
+                {
+                    using (var achievedBrush = new SolidBrush(_previousAchievedColor))
+                    {
+                        g.DrawString(achievedDisplay, font, achievedBrush, currentX, yOffset);
+                    }
+                    currentX += achievedSize.Width;
+                }
 
                 // Draw "vs comparison's"
                 g.DrawString(vs, font, textBrush, currentX, yOffset);
                 currentX += vsSize.Width;
 
-                // Draw comparison grade with its color
-                using (var comparisonBrush = new SolidBrush(_previousComparisonColor))
+                // Draw comparison grade (icon or text)
+                if (useIcons)
                 {
-                    g.DrawString(comparisonDisplay, font, comparisonBrush, currentX, yOffset);
+                    g.DrawImage(_previousComparisonIcon, currentX, iconY, iconSize, iconSize);
+                }
+                else
+                {
+                    using (var comparisonBrush = new SolidBrush(_previousComparisonColor))
+                    {
+                        g.DrawString(comparisonDisplay, font, comparisonBrush, currentX, yOffset);
+                    }
                 }
             }
         }
@@ -828,8 +900,9 @@ namespace LiveSplit.GradingSplits.UI.Components
                 _lastIconGrade = gradeResult.Grade;
                 _lastIconColor = gradeResult.Color;
                 _currentGradeIcon?.Dispose();
+                // Use small icon for the current grade display row (better fit in 25px row height)
                 _currentGradeIcon = gradeResult.Grade != "-" 
-                    ? GradeIconGenerator.GenerateIcon(gradeResult.Grade, gradeResult.Color)
+                    ? GradeIconGenerator.GenerateSmallIcon(gradeResult.Grade, gradeResult.Color)
                     : null;
             }
 
@@ -904,11 +977,17 @@ namespace LiveSplit.GradingSplits.UI.Components
                 var achievedResult = GradeCalculator.CalculateGrade(achievedZScore, Settings.GradingConfig, isGold, isWorst);
                 _previousAchievedGrade = achievedResult.Grade;
                 _previousAchievedColor = achievedResult.Color;
+
+                // Generate small icon for the achieved grade
+                _previousAchievedIcon?.Dispose();
+                _previousAchievedIcon = GradeIconGenerator.GenerateSmallIcon(achievedResult.Grade.Trim(), achievedResult.Color);
             }
             else
             {
                 _previousAchievedGrade = "-";
                 _previousAchievedColor = state.LayoutSettings.TextColor;
+                _previousAchievedIcon?.Dispose();
+                _previousAchievedIcon = null;
             }
 
             // Calculate comparison grade if we have the time
@@ -925,11 +1004,17 @@ namespace LiveSplit.GradingSplits.UI.Components
                 var comparisonResult = GradeCalculator.CalculateGrade(comparisonZScore, Settings.GradingConfig, isGold, isWorst);
                 _previousComparisonGrade = comparisonResult.Grade;
                 _previousComparisonColor = comparisonResult.Color;
+
+                // Generate small icon for the comparison grade
+                _previousComparisonIcon?.Dispose();
+                _previousComparisonIcon = GradeIconGenerator.GenerateSmallIcon(comparisonResult.Grade.Trim(), comparisonResult.Color);
             }
             else
             {
                 _previousComparisonGrade = "-";
                 _previousComparisonColor = state.LayoutSettings.TextColor;
+                _previousComparisonIcon?.Dispose();
+                _previousComparisonIcon = null;
             }
 
             _hasPreviousSplitData = true;
@@ -1026,9 +1111,13 @@ namespace LiveSplit.GradingSplits.UI.Components
             RestoreOriginalSplitNames();
             RestoreOriginalSplitIcons();
 
-            // Dispose cached current grade icon
+            // Dispose cached icons
             _currentGradeIcon?.Dispose();
             _currentGradeIcon = null;
+            _previousAchievedIcon?.Dispose();
+            _previousAchievedIcon = null;
+            _previousComparisonIcon?.Dispose();
+            _previousComparisonIcon = null;
 
             // Unsubscribe from events
             if (_state != null)
