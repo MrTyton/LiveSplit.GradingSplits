@@ -18,7 +18,7 @@ namespace LiveSplit.GradingSplits.Model
         /// <summary>
         /// Generates a grade icon with the specified label and colors.
         /// </summary>
-        /// <param name="label">The grade label (e.g., "S", "A", "★").</param>
+        /// <param name="label">The grade label (e.g., "S", "A+", "★").</param>
         /// <param name="foregroundColor">The color for the label text and border.</param>
         /// <param name="backgroundColor">Optional background color. If null, uses a darker version of foreground.</param>
         /// <returns>A 24x24 bitmap of the grade icon.</returns>
@@ -35,16 +35,19 @@ namespace LiveSplit.GradingSplits.Model
                 // Calculate background color if not provided
                 Color bgColor = backgroundColor ?? GetBackgroundColor(foregroundColor);
 
-                // Draw circular background
+                // Draw rounded rectangle background
+                int cornerRadius = 4;
                 using (var bgBrush = new SolidBrush(bgColor))
+                using (var path = CreateRoundedRectangle(1, 1, IconSize - 2, IconSize - 2, cornerRadius))
                 {
-                    g.FillEllipse(bgBrush, 1, 1, IconSize - 2, IconSize - 2);
+                    g.FillPath(bgBrush, path);
                 }
 
                 // Draw border
                 using (var borderPen = new Pen(foregroundColor, 1.5f))
+                using (var path = CreateRoundedRectangle(1, 1, IconSize - 3, IconSize - 3, cornerRadius))
                 {
-                    g.DrawEllipse(borderPen, 1, 1, IconSize - 3, IconSize - 3);
+                    g.DrawPath(borderPen, path);
                 }
 
                 // Draw label text
@@ -55,22 +58,45 @@ namespace LiveSplit.GradingSplits.Model
         }
 
         /// <summary>
+        /// Creates a rounded rectangle graphics path.
+        /// </summary>
+        private static GraphicsPath CreateRoundedRectangle(int x, int y, int width, int height, int radius)
+        {
+            var path = new GraphicsPath();
+            int diameter = radius * 2;
+
+            // Top left arc
+            path.AddArc(x, y, diameter, diameter, 180, 90);
+            // Top right arc
+            path.AddArc(x + width - diameter, y, diameter, diameter, 270, 90);
+            // Bottom right arc
+            path.AddArc(x + width - diameter, y + height - diameter, diameter, diameter, 0, 90);
+            // Bottom left arc
+            path.AddArc(x, y + height - diameter, diameter, diameter, 90, 90);
+
+            path.CloseFigure();
+            return path;
+        }
+
+        /// <summary>
         /// Draws centered text on the icon.
         /// </summary>
         private static void DrawCenteredText(Graphics g, string label, Color textColor)
         {
             if (string.IsNullOrEmpty(label)) return;
 
-            // Adjust font size based on label length
-            float fontSize = label.Length <= 1 ? 12f : (label.Length == 2 ? 9f : 7f);
+            // Larger font sizes now that we have more space with square shape
+            float fontSize = label.Length <= 1 ? 14f : (label.Length == 2 ? 11f : 9f);
             
             using (var font = new Font("Segoe UI", fontSize, FontStyle.Bold, GraphicsUnit.Pixel))
             using (var textBrush = new SolidBrush(textColor))
+            using (var format = new StringFormat())
             {
-                var size = g.MeasureString(label, font);
-                float x = (IconSize - size.Width) / 2f;
-                float y = (IconSize - size.Height) / 2f;
-                g.DrawString(label, font, textBrush, x, y);
+                format.Alignment = StringAlignment.Center;
+                format.LineAlignment = StringAlignment.Center;
+                
+                var rect = new RectangleF(0, 0, IconSize, IconSize);
+                g.DrawString(label, font, textBrush, rect, format);
             }
         }
 
