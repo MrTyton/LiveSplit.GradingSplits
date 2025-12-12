@@ -45,6 +45,11 @@ namespace LiveSplit.GradingSplits.UI.Components
         private Dictionary<int, Image> _originalSplitIcons = new Dictionary<int, Image>();
         private bool _splitIconsModified = false;
 
+        // Cached current grade icon for component display
+        private Image _currentGradeIcon = null;
+        private string _lastIconGrade = null;
+        private Color _lastIconColor = Color.White;
+
         public string ComponentName => "Grading Splits";
 
         public float HorizontalWidth => Label.ActualWidth + GradeLabel.ActualWidth + 5;
@@ -397,70 +402,95 @@ namespace LiveSplit.GradingSplits.UI.Components
             Label.ShadowColor = state.LayoutSettings.ShadowsColor;
             Label.Font = state.LayoutSettings.TextFont;
 
-            // Use configurable font size for grade label
+            // Determine if we're using icon or text display
+            bool useIconDisplay = Settings.GradingConfig.CurrentGradeDisplayStyle == GradeDisplayStyle.Icon;
+            float gradeDisplayWidth = useIconDisplay ? GradeIconGenerator.IconSize : 0;
+
+            // Use configurable font size for grade label (only needed for text display)
             using (var gradeFont = new Font(state.LayoutSettings.TextFont.FontFamily, Settings.GradingConfig.CurrentGradeFontSize, FontStyle.Bold))
             {
                 GradeLabel.Font = gradeFont;
-
                 GradeLabel.HasShadow = state.LayoutSettings.DropShadows;
                 GradeLabel.ShadowColor = state.LayoutSettings.ShadowsColor;
 
                 // Calculate sizes
                 Label.SetActualWidth(g);
-                GradeLabel.SetActualWidth(g);
-
-                if (horizontal)
+                if (!useIconDisplay)
                 {
-                    if (Settings.GradingConfig.ShowCurrentGrade)
+                    GradeLabel.SetActualWidth(g);
+                    gradeDisplayWidth = GradeLabel.ActualWidth;
+                }
+
+                if (Settings.GradingConfig.ShowCurrentGrade)
+                {
+                    if (horizontal)
                     {
                         Label.X = 0;
                         Label.Y = 0;
                         Label.Width = Label.ActualWidth;
-                        Label.Height = 25; // Fixed height for label at top
+                        Label.Height = 25;
                         Label.Draw(g);
 
-                        GradeLabel.X = Label.ActualWidth + 5;
-                        GradeLabel.Y = 0;
-                        GradeLabel.Width = GradeLabel.ActualWidth;
-                        GradeLabel.Height = 25; // Fixed height for grade at top
+                        float gradeX = Label.ActualWidth + 5;
+                        float gradeY = 0;
 
-                        // Draw background for grade label only if enabled
-                        if (Settings.GradingConfig.UseBackgroundColor)
+                        if (useIconDisplay && _currentGradeIcon != null)
                         {
-                            using (var backgroundBrush = new SolidBrush(Settings.GradingConfig.BackgroundColor))
-                            {
-                                g.FillRectangle(backgroundBrush, GradeLabel.X, GradeLabel.Y, GradeLabel.Width, GradeLabel.Height);
-                            }
+                            // Draw icon centered vertically
+                            float iconY = (25 - GradeIconGenerator.IconSize) / 2f;
+                            g.DrawImage(_currentGradeIcon, gradeX, iconY, GradeIconGenerator.IconSize, GradeIconGenerator.IconSize);
                         }
+                        else
+                        {
+                            GradeLabel.X = gradeX;
+                            GradeLabel.Y = gradeY;
+                            GradeLabel.Width = gradeDisplayWidth;
+                            GradeLabel.Height = 25;
 
-                        GradeLabel.Draw(g);
+                            if (Settings.GradingConfig.UseBackgroundColor)
+                            {
+                                using (var backgroundBrush = new SolidBrush(Settings.GradingConfig.BackgroundColor))
+                                {
+                                    g.FillRectangle(backgroundBrush, GradeLabel.X, GradeLabel.Y, GradeLabel.Width, GradeLabel.Height);
+                                }
+                            }
+
+                            GradeLabel.Draw(g);
+                        }
                     }
-                }
-                else
-                {
-                    if (Settings.GradingConfig.ShowCurrentGrade)
+                    else
                     {
                         Label.X = 5;
                         Label.Y = 0;
-                        Label.Width = width - GradeLabel.ActualWidth - 10;
-                        Label.Height = 25; // Fixed height for label at top
+                        Label.Width = width - gradeDisplayWidth - 10;
+                        Label.Height = 25;
                         Label.Draw(g);
 
-                        GradeLabel.X = width - GradeLabel.ActualWidth - 5;
-                        GradeLabel.Y = 0;
-                        GradeLabel.Width = GradeLabel.ActualWidth;
-                        GradeLabel.Height = 25; // Fixed height for grade at top
+                        float gradeX = width - gradeDisplayWidth - 5;
 
-                        // Draw background for grade label only if enabled
-                        if (Settings.GradingConfig.UseBackgroundColor)
+                        if (useIconDisplay && _currentGradeIcon != null)
                         {
-                            using (var backgroundBrush = new SolidBrush(Settings.GradingConfig.BackgroundColor))
-                            {
-                                g.FillRectangle(backgroundBrush, GradeLabel.X, GradeLabel.Y, GradeLabel.Width, GradeLabel.Height);
-                            }
+                            // Draw icon centered vertically
+                            float iconY = (25 - GradeIconGenerator.IconSize) / 2f;
+                            g.DrawImage(_currentGradeIcon, gradeX, iconY, GradeIconGenerator.IconSize, GradeIconGenerator.IconSize);
                         }
+                        else
+                        {
+                            GradeLabel.X = gradeX;
+                            GradeLabel.Y = 0;
+                            GradeLabel.Width = gradeDisplayWidth;
+                            GradeLabel.Height = 25;
 
-                        GradeLabel.Draw(g);
+                            if (Settings.GradingConfig.UseBackgroundColor)
+                            {
+                                using (var backgroundBrush = new SolidBrush(Settings.GradingConfig.BackgroundColor))
+                                {
+                                    g.FillRectangle(backgroundBrush, GradeLabel.X, GradeLabel.Y, GradeLabel.Width, GradeLabel.Height);
+                                }
+                            }
+
+                            GradeLabel.Draw(g);
+                        }
                     }
                 }
             }
@@ -792,6 +822,17 @@ namespace LiveSplit.GradingSplits.UI.Components
             GradeLabel.Text = gradeResult.Grade;
             GradeLabel.ForeColor = gradeResult.Color;
 
+            // Update cached icon if grade or color changed
+            if (_lastIconGrade != gradeResult.Grade || _lastIconColor != gradeResult.Color)
+            {
+                _lastIconGrade = gradeResult.Grade;
+                _lastIconColor = gradeResult.Color;
+                _currentGradeIcon?.Dispose();
+                _currentGradeIcon = gradeResult.Grade != "-" 
+                    ? GradeIconGenerator.GenerateIcon(gradeResult.Grade, gradeResult.Color)
+                    : null;
+            }
+
             // Calculate previous split comparison data
             UpdatePreviousSplitData(state, index);
         }
@@ -984,6 +1025,10 @@ namespace LiveSplit.GradingSplits.UI.Components
             // Restore original split names and icons before disposing
             RestoreOriginalSplitNames();
             RestoreOriginalSplitIcons();
+
+            // Dispose cached current grade icon
+            _currentGradeIcon?.Dispose();
+            _currentGradeIcon = null;
 
             // Unsubscribe from events
             if (_state != null)

@@ -6,6 +6,22 @@ using System.Linq;
 namespace LiveSplit.GradingSplits.Model
 {
     /// <summary>
+    /// Display style options for the current grade in the component.
+    /// </summary>
+    public enum GradeDisplayStyle
+    {
+        /// <summary>
+        /// Display grade as text (e.g., "A", "S").
+        /// </summary>
+        Text,
+
+        /// <summary>
+        /// Display grade as an icon.
+        /// </summary>
+        Icon
+    }
+
+    /// <summary>
     /// Configuration settings for the grading system, including thresholds and display options.
     /// </summary>
     public class GradingSettings
@@ -101,6 +117,11 @@ namespace LiveSplit.GradingSplits.Model
         public int CurrentGradeFontSize { get; set; }
 
         /// <summary>
+        /// The display style for the current grade (Text or Icon).
+        /// </summary>
+        public GradeDisplayStyle CurrentGradeDisplayStyle { get; set; }
+
+        /// <summary>
         /// Whether to show grades in split names (e.g., "Split Name [A]").
         /// </summary>
         public bool ShowGradeInSplitNames { get; set; }
@@ -149,6 +170,7 @@ namespace LiveSplit.GradingSplits.Model
             PreviousSplitFontSize = 10;
             ShowCurrentGrade = true;
             CurrentGradeFontSize = 15;
+            CurrentGradeDisplayStyle = GradeDisplayStyle.Text;
             ShowGradeInSplitNames = false;
             SplitNameFormat = "{Name} [{Grade}]";
             ShowGradeIcons = false;
@@ -180,6 +202,7 @@ namespace LiveSplit.GradingSplits.Model
                 PreviousSplitFontSize = PreviousSplitFontSize,
                 ShowCurrentGrade = ShowCurrentGrade,
                 CurrentGradeFontSize = CurrentGradeFontSize,
+                CurrentGradeDisplayStyle = CurrentGradeDisplayStyle,
                 ShowGradeInSplitNames = ShowGradeInSplitNames,
                 SplitNameFormat = SplitNameFormat,
                 ShowGradeIcons = ShowGradeIcons

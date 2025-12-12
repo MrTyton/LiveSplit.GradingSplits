@@ -204,8 +204,19 @@ namespace LiveSplit.GradingSplits.UI.Components
             chkShowCurrentGrade.CheckedChanged += (s, e) =>
             {
                 GradingConfig.ShowCurrentGrade = chkShowCurrentGrade.Checked;
-                numCurrentGradeFontSize.Enabled = chkShowCurrentGrade.Checked;
-                lblCurrentGradeFontSize.Enabled = chkShowCurrentGrade.Checked;
+                cboCurrentGradeStyle.Enabled = chkShowCurrentGrade.Checked;
+                lblCurrentGradeStyle.Enabled = chkShowCurrentGrade.Checked;
+                bool textStyleEnabled = chkShowCurrentGrade.Checked && GradingConfig.CurrentGradeDisplayStyle == GradeDisplayStyle.Text;
+                numCurrentGradeFontSize.Enabled = textStyleEnabled;
+                lblCurrentGradeFontSize.Enabled = textStyleEnabled;
+            };
+
+            cboCurrentGradeStyle.SelectedIndexChanged += (s, e) =>
+            {
+                GradingConfig.CurrentGradeDisplayStyle = (GradeDisplayStyle)cboCurrentGradeStyle.SelectedIndex;
+                bool textStyleEnabled = chkShowCurrentGrade.Checked && GradingConfig.CurrentGradeDisplayStyle == GradeDisplayStyle.Text;
+                numCurrentGradeFontSize.Enabled = textStyleEnabled;
+                lblCurrentGradeFontSize.Enabled = textStyleEnabled;
             };
 
             numCurrentGradeFontSize.ValueChanged += (s, e) =>
@@ -280,9 +291,13 @@ namespace LiveSplit.GradingSplits.UI.Components
             numPrevFontSize.Enabled = GradingConfig.ShowPreviousSplit;
 
             chkShowCurrentGrade.Checked = GradingConfig.ShowCurrentGrade;
+            cboCurrentGradeStyle.SelectedIndex = (int)GradingConfig.CurrentGradeDisplayStyle;
+            cboCurrentGradeStyle.Enabled = GradingConfig.ShowCurrentGrade;
+            lblCurrentGradeStyle.Enabled = GradingConfig.ShowCurrentGrade;
             numCurrentGradeFontSize.Value = GradingConfig.CurrentGradeFontSize;
-            numCurrentGradeFontSize.Enabled = GradingConfig.ShowCurrentGrade;
-            lblCurrentGradeFontSize.Enabled = GradingConfig.ShowCurrentGrade;
+            bool textStyleEnabled = GradingConfig.ShowCurrentGrade && GradingConfig.CurrentGradeDisplayStyle == GradeDisplayStyle.Text;
+            numCurrentGradeFontSize.Enabled = textStyleEnabled;
+            lblCurrentGradeFontSize.Enabled = textStyleEnabled;
 
             chkShowSplitNameGrades.Checked = GradingConfig.ShowGradeInSplitNames;
             txtSplitNameFormat.Text = GradingConfig.SplitNameFormat;
@@ -329,6 +344,8 @@ namespace LiveSplit.GradingSplits.UI.Components
             GradingConfig.PreviousSplitFontSize = SettingsHelper.ParseInt(element["PreviousSplitFontSize"], 10);
             GradingConfig.ShowCurrentGrade = SettingsHelper.ParseBool(element["ShowCurrentGrade"], true);
             GradingConfig.CurrentGradeFontSize = SettingsHelper.ParseInt(element["CurrentGradeFontSize"], 15);
+            var displayStyleStr = SettingsHelper.ParseString(element["CurrentGradeDisplayStyle"], "Text");
+            GradingConfig.CurrentGradeDisplayStyle = displayStyleStr == "Icon" ? GradeDisplayStyle.Icon : GradeDisplayStyle.Text;
             GradingConfig.ShowGradeInSplitNames = SettingsHelper.ParseBool(element["ShowGradeInSplitNames"], false);
             GradingConfig.SplitNameFormat = SettingsHelper.ParseString(element["SplitNameFormat"], "{Name} [{Grade}]");
             GradingConfig.ShowGradeIcons = SettingsHelper.ParseBool(element["ShowGradeIcons"], false);
@@ -411,6 +428,7 @@ namespace LiveSplit.GradingSplits.UI.Components
             hash ^= SettingsHelper.CreateSetting(document, parent, "ShowGradeInSplitNames", GradingConfig.ShowGradeInSplitNames);
             hash ^= SettingsHelper.CreateSetting(document, parent, "SplitNameFormat", GradingConfig.SplitNameFormat);
             hash ^= SettingsHelper.CreateSetting(document, parent, "ShowGradeIcons", GradingConfig.ShowGradeIcons);
+            hash ^= SettingsHelper.CreateSetting(document, parent, "CurrentGradeDisplayStyle", GradingConfig.CurrentGradeDisplayStyle.ToString());
 
             // Save thresholds
             if (document != null)

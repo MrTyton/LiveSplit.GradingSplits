@@ -61,6 +61,8 @@ namespace LiveSplit.GradingSplits.UI.Components
             this.lblPrevFontSize = new System.Windows.Forms.Label();
             this.numPrevFontSize = new System.Windows.Forms.NumericUpDown();
             this.chkShowCurrentGrade = new System.Windows.Forms.CheckBox();
+            this.lblCurrentGradeStyle = new System.Windows.Forms.Label();
+            this.cboCurrentGradeStyle = new System.Windows.Forms.ComboBox();
             this.lblCurrentGradeFontSize = new System.Windows.Forms.Label();
             this.numCurrentGradeFontSize = new System.Windows.Forms.NumericUpDown();
             this.chkShowSplitNameGrades = new System.Windows.Forms.CheckBox();
@@ -248,17 +250,20 @@ namespace LiveSplit.GradingSplits.UI.Components
             this.tableLayoutPanel2.Controls.Add(this.lblPrevFontSize, 1, 6);
             this.tableLayoutPanel2.Controls.Add(this.numPrevFontSize, 2, 6);
             this.tableLayoutPanel2.Controls.Add(this.chkShowCurrentGrade, 0, 7);
-            this.tableLayoutPanel2.Controls.Add(this.lblCurrentGradeFontSize, 1, 7);
-            this.tableLayoutPanel2.Controls.Add(this.numCurrentGradeFontSize, 2, 7);
-            this.tableLayoutPanel2.Controls.Add(this.chkShowSplitNameGrades, 0, 8);
-            this.tableLayoutPanel2.Controls.Add(this.txtSplitNameFormat, 1, 8);
+            this.tableLayoutPanel2.Controls.Add(this.lblCurrentGradeStyle, 1, 7);
+            this.tableLayoutPanel2.Controls.Add(this.cboCurrentGradeStyle, 2, 7);
+            this.tableLayoutPanel2.Controls.Add(this.lblCurrentGradeFontSize, 0, 8);
+            this.tableLayoutPanel2.Controls.Add(this.numCurrentGradeFontSize, 1, 8);
+            this.tableLayoutPanel2.Controls.Add(this.chkShowSplitNameGrades, 0, 9);
+            this.tableLayoutPanel2.Controls.Add(this.txtSplitNameFormat, 1, 9);
             this.tableLayoutPanel2.SetColumnSpan(this.txtSplitNameFormat, 2);
-            this.tableLayoutPanel2.Controls.Add(this.chkShowGradeIcons, 0, 9);
+            this.tableLayoutPanel2.Controls.Add(this.chkShowGradeIcons, 0, 10);
             this.tableLayoutPanel2.SetColumnSpan(this.chkShowGradeIcons, 3);
             this.tableLayoutPanel2.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tableLayoutPanel2.Location = new System.Drawing.Point(3, 16);
             this.tableLayoutPanel2.Name = "tableLayoutPanel2";
-            this.tableLayoutPanel2.RowCount = 10;
+            this.tableLayoutPanel2.RowCount = 11;
+            this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 30F));
             this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 30F));
             this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 30F));
             this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 30F));
@@ -270,7 +275,7 @@ namespace LiveSplit.GradingSplits.UI.Components
             this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 30F));
             this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 30F));
             this.tableLayoutPanel2.AutoSize = true;
-            this.tableLayoutPanel2.Size = new System.Drawing.Size(450, 300);
+            this.tableLayoutPanel2.Size = new System.Drawing.Size(450, 330);
             this.tableLayoutPanel2.TabIndex = 0;
             // 
             // chkUseBackground
@@ -478,20 +483,41 @@ namespace LiveSplit.GradingSplits.UI.Components
             this.chkShowCurrentGrade.Text = "Show Current Grade";
             this.chkShowCurrentGrade.UseVisualStyleBackColor = true;
             // 
+            // lblCurrentGradeStyle
+            // 
+            this.lblCurrentGradeStyle.Anchor = System.Windows.Forms.AnchorStyles.Left;
+            this.lblCurrentGradeStyle.AutoSize = true;
+            this.lblCurrentGradeStyle.Location = new System.Drawing.Point(153, 218);
+            this.lblCurrentGradeStyle.Name = "lblCurrentGradeStyle";
+            this.lblCurrentGradeStyle.Size = new System.Drawing.Size(33, 13);
+            this.lblCurrentGradeStyle.TabIndex = 25;
+            this.lblCurrentGradeStyle.Text = "Style:";
+            // 
+            // cboCurrentGradeStyle
+            // 
+            this.cboCurrentGradeStyle.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
+            this.cboCurrentGradeStyle.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.cboCurrentGradeStyle.FormattingEnabled = true;
+            this.cboCurrentGradeStyle.Items.AddRange(new object[] { "Text", "Icon" });
+            this.cboCurrentGradeStyle.Location = new System.Drawing.Point(373, 214);
+            this.cboCurrentGradeStyle.Name = "cboCurrentGradeStyle";
+            this.cboCurrentGradeStyle.Size = new System.Drawing.Size(74, 21);
+            this.cboCurrentGradeStyle.TabIndex = 26;
+            // 
             // lblCurrentGradeFontSize
             // 
             this.lblCurrentGradeFontSize.Anchor = System.Windows.Forms.AnchorStyles.Left;
             this.lblCurrentGradeFontSize.AutoSize = true;
-            this.lblCurrentGradeFontSize.Location = new System.Drawing.Point(153, 218);
+            this.lblCurrentGradeFontSize.Location = new System.Drawing.Point(3, 248);
             this.lblCurrentGradeFontSize.Name = "lblCurrentGradeFontSize";
-            this.lblCurrentGradeFontSize.Size = new System.Drawing.Size(55, 13);
+            this.lblCurrentGradeFontSize.Size = new System.Drawing.Size(99, 13);
             this.lblCurrentGradeFontSize.TabIndex = 22;
-            this.lblCurrentGradeFontSize.Text = "Font Size:";
+            this.lblCurrentGradeFontSize.Text = "Text Font Size:";
             // 
             // numCurrentGradeFontSize
             // 
             this.numCurrentGradeFontSize.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
-            this.numCurrentGradeFontSize.Location = new System.Drawing.Point(373, 215);
+            this.numCurrentGradeFontSize.Location = new System.Drawing.Point(153, 245);
             this.numCurrentGradeFontSize.Maximum = new decimal(new int[] { 48, 0, 0, 0 });
             this.numCurrentGradeFontSize.Minimum = new decimal(new int[] { 8, 0, 0, 0 });
             this.numCurrentGradeFontSize.Name = "numCurrentGradeFontSize";
@@ -594,6 +620,8 @@ namespace LiveSplit.GradingSplits.UI.Components
         private System.Windows.Forms.Label lblPrevFontSize;
         private System.Windows.Forms.NumericUpDown numPrevFontSize;
         private System.Windows.Forms.CheckBox chkShowCurrentGrade;
+        private System.Windows.Forms.Label lblCurrentGradeStyle;
+        private System.Windows.Forms.ComboBox cboCurrentGradeStyle;
         private System.Windows.Forms.Label lblCurrentGradeFontSize;
         private System.Windows.Forms.NumericUpDown numCurrentGradeFontSize;
         private System.Windows.Forms.CheckBox chkShowSplitNameGrades;
