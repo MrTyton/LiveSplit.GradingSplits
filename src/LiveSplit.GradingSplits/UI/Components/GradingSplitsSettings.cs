@@ -60,7 +60,7 @@ namespace LiveSplit.GradingSplits.UI.Components
                     {
                         var colorDialog = new ColorDialog();
                         colorDialog.Color = threshold.ForegroundColor;
-                        if (colorDialog.ShowDialog() == DialogResult.OK)
+                        if (colorDialog.ShowDialog(this.FindForm()) == DialogResult.OK)
                         {
                             threshold.ForegroundColor = colorDialog.Color;
                             row.Cells[2].Value = colorDialog.Color.Name;
@@ -107,7 +107,7 @@ namespace LiveSplit.GradingSplits.UI.Components
             {
                 var colorDialog = new ColorDialog();
                 colorDialog.Color = GradingConfig.BackgroundColor;
-                if (colorDialog.ShowDialog() == DialogResult.OK)
+                if (colorDialog.ShowDialog(this.FindForm()) == DialogResult.OK)
                 {
                     GradingConfig.BackgroundColor = colorDialog.Color;
                     btnBackgroundColor.BackColor = colorDialog.Color;
@@ -130,7 +130,7 @@ namespace LiveSplit.GradingSplits.UI.Components
             {
                 var colorDialog = new ColorDialog();
                 colorDialog.Color = GradingConfig.GoldColor;
-                if (colorDialog.ShowDialog() == DialogResult.OK)
+                if (colorDialog.ShowDialog(this.FindForm()) == DialogResult.OK)
                 {
                     GradingConfig.GoldColor = colorDialog.Color;
                     btnGoldColor.BackColor = colorDialog.Color;
@@ -153,7 +153,7 @@ namespace LiveSplit.GradingSplits.UI.Components
             {
                 var colorDialog = new ColorDialog();
                 colorDialog.Color = GradingConfig.WorstColor;
-                if (colorDialog.ShowDialog() == DialogResult.OK)
+                if (colorDialog.ShowDialog(this.FindForm()) == DialogResult.OK)
                 {
                     GradingConfig.WorstColor = colorDialog.Color;
                     btnWorstColor.BackColor = colorDialog.Color;
