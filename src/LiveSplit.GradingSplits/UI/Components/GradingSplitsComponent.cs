@@ -53,6 +53,10 @@ namespace LiveSplit.GradingSplits.UI.Components
         private bool _lastShowGradeIconsSetting = false;
         private Dictionary<int, (string Grade, Color Color)> _splitIconCache = new Dictionary<int, (string, Color)>();
 
+        // Grade calculation cache - keyed by (splitIndex, useActualTime)
+        private Dictionary<(int Index, bool UseActualTime), (string Grade, Color Color)> _gradeCalculationCache = new Dictionary<(int, bool), (string, Color)>();
+        private int _lastGradeCalcSplitIndex = -1;  // Track when grade cache needs invalidation
+
         // Cached current grade icon for component display
         private Image _currentGradeIcon = null;
         private string _lastIconGrade = null;
@@ -141,9 +145,11 @@ namespace LiveSplit.GradingSplits.UI.Components
             // Clear all caches
             _splitNameGradeCache.Clear();
             _splitIconCache.Clear();
+            _gradeCalculationCache.Clear();
             _lastNameUpdateSplitIndex = -1;
             _lastIconUpdateSplitIndex = -1;
             _lastPreviousSplitIndex = -1;
+            _lastGradeCalcSplitIndex = -1;
             _hasPreviousSplitData = false;
         }
 
@@ -1091,6 +1097,25 @@ namespace LiveSplit.GradingSplits.UI.Components
                 return ("-", state.LayoutSettings.TextColor);
             }
 
+            // Check if cache needs to be invalidated (split completed or run changed)
+            if (_lastGradeCalcSplitIndex != state.CurrentSplitIndex || _gradedRun != state.Run)
+            {
+                _gradeCalculationCache.Clear();
+                _lastGradeCalcSplitIndex = state.CurrentSplitIndex;
+            }
+
+            // Check cache first
+            var cacheKey = (index, useActualTime);
+            if (_gradeCalculationCache.TryGetValue(cacheKey, out var cachedResult))
+            {
+                // For the current split being viewed (used by graph), we still need to populate the cached stats
+                // Only return cached result if this isn't the primary display split
+                if (index != _lastGradedIndex)
+                {
+                    return cachedResult;
+                }
+            }
+
             var segment = state.Run[index];
             var method = state.CurrentTimingMethod;
 
@@ -1108,7 +1133,9 @@ namespace LiveSplit.GradingSplits.UI.Components
             if (_cachedHistory.Count < 2)
             {
                 _cachedHistory.Clear();
-                return ("-", state.LayoutSettings.TextColor);
+                var noDataResult = ("-", state.LayoutSettings.TextColor);
+                _gradeCalculationCache[cacheKey] = noDataResult;
+                return noDataResult;
             }
 
             _cachedMean = Statistics.CalculateMean(_cachedHistory);
@@ -1117,7 +1144,9 @@ namespace LiveSplit.GradingSplits.UI.Components
             if (_cachedStdDev == 0)
             {
                 _cachedHistory.Clear();
-                return ("-", state.LayoutSettings.TextColor);
+                var noStdDevResult = ("-", state.LayoutSettings.TextColor);
+                _gradeCalculationCache[cacheKey] = noStdDevResult;
+                return noStdDevResult;
             }
 
             // Get the segment time - either actual or comparison based on parameter
@@ -1157,10 +1186,14 @@ namespace LiveSplit.GradingSplits.UI.Components
                 bool isGoldSplit = GradeCalculator.IsGoldSplit(_cachedComparisonTime, bestSegment?.TotalSeconds);
                 bool isWorstSplit = GradeCalculator.IsWorstSplit(_cachedComparisonTime, _cachedHistory);
 
-                return GradeCalculator.CalculateGrade(_cachedZScore, Settings.GradingConfig, isGoldSplit, isWorstSplit);
+                var gradeResult = GradeCalculator.CalculateGrade(_cachedZScore, Settings.GradingConfig, isGoldSplit, isWorstSplit);
+                _gradeCalculationCache[cacheKey] = gradeResult;
+                return gradeResult;
             }
 
-            return ("-", state.LayoutSettings.TextColor);
+            var noTimeResult = ("-", state.LayoutSettings.TextColor);
+            _gradeCalculationCache[cacheKey] = noTimeResult;
+            return noTimeResult;
         }
 
         public void Dispose()
