@@ -147,9 +147,9 @@ namespace LiveSplit.GradingSplits.Model
             Thresholds = new List<GradeThreshold>
             {
                 new GradeThreshold(7, "S", Color.Gold),           // ~7th percentile (z=-1.5)
-                new GradeThreshold(31, "A", Color.Green),         // ~31st percentile (z=-0.5)
+                new GradeThreshold(31, "A", Color.LimeGreen),     // ~31st percentile (z=-0.5)
                 new GradeThreshold(69, "B", Color.LightGreen),    // ~69th percentile (z=+0.5)
-                new GradeThreshold(93, "C", Color.Yellow),        // ~93rd percentile (z=+1.5)
+                new GradeThreshold(93, "C", Color.Orange),        // ~93rd percentile (z=+1.5)
                 new GradeThreshold(100, "F", Color.Red)           // Everything else
             };
 
