@@ -71,6 +71,16 @@ namespace LiveSplit.GradingSplits.UI.Components
                 return;
             }
 
+            // Don't modify icons while timer is not running (e.g., when Edit Splits dialog may be open)
+            // This prevents interference with the Run Editor's DataGridView which binds to the same Run object
+            // Icons will be updated when the timer starts or a split is completed
+            if (state.CurrentPhase == TimerPhase.NotRunning)
+            {
+                // Still track the setting state so we update on first run
+                _lastShowGradeIconsSetting = settingEnabled;
+                return;
+            }
+
             // Check if we need to update icons
             bool needsFullUpdate = false;
 

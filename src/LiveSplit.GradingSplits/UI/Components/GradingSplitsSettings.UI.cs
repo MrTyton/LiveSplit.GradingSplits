@@ -62,7 +62,8 @@ namespace LiveSplit.GradingSplits.UI.Components
             {
                 Text = "Select any icon file in your folder to set the icon folder path.\n" +
                        "Icons should be named: S.png, A.png, etc. Use Best.png / Worst.png for special splits.\n" +
-                       "Missing icons will use auto-generated ones. Formats: PNG, JPG, GIF, BMP, ICO",
+                       "Missing icons will use auto-generated ones. Formats: PNG, JPG, GIF, BMP, ICO\n" +
+                       "Note: Icons only update while timer is running, paused, or ended.",
                 AutoSize = true,
                 ForeColor = SystemColors.GrayText,
                 Padding = new Padding(15, 0, 0, 5)
