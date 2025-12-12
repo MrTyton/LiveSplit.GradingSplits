@@ -30,7 +30,11 @@
   <ItemGroup>
     <Reference Include="LiveSplit.Core">
       <HintPath>..\..\deps\LiveSplit\bin\debug\LiveSplit.Core.dll</HintPath>
-      <Private>False</Private>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="SpeedrunComSharp">
+      <HintPath>..\..\deps\LiveSplit\bin\SpeedrunComSharp.dll</HintPath>
+      <Private>True</Private>
     </Reference>
   </ItemGroup>
 

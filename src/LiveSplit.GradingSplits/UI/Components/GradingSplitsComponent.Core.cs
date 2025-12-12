@@ -61,6 +61,8 @@ namespace LiveSplit.GradingSplits.UI.Components
         private int _lastIconUpdateSplitIndex = -1;
         private bool _lastShowGradeIconsSetting = false;
         private Dictionary<int, (string Grade, Color Color)> _splitIconCache = new Dictionary<int, (string, Color)>();
+        private IRun _lastIconRun = null;
+        private TimerPhase _lastIconPhase = TimerPhase.NotRunning;
 
         // Grade calculation cache
         private Dictionary<(int Index, bool UseActualTime), (string Grade, Color Color)> _gradeCalculationCache = new Dictionary<(int, bool), (string, Color)>();
@@ -149,9 +151,17 @@ namespace LiveSplit.GradingSplits.UI.Components
 
         private void State_OnStart(object sender, EventArgs e)
         {
+            // Only store original names if we haven't already for this run
+            // or if the run changed
             if (_originalSplitNames.Count == 0 || _gradedRun != _state.Run)
             {
                 StoreOriginalSplitNames();
+            }
+            
+            // Only store original icons if we haven't already for this run
+            // We check _lastIconRun instead of _gradedRun since icons are tracked separately
+            if (_originalSplitIcons.Count == 0 || _lastIconRun != _state.Run)
+            {
                 StoreOriginalSplitIcons();
             }
         }
@@ -170,6 +180,8 @@ namespace LiveSplit.GradingSplits.UI.Components
             _lastPreviousSplitIndex = -1;
             _lastGradeCalcSplitIndex = -1;
             _hasPreviousSplitData = false;
+            _splitIconsModified = false;  // Reset so icons get reapplied on next run
+            _lastIconPhase = TimerPhase.NotRunning;  // Reset phase tracking
         }
 
         #endregion

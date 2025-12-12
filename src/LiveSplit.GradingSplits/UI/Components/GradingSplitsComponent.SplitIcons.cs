@@ -2,6 +2,7 @@ using LiveSplit.Model;
 using LiveSplit.GradingSplits.Model;
 using System.Drawing;
 using System.Linq;
+using System.Windows.Forms;
 
 namespace LiveSplit.GradingSplits.UI.Components
 {
@@ -39,19 +40,26 @@ namespace LiveSplit.GradingSplits.UI.Components
 
         private void RestoreOriginalSplitIcons()
         {
-            if (!_splitIconsModified || _gradedRun == null) return;
+            if (!_splitIconsModified || _lastIconRun == null) return;
 
             foreach (var kvp in _originalSplitIcons)
             {
-                if (kvp.Key < _gradedRun.Count)
+                if (kvp.Key < _lastIconRun.Count)
                 {
-                    _gradedRun[kvp.Key].Icon = kvp.Value;
+                    _lastIconRun[kvp.Key].Icon = kvp.Value;
                 }
             }
 
             _originalSplitIcons.Clear();
             _splitIconsModified = false;
         }
+
+        /// <summary>
+        /// Throttle for checking if Run Editor is open (avoid checking every frame).
+        /// </summary>
+        private int _runEditorCheckCounter = 0;
+        private bool _lastRunEditorOpenState = false;
+        private const int RunEditorCheckInterval = 30; // Check every ~30 frames
 
         private void UpdateSplitIconsWithGrades(LiveSplitState state)
         {
@@ -71,12 +79,19 @@ namespace LiveSplit.GradingSplits.UI.Components
                 return;
             }
 
-            // Don't modify icons while timer is not running (e.g., when Edit Splits dialog may be open)
-            // This prevents interference with the Run Editor's DataGridView which binds to the same Run object
-            // Icons will be updated when the timer starts or a split is completed
-            if (state.CurrentPhase == TimerPhase.NotRunning)
+            // Throttled check for Run Editor dialog being open
+            _runEditorCheckCounter++;
+            if (_runEditorCheckCounter >= RunEditorCheckInterval)
             {
-                // Still track the setting state so we update on first run
+                _runEditorCheckCounter = 0;
+                _lastRunEditorOpenState = IsRunEditorOpen();
+            }
+
+            // Don't modify icons while the Run Editor dialog is open
+            // This prevents interference with the Run Editor's DataGridView which binds to the same Run object
+            if (_lastRunEditorOpenState)
+            {
+                // Still track the setting state so we update when dialog closes
                 _lastShowGradeIconsSetting = settingEnabled;
                 return;
             }
@@ -90,13 +105,25 @@ namespace LiveSplit.GradingSplits.UI.Components
                 needsFullUpdate = true;
             }
             // Run changed
-            else if (_gradedRun != state.Run)
+            else if (_lastIconRun != state.Run)
             {
                 needsFullUpdate = true;
                 _splitIconCache.Clear();
             }
-            // Split index changed (a split was completed)
-            else if (_lastIconUpdateSplitIndex != state.CurrentSplitIndex)
+            // Timer phase changed (e.g., NotRunning -> Running, Running -> Ended)
+            // This ensures icons are refreshed when state changes
+            else if (_lastIconPhase != state.CurrentPhase)
+            {
+                needsFullUpdate = true;
+            }
+            // Icons were cleared (e.g., after reset) but setting is still enabled
+            // This ensures icons are reapplied after a reset
+            else if (!_splitIconsModified && settingEnabled)
+            {
+                needsFullUpdate = true;
+            }
+            // Split index changed (a split was completed) - only matters when actually running
+            else if (state.CurrentPhase != TimerPhase.NotRunning && _lastIconUpdateSplitIndex != state.CurrentSplitIndex)
             {
                 needsFullUpdate = true;
             }
@@ -109,18 +136,21 @@ namespace LiveSplit.GradingSplits.UI.Components
             }
 
             _lastShowGradeIconsSetting = settingEnabled;
-            _lastIconUpdateSplitIndex = state.CurrentSplitIndex;
             _lastIconFolderPath = Settings.GradingConfig.IconFolderPath;
+            _lastIconPhase = state.CurrentPhase;
 
             if (!needsFullUpdate)
             {
                 return; // Icons are up to date
             }
 
+            _lastIconUpdateSplitIndex = state.CurrentSplitIndex;
+
             // Make sure we have original icons stored
-            if (_originalSplitIcons.Count == 0 || _gradedRun != state.Run)
+            if (_originalSplitIcons.Count == 0 || _lastIconRun != state.Run)
             {
                 StoreOriginalSplitIcons();
+                _lastIconRun = state.Run;
             }
 
             for (int i = 0; i < state.Run.Count; i++)
@@ -130,63 +160,89 @@ namespace LiveSplit.GradingSplits.UI.Components
                 bool isGold = false;
                 bool isWorst = false;
 
-                if (i < state.CurrentSplitIndex)
+                // For upcoming splits (not yet completed), use cached values if available
+                // since their comparison grades don't change during a run
+                bool useActualTime = i < state.CurrentSplitIndex;
+                
+                // Check if we have a cached value we can reuse for grade calculation
+                bool hadCachedValue = _splitIconCache.TryGetValue(i, out var cached);
+                bool canSkipCalculation = hadCachedValue && (!useActualTime || (i < state.CurrentSplitIndex - 1));
+                
+                if (canSkipCalculation)
                 {
-                    // Completed split - show achieved grade
-                    var result = CalculateGradeForSplit(state, i, useActualTime: true);
-                    grade = result.Grade;
-                    color = result.Color;
-                    
-                    // Check if this was a gold or worst split
-                    isGold = Settings.GradingConfig.UseGoldGrade && grade == Settings.GradingConfig.GoldLabel;
-                    isWorst = Settings.GradingConfig.UseWorstGrade && grade == Settings.GradingConfig.WorstLabel;
+                    // Use cached grade/color
+                    grade = cached.Grade;
+                    color = cached.Color;
                 }
                 else
                 {
-                    // Upcoming split - show comparison grade
-                    var result = CalculateGradeForSplit(state, i, useActualTime: false);
+                    // Calculate grade for this split
+                    var result = CalculateGradeForSplit(state, i, useActualTime);
                     grade = result.Grade;
                     color = result.Color;
-                }
-
-                // Check if this split's grade changed from cached value
-                bool gradeChanged = true;
-                if (_splitIconCache.TryGetValue(i, out var cached))
-                {
-                    gradeChanged = cached.Grade != grade || cached.Color.ToArgb() != color.ToArgb();
-                }
-
-                if (gradeChanged)
-                {
-                    _splitIconCache[i] = (grade, color);
-
-                    if (grade != "-" && !string.IsNullOrEmpty(grade))
+                    
+                    if (useActualTime)
                     {
-                        // Try to get a custom icon first
-                        var threshold = Settings.GradingConfig.Thresholds.FirstOrDefault(t => t.Label == grade);
-                        var customIcon = CustomIconLoader.GetCustomIcon(grade, Settings.GradingConfig, threshold, isGold, isWorst);
-                        
-                        if (customIcon != null)
-                        {
-                            state.Run[i].Icon = customIcon;
-                        }
-                        else
-                        {
-                            // Fall back to generated icon
-                            state.Run[i].Icon = GradeIconGenerator.GenerateIcon(grade, color);
-                        }
-                        _splitIconsModified = true;
+                        // Check if this was a gold or worst split
+                        isGold = Settings.GradingConfig.UseGoldGrade && grade == Settings.GradingConfig.GoldLabel;
+                        isWorst = Settings.GradingConfig.UseWorstGrade && grade == Settings.GradingConfig.WorstLabel;
+                    }
+                    
+                    // Update cache
+                    _splitIconCache[i] = (grade, color);
+                }
+
+                // Always set icons when we reach here (needsFullUpdate was true)
+                if (grade != "-" && !string.IsNullOrEmpty(grade))
+                {
+                    // Try to get a custom icon first
+                    var threshold = Settings.GradingConfig.Thresholds.FirstOrDefault(t => t.Label == grade);
+                    var customIcon = CustomIconLoader.GetCustomIcon(grade, Settings.GradingConfig, threshold, isGold, isWorst);
+                    
+                    if (customIcon != null)
+                    {
+                        state.Run[i].Icon = customIcon;
                     }
                     else
                     {
-                        // Restore original icon for splits without grades
-                        if (_originalSplitIcons.ContainsKey(i))
-                        {
-                            state.Run[i].Icon = _originalSplitIcons[i];
-                        }
+                        // Fall back to generated icon
+                        state.Run[i].Icon = GradeIconGenerator.GenerateIcon(grade, color);
+                    }
+                    _splitIconsModified = true;
+                }
+                else
+                {
+                    // Restore original icon for splits without grades
+                    if (_originalSplitIcons.ContainsKey(i))
+                    {
+                        state.Run[i].Icon = _originalSplitIcons[i];
                     }
                 }
             }
+        }
+
+        /// <summary>
+        /// Checks if the Run Editor dialog is currently open.
+        /// </summary>
+        /// <returns>True if the Run Editor dialog is open, false otherwise.</returns>
+        private bool IsRunEditorOpen()
+        {
+            try
+            {
+                // Check if any open form is the RunEditorDialog
+                foreach (Form form in Application.OpenForms)
+                {
+                    if (form.GetType().Name == "RunEditorDialog")
+                    {
+                        return true;
+                    }
+                }
+            }
+            catch
+            {
+                // If we can't check forms, assume it's safe to update
+            }
+            return false;
         }
     }
 }
