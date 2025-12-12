@@ -2,12 +2,28 @@
 
 A LiveSplit component that shows a percentile-based grade for your current split performance, complete with distribution visualization and customizable grading thresholds.
 
+## ⚠️ Important Warning
+
+**Always back up your LiveSplit installation before installing or updating this component!**
+
+This component modifies LiveSplit's internal state (split icons, names) during operation. Occasionally, updates to the DLL can cause issues with your LiveSplit installation that may require:
+- Deleting and re-extracting LiveSplit from scratch
+- Restoring your splits, settings, and layouts from backup
+
+**Recommended before installing/updating:**
+1. Make a copy of your entire LiveSplit folder
+2. Back up your `.lss` split files
+3. Back up your `.lsl` layout files
+4. Back up your LiveSplit settings
+
 ## Features
 
 - **Real-time Grading**: See how your current split compares to your historical attempts on a percentile scale (0-100)
 - **Dynamic Comparison Label**: Shows which comparison you're grading against (e.g., "Personal Best's Grade:")
 - **Previous Split Comparison**: See how your previous split performed vs the comparison time
 - **Split Name Grades**: Optionally display grades directly in split names with customizable format
+- **Grade Icons**: Display grade badges as split icons with auto-generated or custom images
+- **Custom Icon Support**: Use your own images for grade icons (see Custom Icons section)
 - **Customizable Thresholds**: Define your own grade labels, percentile cutoffs, and colors
 - **Distribution Graph**: Optional visualization showing:
   - Normal distribution curve based on your historical data
@@ -46,9 +62,9 @@ Your current split time is then graded based on which percentile threshold it fa
 | Grade | Percentile Range | Color | Meaning |
 |-------|------------------|-------|---------|
 | S | 0-7% | Gold | Exceptional (top ~7%) |
-| A | 7-31% | Green | Above average |
+| A | 7-31% | Lime Green | Above average |
 | B | 31-69% | Light Green | Average |
-| C | 69-93% | Yellow | Below average |
+| C | 69-93% | Orange | Below average |
 | F | 93-100% | Red | Poor performance |
 | ★ | — | Gold | Personal best (gold split) |
 | ✗ | — | Dark Red | Worst segment |
@@ -83,11 +99,44 @@ These are based on standard deviation intervals:
   - Shows "Previous: Achieved [grade] vs [comparison]'s [grade]"
   - Displays "Previous: N/A" when no data available
   - Adjust font size (6-24px)
+- **Current Grade Display**: Show grade as icon or text
 - **Split Name Grades**: Display grades directly in split names
   - Customizable format string using `{Name}` and `{Grade}` placeholders
   - Examples: `{Name} [{Grade}]`, `[{Grade}] {Name}`, `{Name} ({Grade})`
   - Shows comparison grade for upcoming splits, achieved grade for completed splits
   - Automatically reverts to original names on reset
+- **Grade Icons**: Display grade badges as split icons
+  - Auto-generates colored circular icons by default
+  - Supports custom icons (see below)
+
+### Custom Icons
+
+You can use your own images for grade icons instead of the auto-generated colored circles.
+
+**Setup:**
+1. Create a folder containing your custom icon images
+2. In the Grading Splits settings, click the `...` button next to "Custom Icon Folder"
+3. Select any image file inside your icons folder (the folder path will be extracted)
+
+**Icon Naming Convention:**
+- Name icons to match your grade labels: `S.png`, `A.png`, `B.png`, `C.png`, `F.png`, etc.
+- Use `Best.png` for gold/personal best splits
+- Use `Worst.png` for worst splits
+- Any grades without matching icons will use auto-generated ones
+
+**Supported Formats:** PNG, JPG, JPEG, GIF, BMP, ICO
+
+**Example folder structure:**
+```
+MyIcons/
+├── S.png      (for S grade)
+├── A.png      (for A grade)
+├── B.png      (for B grade)
+├── C.png      (for C grade)
+├── F.png      (for F grade)
+├── Best.png   (for gold/PB splits)
+└── Worst.png  (for worst splits)
+```
 
 ### Graph Visualization
 When enabled, the graph shows:
@@ -165,3 +214,9 @@ A: This usually means you have very few attempts or very consistent times (low s
 
 **Q: Can I export my grading settings?**  
 A: Settings are stored in your LiveSplit layout file. You can share your layout file to share your grading configuration.
+
+**Q: My custom icons aren't showing up**  
+A: Check that your icon files are named exactly like your grade labels (case-sensitive on some systems). For example, if your grade is "S", the file should be `S.png`, not `s.png`. Also ensure the icon folder path is correctly set in settings.
+
+**Q: The component crashes or LiveSplit becomes unstable**  
+A: Try deleting and re-extracting LiveSplit, then reinstalling the component. Always keep backups of your splits and layouts before updating the component.

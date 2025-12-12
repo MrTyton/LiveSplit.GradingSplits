@@ -23,9 +23,6 @@ namespace LiveSplit.GradingSplits.UI.Components
         /// </summary>
         private void CreateIconFolderControls()
         {
-            // Find the tableLayoutPanel2 and add a new row for icon folder settings
-            // We'll add these controls after the Show Grade Icons checkbox
-
             // Create label
             lblIconFolder = new Label
             {
@@ -45,9 +42,9 @@ namespace LiveSplit.GradingSplits.UI.Components
             // Create browse button
             btnBrowseIconFolder = new Button
             {
-                Text = "Browse...",
-                Size = new Size(74, 23),
-                Anchor = AnchorStyles.Left | AnchorStyles.Right
+                Text = "...",
+                Size = new Size(30, 23),
+                Anchor = AnchorStyles.Left
             };
             btnBrowseIconFolder.Click += BtnBrowseIconFolder_Click;
 
@@ -55,7 +52,7 @@ namespace LiveSplit.GradingSplits.UI.Components
             btnClearIconFolder = new Button
             {
                 Text = "Clear",
-                Size = new Size(50, 23),
+                Size = new Size(45, 23),
                 Anchor = AnchorStyles.Left
             };
             btnClearIconFolder.Click += BtnClearIconFolder_Click;
@@ -63,55 +60,70 @@ namespace LiveSplit.GradingSplits.UI.Components
             // Create help label with explanation
             lblIconFolderHelp = new Label
             {
-                Text = "Icon files should be named: S.png, A.png, B.png, etc. (matching grade labels)\n" +
-                       "Use Best.png for gold/best splits, Worst.png for worst splits.\n" +
-                       "Supported formats: PNG, JPG, GIF, BMP, ICO",
+                Text = "Select any icon file in your folder to set the icon folder path.\n" +
+                       "Icons should be named: S.png, A.png, etc. Use Best.png / Worst.png for special splits.\n" +
+                       "Missing icons will use auto-generated ones. Formats: PNG, JPG, GIF, BMP, ICO",
                 AutoSize = true,
                 ForeColor = SystemColors.GrayText,
-                Padding = new Padding(15, 0, 0, 5),
-                Dock = DockStyle.Fill
+                Padding = new Padding(15, 0, 0, 5)
             };
-
-            // Add new rows to tableLayoutPanel2
-            // First, increase row count and add row styles
-            tableLayoutPanel2.RowCount += 2;
-            tableLayoutPanel2.RowStyles.Add(new RowStyle(SizeType.Absolute, 30F));
-            tableLayoutPanel2.RowStyles.Add(new RowStyle(SizeType.AutoSize));
 
             // Create a flow panel for browse and clear buttons
             var buttonPanel = new FlowLayoutPanel
             {
                 FlowDirection = FlowDirection.LeftToRight,
                 AutoSize = true,
-                Margin = new Padding(0)
+                AutoSizeMode = AutoSizeMode.GrowAndShrink,
+                WrapContents = false,
+                Margin = new Padding(0),
+                Padding = new Padding(0)
             };
             buttonPanel.Controls.Add(btnBrowseIconFolder);
             buttonPanel.Controls.Add(btnClearIconFolder);
 
-            // Add controls to the new rows (after row 10 which is chkShowGradeIcons)
+            // Suspend layout while adding rows to prevent flickering
+            tableLayoutPanel2.SuspendLayout();
+
+            // Insert rows right after chkShowGradeIcons (row 10)
+            // Row 11: folder path controls, Row 12: help label
+            tableLayoutPanel2.RowCount = 13;
+            
+            // Add row styles for the new rows
+            tableLayoutPanel2.RowStyles.Add(new RowStyle(SizeType.Absolute, 30F));
+            tableLayoutPanel2.RowStyles.Add(new RowStyle(SizeType.AutoSize));
+
+            // Add controls to the new rows
             tableLayoutPanel2.Controls.Add(lblIconFolder, 0, 11);
             tableLayoutPanel2.Controls.Add(txtIconFolderPath, 1, 11);
             tableLayoutPanel2.Controls.Add(buttonPanel, 2, 11);
             tableLayoutPanel2.Controls.Add(lblIconFolderHelp, 0, 12);
             tableLayoutPanel2.SetColumnSpan(lblIconFolderHelp, 3);
+
+            tableLayoutPanel2.ResumeLayout(true);
         }
 
         private void BtnBrowseIconFolder_Click(object sender, EventArgs e)
         {
-            using (var folderDialog = new FolderBrowserDialog())
+            // Use OpenFileDialog in a way that allows folder selection
+            // by having user select any file in the desired folder
+            using (var fileDialog = new OpenFileDialog())
             {
-                folderDialog.Description = "Select folder containing custom grade icons";
-                folderDialog.ShowNewFolderButton = false;
-
-                if (!string.IsNullOrEmpty(GradingConfig.IconFolderPath))
+                fileDialog.Title = "Select any file in the custom icons folder";
+                fileDialog.Filter = "Image files (*.png;*.jpg;*.gif;*.bmp;*.ico)|*.png;*.jpg;*.jpeg;*.gif;*.bmp;*.ico|All files (*.*)|*.*";
+                fileDialog.CheckFileExists = true;
+                
+                if (!string.IsNullOrEmpty(GradingConfig.IconFolderPath) && 
+                    System.IO.Directory.Exists(GradingConfig.IconFolderPath))
                 {
-                    folderDialog.SelectedPath = GradingConfig.IconFolderPath;
+                    fileDialog.InitialDirectory = GradingConfig.IconFolderPath;
                 }
 
-                if (folderDialog.ShowDialog(this.FindForm()) == DialogResult.OK)
+                if (fileDialog.ShowDialog() == DialogResult.OK)
                 {
-                    GradingConfig.IconFolderPath = folderDialog.SelectedPath;
-                    txtIconFolderPath.Text = folderDialog.SelectedPath;
+                    // Get the folder from the selected file
+                    string folderPath = System.IO.Path.GetDirectoryName(fileDialog.FileName);
+                    GradingConfig.IconFolderPath = folderPath;
+                    txtIconFolderPath.Text = folderPath;
                     CustomIconLoader.ClearCache();
                     UpdateIconFolderControlsState();
                 }

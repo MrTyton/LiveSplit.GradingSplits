@@ -46,14 +46,14 @@ namespace LiveSplit.GradingSplits.Model
         /// <param name="threshold">Optional threshold with potential custom icon path.</param>
         /// <param name="isGold">Whether this is a gold/best split.</param>
         /// <param name="isWorst">Whether this is a worst split.</param>
-        /// <returns>The custom icon image, or null if none found.</returns>
+        /// <returns>A cloned custom icon image that caller can manage, or null if none found.</returns>
         public static Image GetCustomIcon(string gradeLabel, GradingSettings settings, GradeThreshold threshold = null, bool isGold = false, bool isWorst = false)
         {
             // Priority 1: Per-threshold custom icon path
             if (threshold != null && !string.IsNullOrEmpty(threshold.CustomIconPath))
             {
                 var icon = LoadIconFromPath(threshold.CustomIconPath);
-                if (icon != null) return icon;
+                if (icon != null) return CloneImage(icon);
             }
 
             // Priority 2: Folder-based icons
@@ -63,22 +63,31 @@ namespace LiveSplit.GradingSplits.Model
                 if (isGold)
                 {
                     var bestIcon = LoadIconFromFolder(settings.IconFolderPath, BestIconName);
-                    if (bestIcon != null) return bestIcon;
+                    if (bestIcon != null) return CloneImage(bestIcon);
                 }
 
                 if (isWorst)
                 {
                     var worstIcon = LoadIconFromFolder(settings.IconFolderPath, WorstIconName);
-                    if (worstIcon != null) return worstIcon;
+                    if (worstIcon != null) return CloneImage(worstIcon);
                 }
 
                 // Fall back to grade label icon
                 var gradeIcon = LoadIconFromFolder(settings.IconFolderPath, gradeLabel);
-                if (gradeIcon != null) return gradeIcon;
+                if (gradeIcon != null) return CloneImage(gradeIcon);
             }
 
             // Priority 3: No custom icon found
             return null;
+        }
+
+        /// <summary>
+        /// Creates a clone of an image to avoid shared reference issues.
+        /// </summary>
+        private static Image CloneImage(Image source)
+        {
+            if (source == null) return null;
+            return new Bitmap(source);
         }
 
         /// <summary>
@@ -154,6 +163,59 @@ namespace LiveSplit.GradingSplits.Model
                 ClearCache();
                 _lastFolderPath = newFolderPath;
             }
+        }
+
+        /// <summary>
+        /// Gets a custom icon resized for small display (e.g., info rows).
+        /// Returns a NEW image that the caller is responsible for disposing.
+        /// </summary>
+        /// <param name="gradeLabel">The grade label.</param>
+        /// <param name="settings">The grading settings.</param>
+        /// <param name="smallSize">The target size for the small icon.</param>
+        /// <param name="isGold">Whether this is a gold/best split.</param>
+        /// <param name="isWorst">Whether this is a worst split.</param>
+        /// <returns>A new resized custom icon that caller must dispose, or null if none found.</returns>
+        public static Image GetCustomIconSmall(string gradeLabel, GradingSettings settings, int smallSize, bool isGold = false, bool isWorst = false)
+        {
+            if (string.IsNullOrEmpty(settings?.IconFolderPath))
+                return null;
+
+            // Try to load the source icon (this is cached)
+            Image customIcon = null;
+            if (isGold)
+            {
+                customIcon = LoadIconFromFolder(settings.IconFolderPath, BestIconName);
+            }
+            if (customIcon == null && isWorst)
+            {
+                customIcon = LoadIconFromFolder(settings.IconFolderPath, WorstIconName);
+            }
+            if (customIcon == null)
+            {
+                customIcon = LoadIconFromFolder(settings.IconFolderPath, gradeLabel);
+            }
+
+            if (customIcon == null)
+                return null;
+
+            // Create a NEW resized image - caller is responsible for disposing this
+            return ResizeImage(customIcon, smallSize);
+        }
+
+        /// <summary>
+        /// Resizes an image to the specified size with high quality.
+        /// </summary>
+        private static Image ResizeImage(Image source, int size)
+        {
+            var result = new System.Drawing.Bitmap(size, size);
+            using (var g = System.Drawing.Graphics.FromImage(result))
+            {
+                g.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic;
+                g.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.HighQuality;
+                g.PixelOffsetMode = System.Drawing.Drawing2D.PixelOffsetMode.HighQuality;
+                g.DrawImage(source, 0, 0, size, size);
+            }
+            return result;
         }
 
         /// <summary>

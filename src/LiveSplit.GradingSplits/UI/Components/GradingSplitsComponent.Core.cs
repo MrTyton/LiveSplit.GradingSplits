@@ -70,6 +70,7 @@ namespace LiveSplit.GradingSplits.UI.Components
         private Image _currentGradeIcon = null;
         private string _lastIconGrade = null;
         private Color _lastIconColor = Color.White;
+        private string _lastPrevIconFolderPath = null;
 
         #endregion
 

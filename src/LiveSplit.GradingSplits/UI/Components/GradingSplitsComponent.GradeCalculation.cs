@@ -44,16 +44,43 @@ namespace LiveSplit.GradingSplits.UI.Components
             GradeLabel.Text = gradeResult.Grade;
             GradeLabel.ForeColor = gradeResult.Color;
 
-            // Update cached icon if grade or color changed
-            if (_lastIconGrade != gradeResult.Grade || _lastIconColor != gradeResult.Color)
+            // Check if icon folder changed - if so, force icon regeneration
+            bool folderChanged = _lastIconFolderPath != Settings.GradingConfig.IconFolderPath;
+            if (folderChanged)
+            {
+                _lastIconFolderPath = Settings.GradingConfig.IconFolderPath;
+            }
+
+            // Update cached icon if grade, color, or folder changed
+            if (_lastIconGrade != gradeResult.Grade || _lastIconColor != gradeResult.Color || folderChanged)
             {
                 _lastIconGrade = gradeResult.Grade;
                 _lastIconColor = gradeResult.Color;
                 _currentGradeIcon?.Dispose();
-                // Use small icon for the current grade display row (better fit in 25px row height)
-                _currentGradeIcon = gradeResult.Grade != "-" 
-                    ? GradeIconGenerator.GenerateSmallIcon(gradeResult.Grade, gradeResult.Color)
-                    : null;
+                
+                if (gradeResult.Grade != "-")
+                {
+                    // Check if this is a gold or worst grade
+                    bool isGold = Settings.GradingConfig.UseGoldGrade && gradeResult.Grade == Settings.GradingConfig.GoldLabel;
+                    bool isWorst = Settings.GradingConfig.UseWorstGrade && gradeResult.Grade == Settings.GradingConfig.WorstLabel;
+                    
+                    // Try custom icon first, fall back to generated
+                    _currentGradeIcon = CustomIconLoader.GetCustomIconSmall(
+                        gradeResult.Grade, 
+                        Settings.GradingConfig, 
+                        GradeIconGenerator.SmallIconSize,
+                        isGold, 
+                        isWorst);
+                    
+                    if (_currentGradeIcon == null)
+                    {
+                        _currentGradeIcon = GradeIconGenerator.GenerateSmallIcon(gradeResult.Grade, gradeResult.Color);
+                    }
+                }
+                else
+                {
+                    _currentGradeIcon = null;
+                }
             }
 
             // Calculate previous split comparison data
@@ -71,10 +98,13 @@ namespace LiveSplit.GradingSplits.UI.Components
             }
 
             // Check if we already have cached data for this split
-            if (_lastPreviousSplitIndex == currentIndex - 1 && _hasPreviousSplitData)
+            // Also regenerate if icon folder changed
+            bool folderChangedForPrev = _lastPrevIconFolderPath != Settings.GradingConfig.IconFolderPath;
+            if (_lastPreviousSplitIndex == currentIndex - 1 && _hasPreviousSplitData && !folderChangedForPrev)
             {
                 return;  // Use cached data
             }
+            _lastPrevIconFolderPath = Settings.GradingConfig.IconFolderPath;
 
             _hasPreviousSplitData = false;
 
@@ -139,9 +169,18 @@ namespace LiveSplit.GradingSplits.UI.Components
                 _previousAchievedGrade = achievedResult.Grade;
                 _previousAchievedColor = achievedResult.Color;
 
-                // Generate small icon for the achieved grade
+                // Generate small icon for the achieved grade - try custom icon first
                 _previousAchievedIcon?.Dispose();
-                _previousAchievedIcon = GradeIconGenerator.GenerateSmallIcon(achievedResult.Grade.Trim(), achievedResult.Color);
+                _previousAchievedIcon = CustomIconLoader.GetCustomIconSmall(
+                    achievedResult.Grade.Trim(),
+                    Settings.GradingConfig,
+                    GradeIconGenerator.SmallIconSize,
+                    isGold,
+                    isWorst);
+                if (_previousAchievedIcon == null)
+                {
+                    _previousAchievedIcon = GradeIconGenerator.GenerateSmallIcon(achievedResult.Grade.Trim(), achievedResult.Color);
+                }
             }
             else
             {
@@ -166,9 +205,18 @@ namespace LiveSplit.GradingSplits.UI.Components
                 _previousComparisonGrade = comparisonResult.Grade;
                 _previousComparisonColor = comparisonResult.Color;
 
-                // Generate small icon for the comparison grade
+                // Generate small icon for the comparison grade - try custom icon first
                 _previousComparisonIcon?.Dispose();
-                _previousComparisonIcon = GradeIconGenerator.GenerateSmallIcon(comparisonResult.Grade.Trim(), comparisonResult.Color);
+                _previousComparisonIcon = CustomIconLoader.GetCustomIconSmall(
+                    comparisonResult.Grade.Trim(),
+                    Settings.GradingConfig,
+                    GradeIconGenerator.SmallIconSize,
+                    isGold,
+                    isWorst);
+                if (_previousComparisonIcon == null)
+                {
+                    _previousComparisonIcon = GradeIconGenerator.GenerateSmallIcon(comparisonResult.Grade.Trim(), comparisonResult.Color);
+                }
             }
             else
             {
