@@ -37,11 +37,14 @@ namespace LiveSplit.GradingSplits.UI.Components
         private bool _hasPreviousSplitData = false;
         private Image _previousAchievedIcon = null;
         private Image _previousComparisonIcon = null;
+        private int _lastPreviousSplitIndex = -1;  // Cache key for previous split data
 
         // Split name grading
         private Dictionary<int, string> _originalSplitNames = new Dictionary<int, string>();
         private bool _splitNamesModified = false;
         private IRun _gradedRun = null;
+        private Dictionary<int, string> _splitNameGradeCache = new Dictionary<int, string>();  // Cache for split name grades
+        private int _lastNameUpdateSplitIndex = -1;  // Track when split names need updating
 
         // Split icon grading
         private Dictionary<int, Image> _originalSplitIcons = new Dictionary<int, Image>();
@@ -134,6 +137,14 @@ namespace LiveSplit.GradingSplits.UI.Components
             // Restore original names when run resets
             RestoreOriginalSplitNames();
             RestoreOriginalSplitIcons();
+
+            // Clear all caches
+            _splitNameGradeCache.Clear();
+            _splitIconCache.Clear();
+            _lastNameUpdateSplitIndex = -1;
+            _lastIconUpdateSplitIndex = -1;
+            _lastPreviousSplitIndex = -1;
+            _hasPreviousSplitData = false;
         }
 
         private void StoreOriginalSplitNames()
@@ -381,8 +392,32 @@ namespace LiveSplit.GradingSplits.UI.Components
                 if (_splitNamesModified)
                 {
                     RestoreOriginalSplitNames();
+                    _splitNameGradeCache.Clear();
                 }
+                _lastNameUpdateSplitIndex = -1;
                 return;
+            }
+
+            // Check if we need to update names
+            bool needsUpdate = false;
+
+            // Run changed
+            if (_gradedRun != state.Run)
+            {
+                needsUpdate = true;
+                _splitNameGradeCache.Clear();
+            }
+            // Split index changed (a split was completed)
+            else if (_lastNameUpdateSplitIndex != state.CurrentSplitIndex)
+            {
+                needsUpdate = true;
+            }
+
+            _lastNameUpdateSplitIndex = state.CurrentSplitIndex;
+
+            if (!needsUpdate)
+            {
+                return;  // Names are up to date
             }
 
             // Make sure we have original names stored
@@ -409,21 +444,33 @@ namespace LiveSplit.GradingSplits.UI.Components
                     grade = result.Grade;
                 }
 
-                if (grade != "-" && !string.IsNullOrEmpty(grade))
+                // Check if grade changed from cached value
+                bool gradeChanged = true;
+                if (_splitNameGradeCache.TryGetValue(i, out var cachedGrade))
                 {
-                    // Use the customizable format string
-                    string format = Settings.GradingConfig.SplitNameFormat;
-                    if (string.IsNullOrEmpty(format))
-                        format = "{Name} [{Grade}]";
-
-                    state.Run[i].Name = format
-                        .Replace("{Name}", originalName)
-                        .Replace("{Grade}", grade);
-                    _splitNamesModified = true;
+                    gradeChanged = cachedGrade != grade;
                 }
-                else
+
+                if (gradeChanged)
                 {
-                    state.Run[i].Name = originalName;
+                    _splitNameGradeCache[i] = grade;
+
+                    if (grade != "-" && !string.IsNullOrEmpty(grade))
+                    {
+                        // Use the customizable format string
+                        string format = Settings.GradingConfig.SplitNameFormat;
+                        if (string.IsNullOrEmpty(format))
+                            format = "{Name} [{Grade}]";
+
+                        state.Run[i].Name = format
+                            .Replace("{Name}", originalName)
+                            .Replace("{Grade}", grade);
+                        _splitNamesModified = true;
+                    }
+                    else
+                    {
+                        state.Run[i].Name = originalName;
+                    }
                 }
             }
         }
@@ -912,13 +959,24 @@ namespace LiveSplit.GradingSplits.UI.Components
 
         private void UpdatePreviousSplitData(LiveSplitState state, int currentIndex)
         {
-            _hasPreviousSplitData = false;
-
             // Need at least one previous split
             if (currentIndex <= 0)
+            {
+                _hasPreviousSplitData = false;
+                _lastPreviousSplitIndex = -1;
                 return;
+            }
+
+            // Check if we already have cached data for this split
+            if (_lastPreviousSplitIndex == currentIndex - 1 && _hasPreviousSplitData)
+            {
+                return;  // Use cached data
+            }
+
+            _hasPreviousSplitData = false;
 
             int prevIndex = currentIndex - 1;
+            _lastPreviousSplitIndex = prevIndex;
             var prevSegment = state.Run[prevIndex];
             var method = state.CurrentTimingMethod;
 
