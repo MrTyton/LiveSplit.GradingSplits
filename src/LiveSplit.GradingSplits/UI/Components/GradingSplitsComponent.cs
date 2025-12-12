@@ -41,6 +41,10 @@ namespace LiveSplit.GradingSplits.UI.Components
         private bool _splitNamesModified = false;
         private IRun _gradedRun = null;
 
+        // Split icon grading
+        private Dictionary<int, Image> _originalSplitIcons = new Dictionary<int, Image>();
+        private bool _splitIconsModified = false;
+
         public string ComponentName => "Grading Splits";
 
         public float HorizontalWidth => Label.ActualWidth + GradeLabel.ActualWidth + 5;
@@ -111,6 +115,7 @@ namespace LiveSplit.GradingSplits.UI.Components
             if (_originalSplitNames.Count == 0 || _gradedRun != _state.Run)
             {
                 StoreOriginalSplitNames();
+                StoreOriginalSplitIcons();
             }
         }
 
@@ -118,6 +123,7 @@ namespace LiveSplit.GradingSplits.UI.Components
         {
             // Restore original names when run resets
             RestoreOriginalSplitNames();
+            RestoreOriginalSplitIcons();
         }
 
         private void StoreOriginalSplitNames()
@@ -215,6 +221,100 @@ namespace LiveSplit.GradingSplits.UI.Components
             _originalSplitNames.Clear();
             _splitNamesModified = false;
             _gradedRun = null;
+        }
+
+        private void StoreOriginalSplitIcons()
+        {
+            if (_state.Run == null) return;
+
+            // First restore any previously modified icons before storing new originals
+            if (_splitIconsModified && _gradedRun != null)
+            {
+                RestoreOriginalSplitIcons();
+            }
+
+            _originalSplitIcons.Clear();
+
+            for (int i = 0; i < _state.Run.Count; i++)
+            {
+                // Store the current icon (may be null)
+                _originalSplitIcons[i] = _state.Run[i].Icon;
+            }
+
+            _splitIconsModified = false;
+        }
+
+        private void RestoreOriginalSplitIcons()
+        {
+            if (!_splitIconsModified || _gradedRun == null) return;
+
+            foreach (var kvp in _originalSplitIcons)
+            {
+                if (kvp.Key < _gradedRun.Count)
+                {
+                    _gradedRun[kvp.Key].Icon = kvp.Value;
+                }
+            }
+
+            _originalSplitIcons.Clear();
+            _splitIconsModified = false;
+        }
+
+        private void UpdateSplitIconsWithGrades(LiveSplitState state)
+        {
+            if (state.Run == null) return;
+
+            // If the feature is disabled, restore original icons if modified
+            if (!Settings.GradingConfig.ShowGradeIcons)
+            {
+                if (_splitIconsModified)
+                {
+                    RestoreOriginalSplitIcons();
+                }
+                return;
+            }
+
+            // Make sure we have original icons stored
+            if (_originalSplitIcons.Count == 0 || _gradedRun != state.Run)
+            {
+                StoreOriginalSplitIcons();
+            }
+
+            for (int i = 0; i < state.Run.Count; i++)
+            {
+                string grade;
+                Color color;
+
+                if (i < state.CurrentSplitIndex)
+                {
+                    // Completed split - show achieved grade
+                    var result = CalculateGradeForSplit(state, i, useActualTime: true);
+                    grade = result.Grade;
+                    color = result.Color;
+                }
+                else
+                {
+                    // Upcoming split - show comparison grade
+                    var result = CalculateGradeForSplit(state, i, useActualTime: false);
+                    grade = result.Grade;
+                    color = result.Color;
+                }
+
+                if (grade != "-" && !string.IsNullOrEmpty(grade))
+                {
+                    // Generate and set the grade icon
+                    state.Run[i].Icon = GradeIconGenerator.GenerateIcon(grade, color);
+                    _splitIconsModified = true;
+                }
+                else
+                {
+                    // Restore original icon for splits without grades
+                    if (_originalSplitIcons.ContainsKey(i))
+                    {
+                        state.Run[i].Icon = _originalSplitIcons[i];
+                    }
+                }
+            }
         }
 
         private void UpdateSplitNamesWithGrades(LiveSplitState state)
@@ -652,6 +752,7 @@ namespace LiveSplit.GradingSplits.UI.Components
         {
             UpdateGrade(state);
             UpdateSplitNamesWithGrades(state);
+            UpdateSplitIconsWithGrades(state);
 
             if (invalidator != null)
             {
@@ -880,8 +981,9 @@ namespace LiveSplit.GradingSplits.UI.Components
 
         public void Dispose()
         {
-            // Restore original split names before disposing
+            // Restore original split names and icons before disposing
             RestoreOriginalSplitNames();
+            RestoreOriginalSplitIcons();
 
             // Unsubscribe from events
             if (_state != null)

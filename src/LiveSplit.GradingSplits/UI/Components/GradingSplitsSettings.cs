@@ -224,6 +224,11 @@ namespace LiveSplit.GradingSplits.UI.Components
                 GradingConfig.SplitNameFormat = txtSplitNameFormat.Text;
             };
 
+            chkShowGradeIcons.CheckedChanged += (s, e) =>
+            {
+                GradingConfig.ShowGradeIcons = chkShowGradeIcons.Checked;
+            };
+
             btnResetDefaults.Click += (s, e) =>
             {
                 if (MessageBox.Show("Reset all grade settings to defaults?", "Confirm Reset",
@@ -283,6 +288,8 @@ namespace LiveSplit.GradingSplits.UI.Components
             txtSplitNameFormat.Text = GradingConfig.SplitNameFormat;
             txtSplitNameFormat.Enabled = GradingConfig.ShowGradeInSplitNames;
 
+            chkShowGradeIcons.Checked = GradingConfig.ShowGradeIcons;
+
             // Populate thresholds grid
             dgvThresholds.Rows.Clear();
             foreach (var threshold in GradingConfig.Thresholds)
@@ -324,6 +331,7 @@ namespace LiveSplit.GradingSplits.UI.Components
             GradingConfig.CurrentGradeFontSize = SettingsHelper.ParseInt(element["CurrentGradeFontSize"], 15);
             GradingConfig.ShowGradeInSplitNames = SettingsHelper.ParseBool(element["ShowGradeInSplitNames"], false);
             GradingConfig.SplitNameFormat = SettingsHelper.ParseString(element["SplitNameFormat"], "{Name} [{Grade}]");
+            GradingConfig.ShowGradeIcons = SettingsHelper.ParseBool(element["ShowGradeIcons"], false);
 
             // Parse thresholds
             var thresholdsNode = element["Thresholds"];
@@ -402,6 +410,7 @@ namespace LiveSplit.GradingSplits.UI.Components
             hash ^= SettingsHelper.CreateSetting(document, parent, "CurrentGradeFontSize", GradingConfig.CurrentGradeFontSize);
             hash ^= SettingsHelper.CreateSetting(document, parent, "ShowGradeInSplitNames", GradingConfig.ShowGradeInSplitNames);
             hash ^= SettingsHelper.CreateSetting(document, parent, "SplitNameFormat", GradingConfig.SplitNameFormat);
+            hash ^= SettingsHelper.CreateSetting(document, parent, "ShowGradeIcons", GradingConfig.ShowGradeIcons);
 
             // Save thresholds
             if (document != null)

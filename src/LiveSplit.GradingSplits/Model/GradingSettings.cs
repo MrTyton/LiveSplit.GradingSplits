@@ -112,6 +112,11 @@ namespace LiveSplit.GradingSplits.Model
         public string SplitNameFormat { get; set; }
 
         /// <summary>
+        /// Whether to show grade icons for each split.
+        /// </summary>
+        public bool ShowGradeIcons { get; set; }
+
+        /// <summary>
         /// Creates a new GradingSettings instance with default values.
         /// Default thresholds use percentiles where 0=fastest and 100=slowest.
         /// </summary>
@@ -146,6 +151,7 @@ namespace LiveSplit.GradingSplits.Model
             CurrentGradeFontSize = 15;
             ShowGradeInSplitNames = false;
             SplitNameFormat = "{Name} [{Grade}]";
+            ShowGradeIcons = false;
         }
 
         /// <summary>
@@ -175,7 +181,8 @@ namespace LiveSplit.GradingSplits.Model
                 ShowCurrentGrade = ShowCurrentGrade,
                 CurrentGradeFontSize = CurrentGradeFontSize,
                 ShowGradeInSplitNames = ShowGradeInSplitNames,
-                SplitNameFormat = SplitNameFormat
+                SplitNameFormat = SplitNameFormat,
+                ShowGradeIcons = ShowGradeIcons
             };
             return clone;
         }

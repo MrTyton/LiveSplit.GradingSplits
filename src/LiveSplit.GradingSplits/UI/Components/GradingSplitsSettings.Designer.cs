@@ -65,6 +65,7 @@ namespace LiveSplit.GradingSplits.UI.Components
             this.numCurrentGradeFontSize = new System.Windows.Forms.NumericUpDown();
             this.chkShowSplitNameGrades = new System.Windows.Forms.CheckBox();
             this.txtSplitNameFormat = new System.Windows.Forms.TextBox();
+            this.chkShowGradeIcons = new System.Windows.Forms.CheckBox();
             this.toolTip1 = new System.Windows.Forms.ToolTip();
             this.btnResetDefaults = new System.Windows.Forms.Button();
             this.tableLayoutPanel1.SuspendLayout();
@@ -252,10 +253,13 @@ namespace LiveSplit.GradingSplits.UI.Components
             this.tableLayoutPanel2.Controls.Add(this.chkShowSplitNameGrades, 0, 8);
             this.tableLayoutPanel2.Controls.Add(this.txtSplitNameFormat, 1, 8);
             this.tableLayoutPanel2.SetColumnSpan(this.txtSplitNameFormat, 2);
+            this.tableLayoutPanel2.Controls.Add(this.chkShowGradeIcons, 0, 9);
+            this.tableLayoutPanel2.SetColumnSpan(this.chkShowGradeIcons, 3);
             this.tableLayoutPanel2.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tableLayoutPanel2.Location = new System.Drawing.Point(3, 16);
             this.tableLayoutPanel2.Name = "tableLayoutPanel2";
-            this.tableLayoutPanel2.RowCount = 9;
+            this.tableLayoutPanel2.RowCount = 10;
+            this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 30F));
             this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 30F));
             this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 30F));
             this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 30F));
@@ -266,7 +270,7 @@ namespace LiveSplit.GradingSplits.UI.Components
             this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 30F));
             this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 30F));
             this.tableLayoutPanel2.AutoSize = true;
-            this.tableLayoutPanel2.Size = new System.Drawing.Size(450, 270);
+            this.tableLayoutPanel2.Size = new System.Drawing.Size(450, 300);
             this.tableLayoutPanel2.TabIndex = 0;
             // 
             // chkUseBackground
@@ -515,6 +519,18 @@ namespace LiveSplit.GradingSplits.UI.Components
             this.txtSplitNameFormat.TabIndex = 21;
             this.toolTip1.SetToolTip(this.txtSplitNameFormat, "Format string for split names.\nUse {Name} for the original split name.\nUse {Grade} for the grade.\n\nExamples:\n  {Name} [{Grade}]\n  [{Grade}] {Name}\n  {Name} ({Grade})");
             // 
+            // chkShowGradeIcons
+            // 
+            this.chkShowGradeIcons.Anchor = System.Windows.Forms.AnchorStyles.Left;
+            this.chkShowGradeIcons.AutoSize = true;
+            this.chkShowGradeIcons.Location = new System.Drawing.Point(3, 276);
+            this.chkShowGradeIcons.Name = "chkShowGradeIcons";
+            this.chkShowGradeIcons.Size = new System.Drawing.Size(130, 17);
+            this.chkShowGradeIcons.TabIndex = 24;
+            this.chkShowGradeIcons.Text = "Show Grade Icons";
+            this.chkShowGradeIcons.UseVisualStyleBackColor = true;
+            this.toolTip1.SetToolTip(this.chkShowGradeIcons, "Display grade icons next to each split.\nIcons are generated based on grade colors.");
+            // 
             // btnResetDefaults
             // 
             this.btnResetDefaults.Anchor = System.Windows.Forms.AnchorStyles.Right;
@@ -582,6 +598,7 @@ namespace LiveSplit.GradingSplits.UI.Components
         private System.Windows.Forms.NumericUpDown numCurrentGradeFontSize;
         private System.Windows.Forms.CheckBox chkShowSplitNameGrades;
         private System.Windows.Forms.TextBox txtSplitNameFormat;
+        private System.Windows.Forms.CheckBox chkShowGradeIcons;
         private System.Windows.Forms.ToolTip toolTip1;
         private System.Windows.Forms.Button btnResetDefaults;
         private System.Windows.Forms.DataGridViewTextBoxColumn colZScore;
