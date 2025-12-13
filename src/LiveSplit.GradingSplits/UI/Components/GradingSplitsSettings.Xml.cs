@@ -22,6 +22,9 @@ namespace LiveSplit.GradingSplits.UI.Components
 
             GradingConfig.UseBackgroundColor = SettingsHelper.ParseBool(element["UseBackgroundColor"], false);
             GradingConfig.BackgroundColor = SettingsHelper.ParseColor(element["BackgroundColor"], Color.Black);
+            GradingConfig.UseOpaqueBackground = SettingsHelper.ParseBool(element["UseOpaqueBackground"], false);
+            GradingConfig.ComponentBackgroundColor = SettingsHelper.ParseColor(element["ComponentBackgroundColor"], Color.FromArgb(30, 30, 30));
+            GradingConfig.ComponentBackgroundColor2 = SettingsHelper.ParseColor(element["ComponentBackgroundColor2"], Color.FromArgb(30, 30, 30));
             GradingConfig.UseGoldGrade = SettingsHelper.ParseBool(element["UseGoldGrade"], true);
             GradingConfig.GoldLabel = SettingsHelper.ParseString(element["GoldLabel"], "★");
             GradingConfig.GoldColor = SettingsHelper.ParseColor(element["GoldColor"], Color.Gold);
@@ -137,6 +140,9 @@ namespace LiveSplit.GradingSplits.UI.Components
         {
             int hash = SettingsHelper.CreateSetting(document, parent, "UseBackgroundColor", GradingConfig.UseBackgroundColor);
             hash ^= SettingsHelper.CreateSetting(document, parent, "BackgroundColor", GradingConfig.BackgroundColor);
+            hash ^= SettingsHelper.CreateSetting(document, parent, "UseOpaqueBackground", GradingConfig.UseOpaqueBackground);
+            hash ^= SettingsHelper.CreateSetting(document, parent, "ComponentBackgroundColor", GradingConfig.ComponentBackgroundColor);
+            hash ^= SettingsHelper.CreateSetting(document, parent, "ComponentBackgroundColor2", GradingConfig.ComponentBackgroundColor2);
             hash ^= SettingsHelper.CreateSetting(document, parent, "UseGoldGrade", GradingConfig.UseGoldGrade);
             hash ^= SettingsHelper.CreateSetting(document, parent, "GoldLabel", GradingConfig.GoldLabel);
             hash ^= SettingsHelper.CreateSetting(document, parent, "GoldColor", GradingConfig.GoldColor);

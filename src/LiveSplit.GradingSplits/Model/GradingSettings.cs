@@ -42,6 +42,23 @@ namespace LiveSplit.GradingSplits.Model
         public Color BackgroundColor { get; set; }
 
         /// <summary>
+        /// Whether to use an opaque background for the entire component.
+        /// When false (default), the component is transparent and shows the layout background/image.
+        /// When true, draws a solid background color.
+        /// </summary>
+        public bool UseOpaqueBackground { get; set; }
+
+        /// <summary>
+        /// The primary background color for the component when UseOpaqueBackground is true.
+        /// </summary>
+        public Color ComponentBackgroundColor { get; set; }
+
+        /// <summary>
+        /// The secondary background color for gradient backgrounds.
+        /// </summary>
+        public Color ComponentBackgroundColor2 { get; set; }
+
+        /// <summary>
         /// Whether to show a special badge for the best (gold) segment.
         /// </summary>
         public bool UseGoldGrade { get; set; }
@@ -162,6 +179,9 @@ namespace LiveSplit.GradingSplits.Model
 
             UseBackgroundColor = false;
             BackgroundColor = Color.Black;
+            UseOpaqueBackground = false;
+            ComponentBackgroundColor = Color.FromArgb(30, 30, 30);
+            ComponentBackgroundColor2 = Color.FromArgb(30, 30, 30);
             UseGoldGrade = true;
             GoldLabel = "★";
             GoldColor = Color.Gold;
@@ -195,6 +215,9 @@ namespace LiveSplit.GradingSplits.Model
                 Thresholds = Thresholds.Select(t => t.Clone()).ToList(),
                 UseBackgroundColor = UseBackgroundColor,
                 BackgroundColor = BackgroundColor,
+                UseOpaqueBackground = UseOpaqueBackground,
+                ComponentBackgroundColor = ComponentBackgroundColor,
+                ComponentBackgroundColor2 = ComponentBackgroundColor2,
                 UseGoldGrade = UseGoldGrade,
                 GoldLabel = GoldLabel,
                 GoldColor = GoldColor,

@@ -18,6 +18,100 @@ namespace LiveSplit.GradingSplits.UI.Components
         private Button btnClearIconFolder;
         private Label lblIconFolderHelp;
 
+        // Opaque background controls (created programmatically)
+        private CheckBox chkOpaqueBackground;
+        private Button btnComponentBgColor;
+        private Button btnComponentBgColor2;
+
+        /// <summary>
+        /// Creates the opaque background UI controls programmatically.
+        /// </summary>
+        private void CreateOpaqueBackgroundControls()
+        {
+            chkOpaqueBackground = new CheckBox
+            {
+                Text = "Use Opaque Background",
+                AutoSize = true,
+                Anchor = AnchorStyles.Left
+            };
+            chkOpaqueBackground.CheckedChanged += (s, e) =>
+            {
+                GradingConfig.UseOpaqueBackground = chkOpaqueBackground.Checked;
+                btnComponentBgColor.Enabled = chkOpaqueBackground.Checked;
+                btnComponentBgColor2.Enabled = chkOpaqueBackground.Checked;
+            };
+
+            btnComponentBgColor = new Button
+            {
+                Text = "Color 1",
+                Size = new Size(70, 23),
+                Anchor = AnchorStyles.Left
+            };
+            btnComponentBgColor.Click += (s, e) =>
+            {
+                using (var colorDialog = new ColorDialog())
+                {
+                    colorDialog.Color = GradingConfig.ComponentBackgroundColor;
+                    if (colorDialog.ShowDialog() == DialogResult.OK)
+                    {
+                        GradingConfig.ComponentBackgroundColor = colorDialog.Color;
+                        btnComponentBgColor.BackColor = colorDialog.Color;
+                    }
+                }
+            };
+
+            btnComponentBgColor2 = new Button
+            {
+                Text = "Color 2",
+                Size = new Size(70, 23),
+                Anchor = AnchorStyles.Left
+            };
+            btnComponentBgColor2.Click += (s, e) =>
+            {
+                using (var colorDialog = new ColorDialog())
+                {
+                    colorDialog.Color = GradingConfig.ComponentBackgroundColor2;
+                    if (colorDialog.ShowDialog() == DialogResult.OK)
+                    {
+                        GradingConfig.ComponentBackgroundColor2 = colorDialog.Color;
+                        btnComponentBgColor2.BackColor = colorDialog.Color;
+                    }
+                }
+            };
+
+            // Create a flow panel for the color buttons
+            var bgButtonPanel = new FlowLayoutPanel
+            {
+                FlowDirection = FlowDirection.LeftToRight,
+                AutoSize = true,
+                AutoSizeMode = AutoSizeMode.GrowAndShrink,
+                WrapContents = false,
+                Margin = new Padding(0),
+                Padding = new Padding(0)
+            };
+            bgButtonPanel.Controls.Add(btnComponentBgColor);
+            bgButtonPanel.Controls.Add(btnComponentBgColor2);
+
+            // Insert at the beginning of tableLayoutPanel2 (row 0)
+            tableLayoutPanel2.SuspendLayout();
+            
+            // Shift all existing controls down by 1 row
+            foreach (Control control in tableLayoutPanel2.Controls)
+            {
+                int currentRow = tableLayoutPanel2.GetRow(control);
+                tableLayoutPanel2.SetRow(control, currentRow + 1);
+            }
+            
+            tableLayoutPanel2.RowCount++;
+            tableLayoutPanel2.RowStyles.Insert(0, new RowStyle(SizeType.Absolute, 30F));
+            
+            tableLayoutPanel2.Controls.Add(chkOpaqueBackground, 0, 0);
+            tableLayoutPanel2.Controls.Add(bgButtonPanel, 1, 0);
+            tableLayoutPanel2.SetColumnSpan(bgButtonPanel, 2);
+
+            tableLayoutPanel2.ResumeLayout(true);
+        }
+
         /// <summary>
         /// Creates the custom icon folder UI controls programmatically.
         /// </summary>
@@ -177,6 +271,13 @@ namespace LiveSplit.GradingSplits.UI.Components
             chkUseBackground.Checked = GradingConfig.UseBackgroundColor;
             btnBackgroundColor.BackColor = GradingConfig.BackgroundColor;
             btnBackgroundColor.Enabled = GradingConfig.UseBackgroundColor;
+
+            // Opaque background settings
+            chkOpaqueBackground.Checked = GradingConfig.UseOpaqueBackground;
+            btnComponentBgColor.BackColor = GradingConfig.ComponentBackgroundColor;
+            btnComponentBgColor.Enabled = GradingConfig.UseOpaqueBackground;
+            btnComponentBgColor2.BackColor = GradingConfig.ComponentBackgroundColor2;
+            btnComponentBgColor2.Enabled = GradingConfig.UseOpaqueBackground;
         }
 
         private void LoadGoldGradeSettings()

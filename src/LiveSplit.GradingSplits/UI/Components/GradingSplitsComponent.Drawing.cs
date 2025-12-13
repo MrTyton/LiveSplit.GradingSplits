@@ -27,6 +27,12 @@ namespace LiveSplit.GradingSplits.UI.Components
         {
             var oldMatrix = g.Transform;
 
+            // Draw component background if opaque background is enabled
+            if (Settings.GradingConfig.UseOpaqueBackground)
+            {
+                DrawComponentBackground(g, width, height);
+            }
+
             // Update label text with current comparison
             Label.Text = state.CurrentComparison + "'s Grade:";
 
@@ -164,6 +170,36 @@ namespace LiveSplit.GradingSplits.UI.Components
             }
 
             g.Transform = oldMatrix;
+        }
+
+        /// <summary>
+        /// Draws the opaque background for the component.
+        /// </summary>
+        private void DrawComponentBackground(Graphics g, float width, float height)
+        {
+            var color1 = Settings.GradingConfig.ComponentBackgroundColor;
+            var color2 = Settings.GradingConfig.ComponentBackgroundColor2;
+
+            if (color1 == color2)
+            {
+                // Solid color
+                using (var brush = new SolidBrush(color1))
+                {
+                    g.FillRectangle(brush, 0, 0, width, height);
+                }
+            }
+            else
+            {
+                // Vertical gradient
+                using (var brush = new System.Drawing.Drawing2D.LinearGradientBrush(
+                    new PointF(0, 0),
+                    new PointF(0, height),
+                    color1,
+                    color2))
+                {
+                    g.FillRectangle(brush, 0, 0, width, height);
+                }
+            }
         }
 
         private void DrawPreviousSplitComparison(Graphics g, LiveSplitState state, float width, float yOffset)
