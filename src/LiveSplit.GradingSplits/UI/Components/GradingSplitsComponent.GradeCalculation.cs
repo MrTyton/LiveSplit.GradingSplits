@@ -57,21 +57,21 @@ namespace LiveSplit.GradingSplits.UI.Components
                 _lastIconGrade = gradeResult.Grade;
                 _lastIconColor = gradeResult.Color;
                 _currentGradeIcon?.Dispose();
-                
+
                 if (gradeResult.Grade != "-")
                 {
                     // Check if this is a gold or worst grade
                     bool isGold = Settings.GradingConfig.UseGoldGrade && gradeResult.Grade == Settings.GradingConfig.GoldLabel;
                     bool isWorst = Settings.GradingConfig.UseWorstGrade && gradeResult.Grade == Settings.GradingConfig.WorstLabel;
-                    
+
                     // Try custom icon first, fall back to generated
                     _currentGradeIcon = CustomIconLoader.GetCustomIconSmall(
-                        gradeResult.Grade, 
-                        Settings.GradingConfig, 
+                        gradeResult.Grade,
+                        Settings.GradingConfig,
                         GradeIconGenerator.SmallIconSize,
-                        isGold, 
+                        isGold,
                         isWorst);
-                    
+
                     if (_currentGradeIcon == null)
                     {
                         _currentGradeIcon = GradeIconGenerator.GenerateSmallIcon(gradeResult.Grade, gradeResult.Color);

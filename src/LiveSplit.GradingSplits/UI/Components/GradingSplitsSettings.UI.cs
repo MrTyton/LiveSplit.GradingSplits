@@ -94,17 +94,17 @@ namespace LiveSplit.GradingSplits.UI.Components
 
             // Insert at the beginning of tableLayoutPanel2 (row 0)
             tableLayoutPanel2.SuspendLayout();
-            
+
             // Shift all existing controls down by 1 row
             foreach (Control control in tableLayoutPanel2.Controls)
             {
                 int currentRow = tableLayoutPanel2.GetRow(control);
                 tableLayoutPanel2.SetRow(control, currentRow + 1);
             }
-            
+
             tableLayoutPanel2.RowCount++;
             tableLayoutPanel2.RowStyles.Insert(0, new RowStyle(SizeType.Absolute, 30F));
-            
+
             tableLayoutPanel2.Controls.Add(chkOpaqueBackground, 0, 0);
             tableLayoutPanel2.Controls.Add(bgButtonPanel, 1, 0);
             tableLayoutPanel2.SetColumnSpan(bgButtonPanel, 2);
@@ -181,7 +181,7 @@ namespace LiveSplit.GradingSplits.UI.Components
             // Insert rows right after chkShowGradeIcons (row 10)
             // Row 11: folder path controls, Row 12: help label
             tableLayoutPanel2.RowCount = 13;
-            
+
             // Add row styles for the new rows
             tableLayoutPanel2.RowStyles.Add(new RowStyle(SizeType.Absolute, 30F));
             tableLayoutPanel2.RowStyles.Add(new RowStyle(SizeType.AutoSize));
@@ -205,8 +205,8 @@ namespace LiveSplit.GradingSplits.UI.Components
                 fileDialog.Title = "Select any file in the custom icons folder";
                 fileDialog.Filter = "Image files (*.png;*.jpg;*.gif;*.bmp;*.ico)|*.png;*.jpg;*.jpeg;*.gif;*.bmp;*.ico|All files (*.*)|*.*";
                 fileDialog.CheckFileExists = true;
-                
-                if (!string.IsNullOrEmpty(GradingConfig.IconFolderPath) && 
+
+                if (!string.IsNullOrEmpty(GradingConfig.IconFolderPath) &&
                     System.IO.Directory.Exists(GradingConfig.IconFolderPath))
                 {
                     fileDialog.InitialDirectory = GradingConfig.IconFolderPath;

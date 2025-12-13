@@ -30,7 +30,7 @@ namespace LiveSplit.GradingSplits.Tests
         {
             // Create a run with 3 segments
             _run = new Run(new StandardComparisonGeneratorsFactory());
-            
+
             // Create original icons for the segments
             _originalIcon1 = CreateTestIcon(Color.Red);
             _originalIcon2 = CreateTestIcon(Color.Blue);
@@ -71,10 +71,10 @@ namespace LiveSplit.GradingSplits.Tests
 
             // Create component
             _component = new GradingSplitsComponent(_state);
-            
+
             // Get settings through public interface
             _settings = _component.GetSettingsControl(LiveSplit.UI.LayoutMode.Horizontal) as GradingSplitsSettings;
-            
+
             // Enable grade icons
             _settings.GradingConfig.ShowGradeIcons = true;
         }
@@ -121,7 +121,7 @@ namespace LiveSplit.GradingSplits.Tests
         {
             _state.CurrentPhase = TimerPhase.Running;
             _state.CurrentSplitIndex = 0;
-            
+
             // Trigger the OnStart event
             TriggerStateEvent("OnStart");
         }
@@ -134,7 +134,7 @@ namespace LiveSplit.GradingSplits.Tests
             var previousPhase = _state.CurrentPhase;
             _state.CurrentPhase = TimerPhase.NotRunning;
             _state.CurrentSplitIndex = -1;
-            
+
             // Trigger the OnReset event
             TriggerStateResetEvent(previousPhase);
         }
@@ -148,12 +148,12 @@ namespace LiveSplit.GradingSplits.Tests
             {
                 _run[_state.CurrentSplitIndex].SplitTime = new Time(splitTime);
                 _state.CurrentSplitIndex++;
-                
+
                 if (_state.CurrentSplitIndex >= _run.Count)
                 {
                     _state.CurrentPhase = TimerPhase.Ended;
                 }
-                
+
                 TriggerStateEvent("OnSplit");
             }
         }
@@ -411,7 +411,7 @@ namespace LiveSplit.GradingSplits.Tests
             SimulateSplit(TimeSpan.FromSeconds(10.5));
             SimulateSplit(TimeSpan.FromSeconds(31.0));
             SimulateSplit(TimeSpan.FromSeconds(62.0));
-            
+
             // Note: We don't call SimulateUpdate() in Ended phase because
             // our test mock doesn't include LayoutSettings, and UpdateGrade
             // tries to access LayoutSettings.TextColor when index is out of bounds.

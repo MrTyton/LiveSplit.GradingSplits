@@ -157,7 +157,7 @@ namespace LiveSplit.GradingSplits.UI.Components
             {
                 StoreOriginalSplitNames();
             }
-            
+
             // Only store original icons if we haven't already for this run
             // We check _lastIconRun instead of _gradedRun since icons are tracked separately
             if (_originalSplitIcons.Count == 0 || _lastIconRun != _state.Run)

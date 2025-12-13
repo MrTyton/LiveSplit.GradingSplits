@@ -163,11 +163,11 @@ namespace LiveSplit.GradingSplits.UI.Components
                 // For upcoming splits (not yet completed), use cached values if available
                 // since their comparison grades don't change during a run
                 bool useActualTime = i < state.CurrentSplitIndex;
-                
+
                 // Check if we have a cached value we can reuse for grade calculation
                 bool hadCachedValue = _splitIconCache.TryGetValue(i, out var cached);
                 bool canSkipCalculation = hadCachedValue && (!useActualTime || (i < state.CurrentSplitIndex - 1));
-                
+
                 if (canSkipCalculation)
                 {
                     // Use cached grade/color
@@ -180,14 +180,14 @@ namespace LiveSplit.GradingSplits.UI.Components
                     var result = CalculateGradeForSplit(state, i, useActualTime);
                     grade = result.Grade;
                     color = result.Color;
-                    
+
                     if (useActualTime)
                     {
                         // Check if this was a gold or worst split
                         isGold = Settings.GradingConfig.UseGoldGrade && grade == Settings.GradingConfig.GoldLabel;
                         isWorst = Settings.GradingConfig.UseWorstGrade && grade == Settings.GradingConfig.WorstLabel;
                     }
-                    
+
                     // Update cache
                     _splitIconCache[i] = (grade, color);
                 }
@@ -198,7 +198,7 @@ namespace LiveSplit.GradingSplits.UI.Components
                     // Try to get a custom icon first
                     var threshold = Settings.GradingConfig.Thresholds.FirstOrDefault(t => t.Label == grade);
                     var customIcon = CustomIconLoader.GetCustomIcon(grade, Settings.GradingConfig, threshold, isGold, isWorst);
-                    
+
                     if (customIcon != null)
                     {
                         state.Run[i].Icon = customIcon;
